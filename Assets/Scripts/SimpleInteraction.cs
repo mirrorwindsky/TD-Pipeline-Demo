@@ -36,7 +36,13 @@ public class SimpleInteraction : MonoBehaviour
             if (hit.collider.CompareTag("Interactable"))
             {
                 Debug.Log($"Interacted with {hit.collider.name}");
-                hit.collider.gameObject.SetActive(false);
+                ConfigurableInteractable interactable = 
+                    hit.collider.GetComponent<ConfigurableInteractable>();
+
+                if (interactable != null)
+                {
+                    interactable.Interact();
+                }
             }
         }
         else

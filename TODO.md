@@ -28,18 +28,18 @@
 - [x] Rewrite Two Sum using Python `dict` / hash table to average O(n)
 - [x] Understand that Python `dict` lookup is average O(1), with extra O(n) space
 
-## Day 2 — First Config → Game Data Chain
+## Day 2 — First Config → Game Data Chain ✅
 
-- [ ] Learn C# `class`
-- [ ] Learn `List`
-- [ ] Learn `Dictionary`
-- [ ] Understand basic serialization
-- [ ] Define first external config for an enemy or interactable object
-- [ ] Load external configuration into Unity
-- [ ] Make configuration values actually change game object behavior
-- [ ] Confirm config edits can change behavior without rewriting gameplay logic
-- [ ] Update README with Day 2 progress
-- [ ] Solve 1 Easy array / HashMap problem
+- [x] Learn C# `class`
+- [x] Learn `List`
+- [x] Learn `Dictionary`
+- [x] Understand basic serialization
+- [x] Define first external config for an enemy or interactable object
+- [x] Load external configuration into Unity
+- [x] Make configuration values actually change game object behavior
+- [x] Confirm config edits can change behavior without rewriting gameplay logic
+- [x] Update README with Day 2 progress
+- [x] Solve 1 Easy array / HashMap problem
 
 ## Day 3 — Python Tool V0
 

@@ -1,0 +1,16 @@
+{
+  "interactables": [
+    {
+      "id": "cube_quick",
+      "displayName": "Quick Cube",
+      "requiredInteractions": 1,
+      "deactivateOnComplete": true
+    },
+    {
+      "id": "cube_sturdy",
+      "displayName": "Sturdy Cube",
+      "requiredInteractions": 3,
+      "deactivateOnComplete": true
+    }
+  ]
+}
