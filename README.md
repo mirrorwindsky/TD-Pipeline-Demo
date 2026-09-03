@@ -54,6 +54,24 @@ Example:
 - `cube_sturdy` requires 3 interactions before completion
 - Changing `cube_sturdy.requiredInteractions` from 3 to 5 in JSON changes its runtime behavior without modifying C# gameplay logic
 
+### Day 3 — Python Tool V0
+
+- Added designer-facing CSV source data in `ConfigSource/interactables.csv`
+- Added `Tools/config_tool.py`
+- Used `pathlib` to resolve deterministic project-relative input and output paths
+- Used `csv.DictReader` to read source configuration rows
+- Added an `InteractableConfig` Python `dataclass` for structured config data
+- Converted CSV string values into runtime data types such as `int` and `bool`
+- Used `json.dump` to generate Unity-consumable JSON
+- Generated `Assets/Data/interactables.json` automatically from CSV source data
+- Verified Unity continues to consume the generated JSON without changing the existing C# loading path
+- Verified changing `cube_sturdy.requiredInteractions` from 3 to 5 in CSV propagates through Python → JSON → Unity and changes runtime behavior to 5 interactions
+- Restored the final example configuration to 3 interactions after verification
+
+Current content pipeline:
+
+`CSV source data → Python config tool → Generated JSON → Unity config database → Runtime gameplay`
+
 ## Current Runtime Behavior
 
 The prototype currently supports:
@@ -70,41 +88,42 @@ Interaction behavior is no longer fully hard-coded inside the player interaction
 
 Key project areas currently include:
 
-- `Assets/Scenes`
-  - Prototype graybox scene
+- `ConfigSource`
+  - Designer-facing CSV source configuration
+- `Tools`
+  - Python config conversion tooling
+- `Assets/Data`
+  - Generated JSON gameplay configuration consumed by Unity
 - `Assets/Scripts`
   - Player movement
   - Raycast interaction
   - Configuration data classes
   - Configuration database
   - Config-driven interactable behavior
-- `Assets/Data`
-  - External JSON gameplay configuration
+- `Assets/Scenes`
+  - Prototype graybox scene
 
 ## Tech
 
 - Unity 6.3 LTS
 - C#
 - JSON
-- Python — pipeline tooling planned from Day 3
+- Python — CSV/JSON pipeline tooling
 - Git / GitHub
 
 ## Next
 
-### Day 3 — Python Tool V0
+### Day 4 — Demo V0
 
 Next objective:
 
-Build the first designer-facing source-data conversion step.
-
-Planned pipeline:
-
-`CSV source data → Python tool → JSON output → Unity runtime`
+Build a small playable graybox content loop using the existing config-driven interaction foundation.
 
 Planned tasks:
 
-- Read CSV configuration data
-- Convert CSV into structured JSON
-- Write generated config to a deterministic output path
-- Make Unity consume generated data
-- Establish the first real automated content-production pipeline
+- Learn basic Prefab workflow
+- Learn Trigger / Event basics
+- Build a small graybox level
+- Implement a clear start → objective → interaction/action → completion loop
+- Add visible completion feedback
+- Play the demo from beginning to end

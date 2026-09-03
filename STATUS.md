@@ -1,7 +1,7 @@
 # Current Status
 
-**Last updated:** 2026-09-02  
-**Sprint stage:** Day 2 completed  
+**Last updated:** 2026-09-03  
+**Sprint stage:** Day 3 completed 
 **Repository:** `TD-Pipeline-Demo`
 
 ## Current Direction
@@ -166,6 +166,83 @@ The core reasoning was independently identified through parity-case analysis, in
 - With at least two odd numbers, odd values can be transformed through odd-minus-odd operations to produce even results
 - With exactly one odd number, even values can subtract that odd value to produce an all-odd result
 
+## Completed — Day 3
+
+### Designer-Facing Source Data
+
+Added:
+
+`ConfigSource/interactables.csv`
+
+The CSV now acts as the editable source configuration for interactable content.
+
+Current source records include:
+
+- `cube_quick`
+- `cube_sturdy`
+
+The source data contains:
+
+- `id`
+- `displayName`
+- `requiredInteractions`
+- `deactivateOnComplete`
+
+### Python Tool V0
+
+Added:
+
+`Tools/config_tool.py`
+
+The tool currently:
+
+1. Resolves project-relative paths using `pathlib`
+2. Reads CSV source data using `csv.DictReader`
+3. Converts each CSV row into an `InteractableConfig` dataclass
+4. Converts CSV string values into appropriate Python types
+5. Converts dataclass instances into dictionaries
+6. Writes the final structure using `json.dump`
+7. Outputs generated data directly to:
+
+`Assets/Data/interactables.json`
+
+### Type Conversion
+
+CSV values are initially read as strings.
+
+The tool currently converts:
+
+- `requiredInteractions` → `int`
+- `deactivateOnComplete` → `bool`
+
+This creates structured configuration data before JSON generation.
+
+### End-to-End Verification
+
+Verified the complete flow:
+
+`CSV → Python → JSON → Unity → Runtime gameplay`
+
+Test performed:
+
+1. Changed `cube_sturdy.requiredInteractions` from 3 to 5 in the CSV source
+2. Ran `config_tool.py`
+3. Confirmed generated JSON changed to 5
+4. Ran the Unity prototype
+5. Confirmed SturdyCube required 5 interactions
+6. Did not manually edit JSON
+7. Did not modify C# gameplay logic
+
+After verification, the source configuration was restored to:
+
+`cube_sturdy.requiredInteractions = 3`
+
+and the JSON was regenerated.
+
+### Coding Warm-up
+
+Completed the Day 3 LeetCode daily problem.
+
 ## Current Runtime State
 
 The current prototype supports:
@@ -176,41 +253,35 @@ and:
 
 `E input → Forward raycast → Interactable tag check → ConfigurableInteractable.Interact()`
 
-The current data-driven gameplay chain is:
+The current end-to-end content pipeline is:
 
-`interactables.json → JsonUtility → List<InteractableConfig> → Dictionary<string, InteractableConfig> → Config ID lookup → Runtime object behavior`
+`ConfigSource/interactables.csv → config_tool.py → Assets/Data/interactables.json → JsonUtility → Dictionary lookup → Runtime object behavior`
 
 ## Current Milestone
 
-Day 2 objective completed:
+Day 3 objective completed:
 
-**The first external configuration → gameplay chain is working.**
+**The first designer-facing CSV → Python → JSON → Unity gameplay pipeline is working.**
 
-Changing gameplay configuration can now alter object behavior without rewriting the interaction implementation.
+Gameplay content can now be changed from the CSV source without manually editing generated JSON or modifying C# gameplay logic.
 
-## Next — Day 3
+## Next — Day 4
 
 Main objective:
 
-**Create Python Tool V0 and start the designer-facing data conversion pipeline.**
+**Build Demo V0 with a small playable graybox content loop.**
 
 Planned tasks:
 
-- Learn only the Python modules needed immediately:
-  - `pathlib`
-  - `csv`
-  - `json`
-  - `dataclass`
-- Create `config_tool.py`
-- Read source CSV config
-- Convert CSV into JSON / structured config
-- Output generated config to a deterministic path
-- Make Unity consume generated data
-- Complete one Easy HashMap / string coding problem
-
-Target flow:
-
-`CSV source config → Python conversion → JSON → Unity → Runtime gameplay`
+- Learn basic Prefab workflow
+- Learn Trigger / Event basics
+- Build a small graybox level
+- Implement an entry/start condition
+- Implement a clear objective
+- Reuse interaction or another minimal action
+- Implement a completion condition
+- Add visible completion feedback / door opening / ending
+- Play the demo from start to finish
 
 ## Current Blockers
 

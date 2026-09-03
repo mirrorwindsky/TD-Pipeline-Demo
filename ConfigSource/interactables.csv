@@ -1,0 +1,3 @@
+id,displayName,requiredInteractions,deactivateOnComplete
+cube_quick,Quick Cube,1,true
+cube_sturdy,Sturdy Cube,3,true

@@ -41,18 +41,18 @@
 - [x] Update README with Day 2 progress
 - [x] Solve 1 Easy array / HashMap problem
 
-## Day 3 — Python Tool V0
+## Day 3 — Python Tool V0 ✅
 
-- [ ] Learn `pathlib`
-- [ ] Learn `csv`
-- [ ] Learn `json`
-- [ ] Learn `dataclass`
-- [ ] Create `config_tool.py`
-- [ ] Read source CSV data
-- [ ] Convert CSV into JSON / structured config
-- [ ] Output generated config to a deterministic path
-- [ ] Make Unity consume generated data
-- [ ] Solve 1 Easy HashMap / string problem
+- [x] Learn `pathlib`
+- [x] Learn `csv`
+- [x] Learn `json`
+- [x] Learn `dataclass`
+- [x] Create `config_tool.py`
+- [x] Read source CSV data
+- [x] Convert CSV into JSON / structured config
+- [x] Output generated config to a deterministic path
+- [x] Make Unity consume generated data
+- [x] Solve 1 Easy HashMap / string problem
 
 ## Day 4 — Demo V0
 
