@@ -1,7 +1,7 @@
 # Current Status
 
-**Last updated:** 2026-09-03  
-**Sprint stage:** Day 3 completed 
+**Last updated:** 2026-09-04  
+**Sprint stage:** Day 4 completed
 **Repository:** `TD-Pipeline-Demo`
 
 ## Current Direction
@@ -243,45 +243,134 @@ and the JSON was regenerated.
 
 Completed the Day 3 LeetCode daily problem.
 
+## Completed — Day 4
+
+### Graybox Demo V0
+
+Built a small playable content loop using the existing player interaction and config-driven object systems.
+
+Current level flow:
+
+`Player Start → StartGate → QuickCube / SturdyCube → ExitDoor → EndMarker`
+
+### Prefab Workflow
+
+Created:
+
+`Assets/Prefabs/StartGate.prefab`
+
+The StartGate was converted into a reusable Prefab.
+
+The Prefab contains the reusable object structure and trigger behavior, including:
+
+- Box Collider configured as a Trigger
+- Disabled Mesh Renderer
+- `StartTrigger` component
+
+Prefab Overrides were applied back to the Prefab Asset after configuring the scene instance.
+
+Scene-specific references such as the active `DemoFlowController` remain connections made by the scene instance rather than reusable Prefab data.
+
+### Trigger-Based Mission Start
+
+Implemented `StartTrigger`.
+
+When the Player enters the trigger:
+
+`OnTriggerEnter → Player tag check → DemoFlowController.StartMission()`
+
+The flow controller prevents repeated mission initialization if the player enters the trigger multiple times.
+
+### Objective Completion Events
+
+Updated `ConfigurableInteractable` with a `Completed` event.
+
+Each interactable now announces completion without directly deciding what other gameplay systems should do.
+
+Current event flow:
+
+`ConfigurableInteractable completed → Completed event → DemoFlowController`
+
+This separates objective behavior from level-flow behavior.
+
+### Demo Flow Controller
+
+Implemented `DemoFlowController`.
+
+It currently tracks:
+
+- Whether the mission has started
+- Number of completed objectives
+- Whether the exit is unlocked
+- Whether the mission has finished
+
+The controller subscribes to completion events from:
+
+- QuickCube
+- SturdyCube
+
+After both objectives are complete:
+
+`2 / 2 objectives → ExitDoor disabled → Exit opened`
+
+### End Trigger
+
+Implemented `EndTrigger`.
+
+After the exit has been unlocked, entering the EndMarker calls:
+
+`DemoFlowController.TryFinishMission()`
+
+and completes the playable loop with:
+
+`Demo Complete!`
+
+### Runtime Verification
+
+Verified three cases:
+
+1. Normal flow:
+   `Start → QuickCube → SturdyCube → Exit → End`
+
+2. Reverse objective order:
+   `Start → SturdyCube → QuickCube → Exit → End`
+
+3. Re-entering StartGate:
+   the mission is not initialized a second time
+
+All tests behaved as expected.
+
 ## Current Runtime State
 
-The current prototype supports:
+The current playable loop is:
 
-`WASD input → Player movement → Face movement direction`
+`Start Trigger → Mission Start → Config-Driven Objectives → Completed Events → Objective Count 2/2 → Exit Open → End Trigger → Demo Complete`
 
-and:
+The content data pipeline remains:
 
-`E input → Forward raycast → Interactable tag check → ConfigurableInteractable.Interact()`
-
-The current end-to-end content pipeline is:
-
-`ConfigSource/interactables.csv → config_tool.py → Assets/Data/interactables.json → JsonUtility → Dictionary lookup → Runtime object behavior`
+`ConfigSource/interactables.csv → config_tool.py → interactables.json → Unity → Runtime gameplay`
 
 ## Current Milestone
 
-Day 3 objective completed:
+Day 4 objective completed:
 
-**The first designer-facing CSV → Python → JSON → Unity gameplay pipeline is working.**
+**Demo V0 can now be played from beginning to end as a complete graybox content loop.**
 
-Gameplay content can now be changed from the CSV source without manually editing generated JSON or modifying C# gameplay logic.
-
-## Next — Day 4
+## Next — Day 5
 
 Main objective:
 
-**Build Demo V0 with a small playable graybox content loop.**
+**Upgrade Python Tool V0 with validation and actionable error reporting.**
 
 Planned tasks:
 
-- Learn basic Prefab workflow
-- Learn Trigger / Event basics
-- Build a small graybox level
-- Implement an entry/start condition
-- Implement a clear objective
-- Reuse interaction or another minimal action
-- Implement a completion condition
-- Add visible completion feedback / door opening / ending
-- Play the demo from start to finish
+- Missing-field validation
+- Duplicate-ID validation
+- Range validation
+- Reference validation
+- ERROR / WARNING separation
+- Actionable error messages
+- Invalid-data testing
 
 ## Current Blockers
 

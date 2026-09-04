@@ -72,6 +72,24 @@ Current content pipeline:
 
 `CSV source data → Python config tool → Generated JSON → Unity config database → Runtime gameplay`
 
+### Day 4 — Demo V0
+
+- Built a small playable graybox content loop
+- Created and applied a reusable `StartGate` Prefab
+- Added trigger-based mission start using `OnTriggerEnter`
+- Added `Completed` events to configurable interactables
+- Added `DemoFlowController` to manage mission state and objective completion
+- Reused the existing config-driven QuickCube and SturdyCube as gameplay objectives
+- Opened `ExitDoor` after both objectives were completed
+- Added an end trigger that reports `Demo Complete` after the exit is unlocked
+- Verified the complete demo from start to finish
+- Verified objective completion works regardless of QuickCube / SturdyCube order
+- Verified repeatedly entering the start trigger does not restart the mission
+
+Current gameplay loop:
+
+`Enter Start Trigger → Start Mission → Complete 2 Config-Driven Objectives → Completed Events → Unlock Exit → Reach End Trigger → Demo Complete`
+
 ## Current Runtime Behavior
 
 The prototype currently supports:
@@ -113,17 +131,16 @@ Key project areas currently include:
 
 ## Next
 
-### Day 4 — Demo V0
+### Day 5 — Python Tool V1
 
 Next objective:
 
-Build a small playable graybox content loop using the existing config-driven interaction foundation.
+Add validation and actionable error reporting to the existing CSV → Python → JSON pipeline.
 
-Planned tasks:
+Planned validation includes:
 
-- Learn basic Prefab workflow
-- Learn Trigger / Event basics
-- Build a small graybox level
-- Implement a clear start → objective → interaction/action → completion loop
-- Add visible completion feedback
-- Play the demo from beginning to end
+- Missing / malformed fields
+- Duplicate IDs
+- Invalid value ranges
+- Broken references
+- ERROR / WARNING reporting

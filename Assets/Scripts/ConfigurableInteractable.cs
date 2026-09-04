@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class ConfigurableInteractable : MonoBehaviour
@@ -5,8 +6,11 @@ public class ConfigurableInteractable : MonoBehaviour
     [SerializeField] private string configId;
     [SerializeField] private InteractableConfigDatabase database;
 
+    public event Action Completed;
+
     private InteractableConfig config;
     private int interactionCount;
+    private bool isCompleted;
 
     private void Start()
     {
@@ -23,6 +27,9 @@ public class ConfigurableInteractable : MonoBehaviour
 
     public void Interact()
     {
+        if (isCompleted)
+            return;
+
         interactionCount++;
 
         Debug.Log(
@@ -30,10 +37,16 @@ public class ConfigurableInteractable : MonoBehaviour
             $"{interactionCount}/{config.requiredInteractions}"
         );
 
-        if (interactionCount >= config.requiredInteractions
-            && config.deactivateOnComplete)
+        if (interactionCount >= config.requiredInteractions)
         {
-            gameObject.SetActive(false);
+            isCompleted = true;
+
+            Completed?.Invoke();
+
+            if (config.deactivateOnComplete)
+            {
+                gameObject.SetActive(false);
+            }
         }
     }
 }

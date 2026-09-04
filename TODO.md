@@ -54,18 +54,18 @@
 - [x] Make Unity consume generated data
 - [x] Solve 1 Easy HashMap / string problem
 
-## Day 4 — Demo V0
+## Day 4 — Demo V0 ✅
 
-- [ ] Learn basic Prefab workflow
-- [ ] Learn Trigger / Event basics
-- [ ] Build a small graybox level
-- [ ] Implement "enter area"
-- [ ] Implement a clear objective
-- [ ] Implement interaction / minimal combat or equivalent action
-- [ ] Implement completion condition
-- [ ] Implement visible completion feedback / door opening / ending
-- [ ] Play the whole demo from start to finish
-- [ ] Solve 1 basic stack / queue problem
+- [x] Learn basic Prefab workflow
+- [x] Learn Trigger / Event basics
+- [x] Build a small graybox level
+- [x] Implement "enter area"
+- [x] Implement a clear objective
+- [x] Implement interaction / minimal combat or equivalent action
+- [x] Implement completion condition
+- [x] Implement visible completion feedback / door opening / ending
+- [x] Play the whole demo from start to finish
+- [x] Solve 2 leetcode problem
 
 ## Day 5 — Python Tool V1
 
