@@ -69,15 +69,15 @@
 
 ## Day 5 — Python Tool V1
 
-- [ ] Add schema / missing-field validation
-- [ ] Add duplicate-ID validation
-- [ ] Add invalid-range validation
-- [ ] Add resource / ID reference validation
-- [ ] Separate `ERROR` and `WARNING`
-- [ ] Produce actionable error messages
-- [ ] Intentionally feed invalid data and verify detection
-- [ ] Draft first resume bullets for the project
-- [ ] Solve 1 basic binary-search problem
+- [x] Add schema / missing-field validation
+- [x] Add duplicate-ID validation
+- [x] Add invalid-range validation
+- [x] Add resource / ID reference validation
+- [x] Separate `ERROR` and `WARNING`
+- [x] Produce actionable error messages
+- [x] Intentionally feed invalid data and verify detection
+- [x] Draft first resume bullets for the project
+- [x] Solve 1 basic binary-search problem
 
 ## Day 6 — Pipeline V1
 

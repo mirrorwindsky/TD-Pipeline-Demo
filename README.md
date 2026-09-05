@@ -90,6 +90,33 @@ Current gameplay loop:
 
 `Enter Start Trigger → Start Mission → Complete 2 Config-Driven Objectives → Completed Events → Unlock Exit → Reach End Trigger → Demo Complete`
 
+### Day 5 — Python Tool V1
+
+- Upgraded `Tools/config_tool.py` with pre-generation validation
+- Added schema validation for required CSV columns and missing values
+- Added type validation for `requiredInteractions` and `deactivateOnComplete`
+- Added range validation for interaction counts
+- Added duplicate-ID detection using a `set`
+- Added ERROR / WARNING severity separation
+- Added actionable error messages containing file, row, field, and invalid value information
+- Added cross-file reference validation between Unity scene `configId` values and IDs defined in the designer-facing CSV
+- Added fail-fast behavior so configurations containing ERROR-level issues do not overwrite the existing generated JSON
+- Normalized string values before writing generated configuration
+- Tested malformed values, invalid ranges, invalid boolean values, duplicate IDs, missing fields, and broken Unity scene references
+- Verified multiple independent validation issues can be reported in a single run
+- Verified valid source data continues to generate `Assets/Data/interactables.json` normally
+
+Current validation flow:
+
+`CSV / Unity Scene → Schema Validation → Value / Range Validation → Duplicate-ID Validation → Scene Reference Validation → ERROR Check → JSON Generation`
+
+Validation behavior:
+
+- `ERROR` blocks JSON generation
+- `WARNING` is reported but does not block generation
+- Invalid source data does not overwrite the previous valid generated JSON
+- Unity scene references are checked before runtime so broken `configId` links can be detected earlier in the content-production pipeline
+
 ## Current Runtime Behavior
 
 The prototype currently supports:
@@ -131,16 +158,15 @@ Key project areas currently include:
 
 ## Next
 
-### Day 5 — Python Tool V1
+### Day 6 — Pipeline V1
 
 Next objective:
 
-Add validation and actionable error reporting to the existing CSV → Python → JSON pipeline.
+Consolidate and verify the complete designer-facing content pipeline from source configuration through validation, conversion, Unity loading, and runtime gameplay.
 
-Planned validation includes:
+Planned work includes:
 
-- Missing / malformed fields
-- Duplicate IDs
-- Invalid value ranges
-- Broken references
-- ERROR / WARNING reporting
+- Verify the complete CSV → validator → JSON → Unity → runtime chain
+- Confirm source-data edits still propagate into real gameplay behavior
+- Debug obvious pipeline issues
+- Document the first complete pipeline diagram

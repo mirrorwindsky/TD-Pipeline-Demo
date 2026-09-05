@@ -1,7 +1,7 @@
 # Current Status
 
-**Last updated:** 2026-09-04  
-**Sprint stage:** Day 4 completed
+**Last updated:** 2026-09-05  
+**Sprint stage:** Day 5 Tool V1 completed
 **Repository:** `TD-Pipeline-Demo`
 
 ## Current Direction
@@ -340,37 +340,151 @@ Verified three cases:
 
 All tests behaved as expected.
 
+## Completed — Day 5
+
+### Python Tool V1
+
+Upgraded:
+
+`Tools/config_tool.py`
+
+from a CSV → JSON conversion script into a validation-aware content pipeline tool.
+
+### Schema Validation
+
+Added validation for:
+
+- Missing CSV headers
+- Missing required columns
+- Empty required field values
+
+Current required fields are:
+
+- `id`
+- `displayName`
+- `requiredInteractions`
+- `deactivateOnComplete`
+
+Validation errors report the relevant file, row, and field where applicable.
+
+### Type and Range Validation
+
+Added validation for:
+
+- Non-integer `requiredInteractions`
+- `requiredInteractions` values below the valid minimum
+- Unusually high interaction counts
+- Invalid boolean values for `deactivateOnComplete`
+
+Current severity behavior:
+
+- Invalid data such as non-integer values or interaction counts below 1 → `ERROR`
+- Interaction counts above the current recommended maximum → `WARNING`
+
+`WARNING` messages do not stop generation.
+
+### Duplicate-ID Validation
+
+Added duplicate configuration ID detection using a Python `set`.
+
+Duplicate IDs are treated as `ERROR` because config IDs act as lookup and reference keys throughout the content pipeline.
+
+### Unity Scene Reference Validation
+
+Added cross-file validation between:
+
+`ConfigSource/interactables.csv`
+
+and:
+
+`Assets/Scenes/Prototype_01.unity`
+
+The tool scans serialized `ConfigurableInteractable` components and verifies that each scene `configId` exists in the CSV source data.
+
+Verified broken-reference case:
+
+1. Renamed `cube_sturdy` to `cube_sturdy_v2` in the CSV
+2. Left the Unity scene reference unchanged
+3. Python detected that the scene still referenced the missing `cube_sturdy`
+4. JSON generation was blocked before the invalid data reached Unity runtime
+
+### Fail-Safe Generation
+
+The tool now performs validation before loading and generating final configuration data.
+
+Current behavior:
+
+`Source data → Validation → ERROR check → Config loading → JSON generation`
+
+If any `ERROR` exists:
+
+- Validation issues are printed
+- JSON generation is cancelled
+- The previous valid generated JSON is not overwritten
+
+If only `WARNING` messages exist:
+
+- Warnings are printed
+- JSON generation continues
+
+### Invalid-Data Testing
+
+Verified detection of:
+
+- Missing field values
+- Missing required columns
+- Invalid integer values
+- Out-of-range interaction values
+- Invalid boolean values
+- Duplicate IDs
+- Broken Unity scene references
+
+Also verified that multiple independent problems can be reported during one validation run.
+
+After testing, the source CSV was restored to its valid state and JSON generation was verified again.
+
+### Resume Bullet Draft
+
+Created the first draft of future resume project bullets based only on currently verified project work.
+
+The draft currently covers:
+
+- Config-driven Unity gameplay and the playable graybox content loop
+- Python CSV → JSON → Unity pipeline tooling
+- Pre-runtime validation and broken-reference prevention
+
+Quantified efficiency claims are intentionally deferred until real measurements are collected later in the sprint.
+
 ## Current Runtime State
 
-The current playable loop is:
+The playable loop remains:
 
 `Start Trigger → Mission Start → Config-Driven Objectives → Completed Events → Objective Count 2/2 → Exit Open → End Trigger → Demo Complete`
 
-The content data pipeline remains:
+The current content pipeline is now:
 
-`ConfigSource/interactables.csv → config_tool.py → interactables.json → Unity → Runtime gameplay`
+`Designer CSV → Python Validation → JSON Generation → Unity Config Database → Runtime Gameplay`
+
+The validation layer additionally checks Unity scene `configId` references against the source configuration before generation.
 
 ## Current Milestone
 
-Day 4 objective completed:
+Day 5 core project objective completed:
 
-**Demo V0 can now be played from beginning to end as a complete graybox content loop.**
+**Python Tool V1 now validates real Demo configuration data and blocks known invalid data before it reaches Unity runtime.**
 
-## Next — Day 5
+## Next — Day 6
 
 Main objective:
 
-**Upgrade Python Tool V0 with validation and actionable error reporting.**
+**Consolidate and verify Pipeline V1 as one complete end-to-end content-production workflow.**
 
 Planned tasks:
 
-- Missing-field validation
-- Duplicate-ID validation
-- Range validation
-- Reference validation
-- ERROR / WARNING separation
-- Actionable error messages
-- Invalid-data testing
+- Re-run the full designer CSV → validation → JSON → Unity → gameplay chain
+- Verify source edits propagate into real runtime content
+- Fix obvious pipeline bugs
+- Draw the first complete pipeline diagram
 
 ## Current Blockers
 
