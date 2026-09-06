@@ -1,5 +1,7 @@
 # TD Pipeline Demo
 
+[English](README.md) | 简体中文
+
 这是一个仍在持续开发中的 Technical Designer（技术策划）作品集项目，使用 Unity、C# 与 Python 探索**数据驱动玩法、内容校验、工具开发与内容生产管线自动化**。
 
 ## 项目概述
@@ -274,7 +276,8 @@ requiredInteractions = 3
 
 ## 文档
 
-- [`Docs/Pipeline_V1.md`](Docs/Pipeline_V1.md) — 完整端到端管线、各校验阶段、Unity 加载路径、运行时流程、验证过程与当前能力边界。
+- [`Docs/Pipeline_V1.zh-CN.md`](Docs/Pipeline_V1.zh-CN.md) — 中文版：完整端到端管线、各校验阶段、Unity 加载路径、运行时流程、验证过程与当前能力边界。
+- [`Docs/Pipeline_V1.md`](Docs/Pipeline_V1.md) — English version.
 - [`STATUS.md`](STATUS.md) — 当前项目状态与里程碑交接信息。
 - [`TODO.md`](TODO.md) — 当前冲刺执行清单与后续工作。
 
@@ -297,12 +300,14 @@ TD-Pipeline-Demo/
 │   └── interactables.csv
 │
 ├── Docs/
-│   └── Pipeline_V1.md
+│   ├── Pipeline_V1.md
+│   └── Pipeline_V1.zh-CN.md
 │
 ├── Tools/
 │   └── config_tool.py
 │
 ├── README.md
+├── README.zh-CN.md
 ├── STATUS.md
 └── TODO.md
 ```

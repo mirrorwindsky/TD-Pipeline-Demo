@@ -1,5 +1,7 @@
 # Pipeline V1
 
+[English](Pipeline_V1.md) | 简体中文
+
 ## 1. 概述
 
 本文档描述 `TD-Pipeline-Demo` 的第一版完整端到端内容生产管线（End-to-End Content Pipeline）。
@@ -219,7 +221,7 @@ WARNING
 
 ## 5. 生成数据
 
-如果所有校验都通过，Python 工具会将 CSV 转换为带类型的 `InteractableConfig` 对象，并生成：
+如果校验流程未发现阻断生成的 `ERROR`，Python 工具会将 CSV 转换为带类型的 `InteractableConfig` 对象，并生成：
 
 ```text
 Assets/Data/interactables.json

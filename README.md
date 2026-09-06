@@ -1,5 +1,7 @@
 # TD Pipeline Demo
 
+English | [简体中文](README.zh-CN.md)
+
 A work-in-progress Technical Designer portfolio project exploring **data-driven gameplay, content validation, tooling, and content-pipeline automation** with Unity, C#, and Python.
 
 ## Overview
@@ -275,6 +277,7 @@ Runtime interaction behavior
 ## Documentation
 
 * [`Docs/Pipeline_V1.md`](Docs/Pipeline_V1.md) — Detailed end-to-end pipeline, validation stages, Unity loading path, runtime flow, verification procedure, and current scope boundaries.
+* [`Docs/Pipeline_V1.zh-CN.md`](Docs/Pipeline_V1.zh-CN.md) — Simplified Chinese version.
 * [`STATUS.md`](STATUS.md) — Current project status and milestone handoff context.
 * [`TODO.md`](TODO.md) — Sprint execution checklist and upcoming work.
 
@@ -297,12 +300,14 @@ TD-Pipeline-Demo/
 │   └── interactables.csv
 │
 ├── Docs/
-│   └── Pipeline_V1.md
+│   ├── Pipeline_V1.md
+│   └── Pipeline_V1.zh-CN.md
 │
 ├── Tools/
 │   └── config_tool.py
 │
 ├── README.md
+├── README.zh-CN.md
 ├── STATUS.md
 └── TODO.md
 ```

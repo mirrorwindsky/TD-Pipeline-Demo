@@ -1,4 +1,6 @@
-# Pipeline V1
+# Pipeline V1、
+
+English | [简体中文](Pipeline_V1.zh-CN.md)
 
 ## 1. Overview
 
