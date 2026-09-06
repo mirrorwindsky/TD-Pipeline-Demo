@@ -1,6 +1,6 @@
 # TD Pipeline Demo — 14-Day Sprint TODO
 
-> Goal: build one portfolio-ready Technical Designer project that demonstrates gameplay/content implementation, tooling, pipeline automation, debugging, and iteration.
+> Goal: build one portfolio-ready Technical Designer flagship student case combining a game-like Unity Vertical Slice with a real content-production Pipeline, validation tooling, automation, and measurable workflow improvement.
 >
 > Core stack for this sprint is frozen: **Unity 6.3 LTS + C# + Python + Git**.
 > Do not start a second project or switch to UE5 / frontend / RAG during this sprint.
@@ -93,130 +93,351 @@
 - [x] Draw the first pipeline diagram
 - [x] Solve 1 introductory DFS / BFS problem
 
-## Day 7 — Milestone 1: Mandatory Wrap-up
+## Day 7 — Week 1 Milestone Wrap-up ✅
 
-> **Do not learn new technology today.**
+- [x] Re-test Demo V1 for obvious blocking issues
+- [x] Re-test Tool V1 for obvious blocking issues
+- [x] Clean Unity template / tutorial assets not used by the project
+- [x] Update Unity Build Scene List to use `Prototype_01.unity`
+- [x] Re-run Python pipeline after cleanup
+- [x] Re-run complete Unity gameplay loop after cleanup
+- [x] Finalize Pipeline V1 documentation
+- [x] Reorganize README into an external-reader / portfolio structure
+- [x] Add Simplified Chinese README
+- [x] Add Simplified Chinese Pipeline V1 documentation
+- [x] Add bilingual navigation and synchronize documentation structure
 
-- [ ] Fix obvious Demo V1 bugs
-- [ ] Fix obvious Tool V1 bugs
-- [ ] Clean project structure
-- [ ] Update README
-- [ ] Record a 1–2 minute Demo V1 video
-- [ ] Finalize Pipeline V1 diagram
-- [ ] Produce Resume V1
-- [ ] Send current project direction / resume to Lilith referral senior
-- [ ] Ask whether the project direction matches real TD work
-- [ ] Ask whether current hiring progress requires earlier referral submission
-- [ ] Decide whether to submit Lilith around D7
+> Demo video, Resume, and Lilith external feedback were intentionally deferred to D13–D14 after the upgraded Demo V2 is complete.
 
-## Day 8 — Unity Editor Tool V0
+---
 
-- [ ] Learn minimal Unity Editor scripting
-- [ ] Build a simple data viewer / config entry point
-- [ ] View current gameplay config inside the editor
-- [ ] Edit at least one meaningful config value
-- [ ] Ensure the editor tool is connected to the real demo pipeline
+## Day 8 — Gameplay Vertical Slice + Content Model V2
+
+### Gameplay
+
+- [ ] Choose a clear scene theme and player objective
+- [ ] Build a 5–8 minute playable content loop
+- [ ] Implement at least 3 genuinely different content-object types:
+  - [ ] Pickup
+  - [ ] Interactable / Device
+  - [ ] Gate / Door
+- [ ] Add at least one cross-object dependency chain
+- [ ] Add minimal Inventory / Player State needed by the dependency chain
+- [ ] Add Interaction Prompt
+- [ ] Add Objective UI
+- [ ] Add insufficient-condition feedback
+- [ ] Add completion feedback
+- [ ] Ensure the player can understand the whole flow without reading the Unity Console
+
+### Content Model V2
+
+- [ ] Expand the content model beyond the current single-parameter interactable config
+- [ ] Introduce multiple content tables where useful:
+  - [ ] `items.csv`
+  - [ ] `objectives.csv`
+  - [ ] `interactables.csv`
+- [ ] Add real ID-based relationships between content records
+- [ ] Keep only fields that are actually used by the game
+- [ ] Ensure at least one gameplay dependency is expressed through source configuration rather than hard-coded logic
+
+### Day 8 Acceptance
+
+- [ ] Complete loop works from start to finish
+- [ ] At least 3 content-object types participate in gameplay
+- [ ] At least 1 cross-object dependency exists
+- [ ] Player-visible objective and interaction feedback works
+- [ ] Demo begins to look like a game rather than a test scene
 - [ ] Solve 1 DFS / BFS problem
 
-## Day 9 — Batch Processing
+---
 
-- [ ] Choose one real batch-processing use case
-- [ ] Implement at least one:
+## Day 9 — Multi-Table Pipeline V2 + Cross-Reference + Batch
+
+### Pipeline Architecture
+
+- [ ] Read all source tables through one unified pipeline
+- [ ] Parse source data once
+- [ ] Build a Typed Intermediate Model
+- [ ] Make validation and generation consume the same parsed representation
+- [ ] Preserve existing validation:
+  - [ ] Schema validation
+  - [ ] Type validation
+  - [ ] Range validation
+  - [ ] Duplicate-ID validation
+  - [ ] `ERROR` / `WARNING` separation
+  - [ ] Unity Scene reference validation
+
+### New Validation
+
+- [ ] Validate `interactionType` or equivalent enum / legal values
+- [ ] Add cross-table reference validation
+- [ ] Validate real references such as:
+  - [ ] `requiredItemId`
+  - [ ] `grantedItemId`
+  - [ ] `unlockTargetId`
+  - [ ] `objectiveId`
+- [ ] Produce clear file / row / field / reference error messages
+
+### Batch Processing
+
+- [ ] Implement at least one genuine batch operation:
   - [ ] Batch validation
   - [ ] Batch modification
   - [ ] Batch export
-- [ ] Prepare roughly 30–50 test records
-- [ ] Verify batch processing works on the test set
-- [ ] Record the equivalent manual workflow
+- [ ] Ensure the batch operation solves a real content-production task
+
+### Intentional Failure Tests
+
+- [ ] Detect a missing item reference
+- [ ] Detect a missing objective reference
+- [ ] Detect a missing unlock-target reference
+- [ ] Detect a duplicate ID
+- [ ] Detect an illegal interaction type
+
+### Day 9 Acceptance
+
+- [ ] Multi-table source data generates Unity-consumable output
+- [ ] Cross-table errors are blocked before Unity runtime
+- [ ] Source-config changes alter real gameplay dependencies
+- [ ] Generated structured data does not require manual editing
+- [ ] Batch V1 works on real project data
 - [ ] Solve 1 DFS / BFS problem
 
-## Day 10 — Tool V2 / Basic UI & UX
+---
 
-- [ ] Improve default values
-- [ ] Improve error messages
-- [ ] Improve information hierarchy
-- [ ] Add search / filtering or another workflow-shortening feature
-- [ ] Ask: can a non-programmer designer use this without touching code?
-- [ ] Record the reasons for V1 → V2 changes
+## Day 10 — Game Presentation + Tool UX / Optional Editor Integration
+
+### Game Presentation
+
+- [ ] Improve scene layout and spatial readability
+- [ ] Add basic materials / visual differentiation
+- [ ] Improve lighting
+- [ ] Make important interactable objects visually identifiable
+- [ ] Add visible state changes for interactable content
+- [ ] Polish Interaction Prompt
+- [ ] Polish Objective UI
+- [ ] Polish feedback text / state feedback
+- [ ] Add sound / VFX only if core work is already complete
+
+### Tool UX
+
+- [ ] Improve validation summary
+- [ ] Improve error readability and information hierarchy
+- [ ] Make the normal designer workflow obvious
+- [ ] Reduce unnecessary manual steps
+
+### Optional Unity Editor Integration
+
+Only implement this if it genuinely shortens the content-production workflow.
+
+- [ ] Show Config / Item / Objective counts
+- [ ] Show Error / Warning summary
+- [ ] Add `Run Validation`
+- [ ] Add `Regenerate Data`
+- [ ] Optional: search / locate by ID
+
+### Build Verification
+
+- [ ] Produce a standalone Build
+- [ ] Play the Build from beginning to end
+- [ ] Confirm the player does not need Unity Console to understand game state
+- [ ] Confirm Pipeline V2 still drives the real Demo
+
+### D10 Hard Acceptance
+
+- [ ] Demo is approximately 5–8 minutes and visibly resembles a small game
+- [ ] At least 3 different content-object types participate in the loop
+- [ ] At least 1 cross-object dependency is configuration-driven
+- [ ] Editing source configuration changes a real task condition, dependency, or runtime behavior
+- [ ] Invalid Item / Objective / UnlockTarget references are detected before Unity runtime
+- [ ] Generated data is never manually edited during the normal workflow
+- [ ] Scene has basic materials, lighting, spatial structure, UI, prompts, and feedback
+- [ ] Current state is visually strong enough to justify recording a final demo later
 - [ ] Solve 1 basic linked-list / tree problem
 
-## Day 11 — Edge Cases + QA
+---
 
+## Day 11 — QA + Scale Test
+
+- [ ] Prepare roughly 30–50 content records
+- [ ] Verify the Pipeline processes the full test set
 - [ ] Test missing fields
 - [ ] Test duplicate IDs
+- [ ] Test invalid types
 - [ ] Test invalid ranges
-- [ ] Test broken references
-- [ ] Test empty / malformed input
-- [ ] Fix discovered bugs
-- [ ] Record at least one case where AI-generated code was incomplete/wrong
-- [ ] Document how the issue was identified, corrected, and verified
+- [ ] Test broken cross-table references
+- [ ] Test broken Unity references
+- [ ] Test empty input
+- [ ] Test malformed input
+- [ ] Fix real bugs discovered by QA
+- [ ] Record reproducible test cases
+- [ ] Preserve at least one case where AI-generated code was incomplete or wrong
+- [ ] Document:
+  - [ ] What the AI output missed
+  - [ ] How the problem was detected
+  - [ ] How it was fixed
+  - [ ] How the fix was verified
+- [ ] Optional: dependency-cycle detection
+- [ ] Optional: unreachable-objective detection
 - [ ] Solve 1 basic coding problem
 
-## Day 12 — Pipeline Case Study
+---
 
-- [ ] Manually process 30–50 records and time it
-- [ ] Run the automated workflow on the same data and time it
-- [ ] Record errors missed / found in the manual workflow
-- [ ] Record errors caught automatically before Unity/runtime
-- [ ] Draw "before" pipeline
-- [ ] Draw "after" pipeline
-- [ ] Write:
-  - [ ] Original workflow pain points
-  - [ ] Why a tool was needed
-  - [ ] What the tool automates
-  - [ ] Efficiency change
-  - [ ] Bug-risk change
+## Day 12 — Before / After + Pipeline Case Study
 
-## Day 13 — User Test
+### Quantitative Test
 
-- [ ] Ask 1–2 people to use the tool
-- [ ] Do not teach the interface live
+- [ ] Use the same 30–50 content records for both workflows
+- [ ] Manually perform the equivalent content-processing task and time it
+- [ ] Run the automated workflow and time it
+- [ ] Record errors missed during the manual workflow
+- [ ] Record errors automatically detected before Unity / runtime
+- [ ] Record the actual efficiency difference without inventing a target multiplier
+
+### Case Study
+
+- [ ] Draw the Before pipeline
+- [ ] Draw the After pipeline
+- [ ] Write the original workflow pain points
+- [ ] Explain why tooling was needed
+- [ ] Explain what is automated
+- [ ] Explain what remains manual
+- [ ] Explain the data model and dependency structure
+- [ ] Explain validation strategy
+- [ ] Explain efficiency change
+- [ ] Explain bug-risk change
+- [ ] Explain important design trade-offs
+- [ ] Produce Pipeline Case Study V1
+
+---
+
+## Day 13 — User Test + TD External Feedback + Resume
+
+### User Test
+
+- [ ] Ask 1–2 people to use the workflow
 - [ ] Give each tester a concrete task
+- [ ] Do not teach the interface / workflow live
 - [ ] Observe where they get stuck
 - [ ] Record misoperations
 - [ ] Record unclear wording / feedback
-- [ ] Modify the tool based on real feedback
-- [ ] Produce Tool V3
-- [ ] Update Case Study
+- [ ] Modify the tool or workflow based on real feedback
+- [ ] Produce Tool / Pipeline V3 if the feedback justifies changes
+- [ ] Update the Case Study with the iteration
+
+### TD External Feedback
+
+- [ ] Prepare a concise project summary for the Lilith referral senior
+- [ ] Send current project / portfolio material
+- [ ] Ask whether the project direction resembles real TD pipeline / tooling work
+- [ ] Ask which parts are still too student-like or low-value
+- [ ] Ask about current hiring / HC timing
+- [ ] Ask whether the referral should be submitted immediately or after one more iteration
+
+### Resume
+
+- [ ] Produce or update Resume V1 / V2
+- [ ] Add truthful and verifiable project bullets
+- [ ] Include real QA / Batch / quantified results
+- [ ] Avoid unsupported efficiency claims
+- [ ] Prepare a stable project link
+
+---
 
 ## Day 14 — Final Wrap-up + Formal Applications
 
-> **Do not learn new technology today.**
+> **Do not start new technology or expand the feature scope today.**
 
-- [ ] Demo runs end-to-end
-- [ ] Python tool runs end-to-end
-- [ ] Full pipeline runs end-to-end
-- [ ] Finish README
-- [ ] Finish Case Study
-- [ ] Record final 2–4 minute demo video
+### Final Project
+
+- [ ] Standalone Demo runs end-to-end
+- [ ] Python Pipeline runs end-to-end
+- [ ] Full source-data → validation → generation → Unity → gameplay chain runs end-to-end
 - [ ] Clean Git repository
-- [ ] Produce Resume V2
+- [ ] Finish English README
+- [ ] Finish Simplified Chinese README
+- [ ] Finish English Pipeline documentation
+- [ ] Finish Simplified Chinese Pipeline documentation
+- [ ] Finish Case Study
+- [ ] Add bilingual Case Study if appropriate
 - [ ] Prepare stable portfolio link
+
+### Presentation
+
+- [ ] Record final 2–4 minute demo video
+- [ ] Show both:
+  - [ ] Game-like Vertical Slice
+  - [ ] Tool / Pipeline workflow
+- [ ] Show at least one configuration-driven gameplay change
+- [ ] Show at least one validation failure before runtime
+
+### Job Search
+
+- [ ] Produce Resume V2
 - [ ] Finish personal game-experience table
-- [ ] Prepare notes for 3 "core/favorite" games
-- [ ] Finish at least 2 short analyses
+- [ ] Prepare notes for 3 core / favorite games
+- [ ] Finish at least 2 short game / system analyses
 - [ ] Expand formal applications
+- [ ] Decide Lilith referral timing using D13 feedback
 
-## Final Acceptance Checklist
+---
 
-- [ ] Unity Demo can be played from beginning to end
-- [ ] Python tool processes the Demo's real data
+## Final Acceptance Checklist — V2
+
+### Unity Vertical Slice
+
+- [ ] Demo is approximately 5–8 minutes
+- [ ] Demo visibly resembles a small game rather than a test scene
+- [ ] Demo has a clear objective and complete beginning → middle → ending flow
+- [ ] At least 3 genuinely different content-object types exist
+- [ ] Interaction Prompt / Objective UI / Feedback work without Console dependency
+- [ ] Basic materials, lighting, environment layout, and object-state feedback exist
+
+### Content Model / Pipeline
+
+- [ ] Python Pipeline processes the Demo's real multi-table content data
+- [ ] At least one real cross-object / cross-table dependency exists
+- [ ] Source configuration can change that dependency or gameplay condition
+- [ ] Schema errors are detected
+- [ ] Type / range errors are detected
+- [ ] Duplicate IDs are detected
+- [ ] Cross-table reference errors are detected
+- [ ] Unity reference errors are detected
 - [ ] At least one genuine batch operation exists
-- [ ] At least three categories of config errors are automatically detected
-- [ ] There is a real V1 → problem → V2/V3 iteration
-- [ ] At least one efficiency / error-risk improvement is quantified
-- [ ] A 2–4 minute demo video exists
-- [ ] README / Case Study clearly explains the project
-- [ ] Resume contains truthful, verifiable project bullets
-- [ ] Real applications have started
-- [ ] Without Codex, the full data flow, major modules, core code logic, and design trade-offs can be explained
+- [ ] Generated Unity data is not manually edited in the normal workflow
 
-## Sprint Rules
+### Verification / Iteration
+
+- [ ] 30–50 content records have been used for a Scale Test
+- [ ] At least one real V1 → problem → V2/V3 iteration exists
+- [ ] At least one efficiency or error-risk improvement is measured
+- [ ] Before / After Pipeline is documented
+- [ ] At least one real AI-assisted debugging case is documented
+- [ ] At least one external user or TD feedback cycle is completed
+
+### Portfolio / Applications
+
+- [ ] README clearly explains the project
+- [ ] Pipeline documentation clearly explains the technical flow
+- [ ] Case Study explains the production problem, solution, validation, and results
+- [ ] Core external documentation has Chinese / English versions where appropriate
+- [ ] Final 2–4 minute video shows both gameplay and Pipeline
+- [ ] Resume V2 contains truthful, verifiable project bullets
+- [ ] Stable portfolio link exists
+- [ ] Formal applications have started / expanded
+- [ ] Without Codex, the complete data flow, major modules, core code logic, tool value, and design trade-offs can be explained
+
+---
+
+## Sprint Rules — V2
 
 - Do not rebuild the project because of a new JD; only adjust feature priority.
-- Keep **Unity + C# + Python** as the main stack for this sprint.
-- Do not start a second portfolio project before this one reaches the final acceptance checklist.
-- Progress is measured by code, working Demo, tools, documentation, video, and applications — not hours of tutorials watched.
-- D7 and D14 are mandatory wrap-up days.
-- Any feature that does not strengthen evidence of **content implementation, tooling, automation, workflow understanding, or engineering execution** is lower priority.
-- Finish one complete loop before pursuing more advanced technology.
+- Keep **Unity 6.3 LTS + C# + Python + Git** as the main stack through D14.
+- Do not start a second portfolio project during this sprint.
+- D8–D10 are one continuous high-intensity Build Sprint rather than isolated tutorial days.
+- Do not build a large game; build one small but complete Vertical Slice.
+- Complexity must come from real content-production needs rather than architecture for its own sake.
+- Editor Tool / GUI / dependency visualization are optional unless they shorten a real workflow.
+- D11–D14 must shift from feature expansion to QA, measurement, Case Study, Resume, video, feedback, and applications.
+- Finishing early is allowed; do not add low-value features merely to fill time.
+- Any implementation entering README / Case Study / Resume / video must be independently explainable without Codex.
