@@ -1,7 +1,7 @@
 # Current Status
 
-**Last updated:** 2026-09-05  
-**Sprint stage:** Day 5 Tool V1 completed
+**Last updated:** 2026-09-06  
+**Sprint stage:** Day 6 Pipeline V1 completed
 **Repository:** `TD-Pipeline-Demo`
 
 ## Current Direction
@@ -455,36 +455,96 @@ The draft currently covers:
 
 Quantified efficiency claims are intentionally deferred until real measurements are collected later in the sprint.
 
+## Completed — Day 6
+
+### Pipeline V1 End-to-End Verification
+
+Re-ran the complete content-production workflow using the current Tool V1 and playable Demo V0.
+
+Verified chain:
+
+`Designer CSV → Python Validation → Automatic Conversion → Generated JSON → Unity Loading → Runtime Config Lookup → Gameplay Behavior → Demo Flow`
+
+### Source-to-Runtime Propagation Test
+
+Used the valid baseline:
+
+`cube_sturdy.requiredInteractions = 3`
+
+Then:
+
+1. Changed only the designer-facing CSV value from 3 to 5
+2. Ran `py Tools/config_tool.py`
+3. Confirmed all validation stages passed
+4. Confirmed `Assets/Data/interactables.json` was regenerated automatically with value 5
+5. Did not manually edit generated JSON
+6. Did not modify gameplay C# code
+7. Ran the complete Unity prototype
+8. Confirmed SturdyCube required exactly 5 interactions
+9. Completed both objectives
+10. Confirmed ExitDoor opened normally
+11. Reached EndMarker and confirmed `Demo Complete`
+12. Restored the CSV value to 3
+13. Regenerated JSON and returned the project to its valid baseline state
+
+This verifies that designer-facing source-data changes can propagate through the complete pipeline into real runtime content.
+
+### Pipeline Documentation
+
+Added:
+
+`Docs/Pipeline_V1.md`
+
+The document records:
+
+- Designer-facing source data
+- Python validation stages
+- ERROR / WARNING generation gate
+- Typed configuration conversion
+- Generated JSON
+- Unity configuration loading
+- Dictionary-based runtime lookup
+- Config-driven interaction behavior
+- Objective completion and level-flow integration
+- Day 6 end-to-end verification
+- Current Pipeline V1 scope boundaries
+
+### Pipeline Review
+
+Reviewed the current intended workflow for obvious blocking pipeline issues.
+
+No blocker was found during the Day 6 end-to-end test.
+
+Known limitations remain intentionally deferred to later sprint stages, including:
+
+- broader Scene / Prefab reference scanning
+- malformed or missing source-file handling
+- additional Unity-side configuration robustness
+- more extensive edge-case testing
+
 ## Current Runtime State
 
 The playable loop remains:
 
 `Start Trigger → Mission Start → Config-Driven Objectives → Completed Events → Objective Count 2/2 → Exit Open → End Trigger → Demo Complete`
 
-The current content pipeline is now:
+The verified Pipeline V1 is:
 
-`Designer CSV → Python Validation → JSON Generation → Unity Config Database → Runtime Gameplay`
-
-The validation layer additionally checks Unity scene `configId` references against the source configuration before generation.
+`Designer CSV + Unity Scene References → Python Preflight Validation → JSON Generation → Unity Config Database → Runtime Config Lookup → Gameplay Behavior → Demo Completion`
 
 ## Current Milestone
 
-Day 5 core project objective completed:
+Day 6 core project objective completed:
 
-**Python Tool V1 now validates real Demo configuration data and blocks known invalid data before it reaches Unity runtime.**
+**Pipeline V1 has been re-verified as a complete source-data-to-runtime workflow, and its structure and current boundaries are now documented.**
 
-## Next — Day 6
+## Next — Day 7
 
 Main objective:
 
-**Consolidate and verify Pipeline V1 as one complete end-to-end content-production workflow.**
+**Mandatory Week 1 wrap-up: stabilize Demo V1 / Tool V1 and convert the current work into usable job-search materials.**
 
-Planned tasks:
-
-- Re-run the full designer CSV → validation → JSON → Unity → gameplay chain
-- Verify source edits propagate into real runtime content
-- Fix obvious pipeline bugs
-- Draw the first complete pipeline diagram
+Do not add new technology on Day 7.
 
 ## Current Blockers
 

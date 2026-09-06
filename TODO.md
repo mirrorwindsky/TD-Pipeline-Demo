@@ -81,17 +81,17 @@
 
 ## Day 6 — Pipeline V1
 
-- [ ] Connect the full pipeline:
-  - [ ] Designer-facing CSV / config
-  - [ ] Python validator
-  - [ ] Automatic conversion
-  - [ ] JSON / structured output
-  - [ ] Unity import/load
-  - [ ] Runtime game content
-- [ ] Verify editing the source config changes real game content
-- [ ] Fix obvious pipeline bugs
-- [ ] Draw the first pipeline diagram
-- [ ] Solve 1 introductory DFS / BFS problem
+- [x] Connect the full pipeline:
+  - [x] Designer-facing CSV / config
+  - [x] Python validator
+  - [x] Automatic conversion
+  - [x] JSON / structured output
+  - [x] Unity import/load
+  - [x] Runtime game content
+- [x] Verify editing the source config changes real game content
+- [x] Fix obvious pipeline bugs
+- [x] Draw the first pipeline diagram
+- [x] Solve 1 introductory DFS / BFS problem
 
 ## Day 7 — Milestone 1: Mandatory Wrap-up
 

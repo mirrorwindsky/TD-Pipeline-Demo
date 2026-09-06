@@ -117,6 +117,23 @@ Validation behavior:
 - Invalid source data does not overwrite the previous valid generated JSON
 - Unity scene references are checked before runtime so broken `configId` links can be detected earlier in the content-production pipeline
 
+### Day 6 — Pipeline V1
+
+- Re-verified the complete designer-facing content pipeline from source configuration to runtime gameplay
+- Confirmed the pipeline includes CSV source data, Python validation, automatic conversion, generated JSON, Unity loading, configuration lookup, and runtime behavior
+- Performed an end-to-end source-data propagation test by changing only `cube_sturdy.requiredInteractions` from 3 to 5 in the CSV
+- Ran `Tools/config_tool.py` without manually editing generated JSON
+- Verified the generated JSON changed automatically to 5
+- Ran the complete Unity demo and confirmed SturdyCube required exactly 5 interactions
+- Verified objective completion, exit unlocking, and `Demo Complete` still worked normally after the configuration change
+- Restored the source value to 3 and regenerated the valid JSON
+- Reviewed the pipeline for obvious blocking issues; none were found in the current intended workflow
+- Added `Docs/Pipeline_V1.md` documenting the complete content pipeline, validation gate, Unity loading path, runtime flow, verification procedure, and current scope boundaries
+
+Current end-to-end pipeline:
+
+`Designer CSV + Unity Scene References → Python Validation → Automatic Conversion → Generated JSON → Unity Config Loading → Runtime Config Lookup → Gameplay Behavior → Demo Completion`
+
 ## Current Runtime Behavior
 
 The prototype currently supports:
@@ -158,15 +175,18 @@ Key project areas currently include:
 
 ## Next
 
-### Day 6 — Pipeline V1
+### Day 7 — Milestone 1 Wrap-up
 
 Next objective:
 
-Consolidate and verify the complete designer-facing content pipeline from source configuration through validation, conversion, Unity loading, and runtime gameplay.
+Stabilize and package the first-week milestone without adding new technology.
 
 Planned work includes:
 
-- Verify the complete CSV → validator → JSON → Unity → runtime chain
-- Confirm source-data edits still propagate into real gameplay behavior
-- Debug obvious pipeline issues
-- Document the first complete pipeline diagram
+- Fix obvious Demo V1 / Tool V1 issues
+- Clean project structure
+- Finalize Pipeline V1 documentation
+- Update README and project materials
+- Record a 1–2 minute Demo V1 video
+- Produce Resume V1
+- Prepare the current project and resume for external TD-role feedback
