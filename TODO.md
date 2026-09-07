@@ -68,7 +68,7 @@
 - [x] Objective / Prompt / Feedback works
 - [x] At least 1 gameplay dependency is source-config-driven
 - [x] A real Pipeline V2 limitation was discovered from testing
-- [ ] Solve 1 DFS / BFS problem
+- [x] DFS / BFS practice covered by previous day's extra problems
 
 > The final timing target, visual presentation, multi-table source model, field cleanup, `interactionType` validation, and cross-reference validation are intentionally moved to D9–D10.
 
