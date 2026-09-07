@@ -2,22 +2,18 @@
 
 English | [简体中文](README.zh-CN.md)
 
-A work-in-progress Technical Designer portfolio project exploring **data-driven gameplay, content validation, tooling, and content-pipeline automation** with Unity, C#, and Python.
+A work-in-progress Technical Designer portfolio project exploring **gameplay/content implementation, data-driven design, validation tooling, automation, and content-production pipelines** with Unity, C#, and Python.
 
 ## Overview
 
-`TD-Pipeline-Demo` combines a small playable Unity prototype with a designer-facing configuration pipeline.
+`TD-Pipeline-Demo` combines a playable Unity gameplay slice with a designer-facing configuration pipeline.
 
-Instead of treating gameplay implementation and tooling as separate exercises, the project connects them into one real workflow:
+The project is intentionally built as one connected workflow rather than as separate gameplay and tooling exercises:
 
 ```text
 Designer-facing CSV
-        +
-Unity Scene references
         ↓
-Python preflight validation
-        ↓
-Validated configuration conversion
+Python validation / generation
         ↓
 Generated JSON
         ↓
@@ -30,71 +26,105 @@ Config-driven gameplay
 
 The project is intended to demonstrate:
 
-* Gameplay / content implementation
-* Data-driven design
-* Python tooling and automation
-* Pre-runtime content validation
-* Cross-file configuration reference checking
-* End-to-end content-pipeline understanding
-* Debugging and iteration
-* Explainable AI-assisted development
+- Gameplay / content implementation
+- Data-driven design
+- Python tooling and automation
+- Pre-runtime content validation
+- Runtime content dependencies
+- End-to-end content-pipeline understanding
+- Debugging and iteration
+- Explainable AI-assisted development
+
+---
 
 ## Current Milestone
 
-**Pipeline V1 is complete and verified end-to-end.**
+**Day 8 core is complete: the project now contains a playable graybox Vertical Slice and the first runtime-integrated Content Model V2.**
 
-The current project contains:
-
-* A playable Unity graybox mission loop
-* External configuration driving runtime interaction parameters
-* Designer-facing CSV source data
-* Automatic CSV → JSON conversion
-* Schema, type, range, duplicate-ID, and Unity Scene reference validation
-* `ERROR` / `WARNING` severity handling
-* Fail-safe generation that preserves the previous valid JSON when validation fails
-* Runtime configuration lookup through `Dictionary<string, InteractableConfig>`
-* A documented and verified source-data-to-runtime pipeline
-
-A real end-to-end verification changed only:
+The original Week 1 prototype is preserved in:
 
 ```text
-cube_sturdy.requiredInteractions
+Assets/Scenes/Prototype_01.unity
+```
+
+The current gameplay slice is developed in:
+
+```text
+Assets/Scenes/VerticalSlice_01.unity
+```
+
+Current gameplay dependency chain:
+
+```text
+PowerCell
+→ PlayerInventory
+→ PowerNode
+→ ControlTerminal
+→ ExitDoor
+→ EndMarker
+→ Mission Complete
+```
+
+The current slice includes:
+
+- A multi-room graybox facility layout
+- CharacterController-based movement with gravity
+- A smooth follow camera
+- Generic interaction through `IInteractable`
+- Pickup, Device, and Gate gameplay types
+- Minimal ID-based inventory state
+- Required-item and prerequisite-device dependencies
+- Event-driven gate unlocking
+- Interaction Prompt, Objective UI, and Feedback
+- Event-driven objective progression
+- A complete start-to-end mission loop
+- CSV-driven runtime parameters for pickup/device content
+
+A real source-data verification changed only:
+
+```text
+power_node.requiredInteractions
 3 → 5
 ```
 
-The value propagated through:
+Then ran:
 
 ```text
 CSV
-→ Python validation
-→ generated JSON
-→ Unity config loading
-→ runtime gameplay
+→ Python
+→ JSON
+→ Unity
 ```
 
-without manually editing generated JSON or modifying gameplay C# code.
+and verified that the PowerNode required exactly five runtime interactions without manually editing generated JSON or changing gameplay C# code.
 
-The complete playable flow still worked after the data change:
+A second intentional test changed:
 
 ```text
-StartGate
-→ Config-Driven Objectives
-→ Objective Completion
-→ Exit Unlock
-→ EndMarker
-→ Demo Complete
+power_node.requiredItemId
+power_cell → fake_cell
 ```
+
+The invalid dependency was accepted by the current generator and only became visible through runtime behavior.
+
+This exposes the next real pipeline problem:
+
+> **Content dependencies can now be expressed in source data, but invalid cross-record references are not yet validated before runtime.**
+
+That limitation is the concrete starting point for Pipeline V2.
+
+---
 
 ## Quick Start
 
 ### Requirements
 
-* Unity 6.3 LTS
-* Python 3
+- Unity 6.3 LTS
+- Python 3
 
-### 1. Generate Validated Configuration Data
+### 1. Generate Configuration Data
 
-The designer-facing source configuration is:
+The current designer-facing source configuration is:
 
 ```text
 ConfigSource/interactables.csv
@@ -112,40 +142,170 @@ If validation succeeds, the tool generates:
 Assets/Data/interactables.json
 ```
 
-If any `ERROR` is detected:
+Current generation behavior:
 
-* JSON generation is stopped
-* actionable validation messages are printed
-* the previous valid generated JSON is preserved
+- `ERROR` blocks generation
+- `WARNING` is reported but does not block generation
+- invalid source data does not overwrite the previous valid generated JSON
 
-`WARNING` messages are reported but do not block generation.
-
-### 2. Run the Unity Demo
+### 2. Run the Current Vertical Slice
 
 1. Open the project with Unity 6.3 LTS.
-2. Open `Assets/Scenes/Prototype_01.unity`.
+2. Open `Assets/Scenes/VerticalSlice_01.unity`.
 3. Enter Play Mode.
-4. Walk through `StartGate`.
-5. Complete both configurable interaction objectives.
-6. After both objectives are complete, the exit opens.
-7. Reach `EndMarker` to complete the current demo loop.
+4. Follow the on-screen objective.
+5. Find and pick up the Power Cell in Storage.
+6. Use it to repair the Power Node in Maintenance.
+7. Activate the Control Terminal.
+8. Enter the unlocked Exit area.
+9. Reach the EndMarker to complete the mission.
 
 Current gameplay flow:
 
 ```text
-StartGate
-→ Config-Driven Objectives
-→ Completed Events
-→ Exit Unlock
-→ EndMarker
-→ Demo Complete
+Find PowerCell
+→ Repair PowerNode
+→ Activate ControlTerminal
+→ Unlock ExitDoor
+→ Reach Exit
+→ Mission Complete
 ```
 
-## Core Pipeline
+The previous `Prototype_01.unity` scene remains available as the Pipeline V1 / Week 1 baseline.
 
-### Designer-Facing Source
+---
 
-Gameplay configuration is authored in:
+## Gameplay Architecture
+
+### Player Movement
+
+```text
+WASD
+→ movement vector
+→ normalization
+→ CharacterController.Move()
+→ gravity
+→ player movement
+```
+
+The player rotates toward movement direction.
+
+### Follow Camera
+
+A simple follow camera updates after player movement in `LateUpdate`.
+
+This keeps the player visible while moving through the larger Vertical Slice layout.
+
+### Generic Interaction
+
+The player no longer depends directly on one concrete interaction component.
+
+```text
+E / forward Raycast
+→ Interactable tag
+→ IInteractable
+→ object-specific behavior
+```
+
+Current implementations include:
+
+```text
+IInteractable
+├── ConfigurableInteractable   (V1 baseline)
+├── PickupInteractable         (V2 pickup)
+└── DeviceInteractable         (V2 device)
+```
+
+This allows the player interaction code to remain unchanged when new interaction types are added.
+
+### Inventory / Pickup
+
+```text
+PowerCell
+→ PickupInteractable
+→ PlayerInventory
+→ grantedItemId = power_cell
+```
+
+`PlayerInventory` currently uses a `HashSet<string>` because the current slice only needs unique item-ID membership checks.
+
+### Device State
+
+`DeviceInteractable` currently tracks:
+
+```text
+Requirement satisfied?
+        ↓
+Interaction progress
+        ↓
+Completed?
+```
+
+A device can currently depend on:
+
+- an item ID
+- another `DeviceInteractable`
+- a configured number of interactions
+
+Current example:
+
+```text
+PlayerInventory has power_cell
+→ PowerNode becomes usable
+→ power_cell is consumed
+→ PowerNode interaction progress
+→ PowerNode Completed
+```
+
+### Device Dependency
+
+The ControlTerminal currently depends on PowerNode completion:
+
+```text
+PowerNode incomplete
+→ ControlTerminal blocked
+
+PowerNode completed
+→ ControlTerminal usable
+```
+
+### Gate Flow
+
+`GateController` listens for the ControlTerminal completion event:
+
+```text
+ControlTerminal.Completed
+→ GateController
+→ ExitDoor unlocked
+```
+
+### Mission / Objective Flow
+
+The current player-facing objective sequence is:
+
+```text
+Find a Power Cell in Storage
+→ Repair the Power Node in Maintenance
+→ Activate the Control Terminal
+→ Reach the Exit
+→ Mission Complete
+```
+
+The HUD provides:
+
+- current objective
+- interaction prompt
+- blocked-condition feedback
+- interaction progress feedback
+- completion feedback
+
+The intended flow can be understood without reading the Unity Console.
+
+---
+
+## Content Model
+
+The current source file is:
 
 ```text
 ConfigSource/interactables.csv
@@ -153,24 +313,65 @@ ConfigSource/interactables.csv
 
 Current fields include:
 
-* `id`
-* `displayName`
-* `requiredInteractions`
-* `deactivateOnComplete`
+- `id`
+- `displayName`
+- `interactionType`
+- `requiredInteractions`
+- `requiredItemId`
+- `grantedItemId`
+- `blockedMessage`
+- `completionMessage`
+- `deactivateOnComplete`
 
-The CSV is treated as the editable source of truth.
+The current V2 model is still **single-table**.
 
-Generated JSON is not intended to be manually edited during the normal workflow.
+Current example relationships include:
 
-### Python Tool
+```text
+power_cell
+grantedItemId = power_cell
+```
 
-The pipeline tool is:
+and:
+
+```text
+power_node
+requiredItemId = power_cell
+requiredInteractions = 3
+```
+
+Runtime content retrieves configuration through:
+
+```text
+configId
+↓
+InteractableConfigDatabase
+↓
+InteractableConfig
+```
+
+The same database now supports multiple runtime consumers:
+
+```text
+InteractableConfigDatabase
+├── ConfigurableInteractable
+├── PickupInteractable
+└── DeviceInteractable
+```
+
+The next Pipeline V2 milestone will introduce stronger source modeling and reference validation rather than continuing to expand the single-table format indefinitely.
+
+---
+
+## Python Tool
+
+The current pipeline tool is:
 
 ```text
 Tools/config_tool.py
 ```
 
-It currently performs:
+The Week 1 validation flow is:
 
 ```text
 CSV / Unity Scene
@@ -190,96 +391,29 @@ Typed Configuration
 JSON Generation
 ```
 
-### Validation
-
 Current validation includes:
 
-* Missing CSV headers
-* Missing required columns
-* Empty required values
-* Invalid integer values
-* Invalid boolean values
-* Invalid interaction ranges
-* Suspicious interaction values
-* Duplicate configuration IDs
-* Broken Unity Scene `configId` references
+- Missing CSV headers
+- Missing required columns
+- Missing required field values
+- Invalid integer values
+- Invalid boolean values
+- Invalid interaction ranges
+- Suspicious interaction values
+- Duplicate IDs
+- V1 Unity Scene `configId` references
 
-Example broken-reference case:
-
-```text
-CSV:
-cube_sturdy → renamed to cube_sturdy_v2
-
-Unity Scene:
-configId = cube_sturdy
-```
-
-The Python tool detects that the Scene still references an ID that no longer exists and blocks JSON generation before the invalid configuration reaches Unity runtime.
-
-### Generated Data
-
-Validated source data is converted into:
+The current tool does **not yet** validate relationships such as:
 
 ```text
-Assets/Data/interactables.json
+requiredItemId = fake_cell
 ```
 
-The transformation is:
+against a real item/content registry.
 
-```text
-CSV strings
-↓
-Python type conversion
-↓
-InteractableConfig dataclass
-↓
-Dictionary representation
-↓
-JSON
-```
+That is a deliberate Pipeline V2 target.
 
-### Unity Loading
-
-Unity consumes the generated JSON through `InteractableConfigDatabase`.
-
-```text
-interactables.json
-↓
-TextAsset
-↓
-InteractableConfigDatabase.Awake()
-↓
-JsonUtility.FromJson
-↓
-InteractableConfigCollection
-↓
-List<InteractableConfig>
-↓
-Dictionary<string, InteractableConfig>
-```
-
-Each `ConfigurableInteractable` contains a serialized `configId` and retrieves its corresponding runtime configuration through the dictionary.
-
-For example:
-
-```text
-SturdyCube
-↓
-configId = cube_sturdy
-↓
-Dictionary lookup
-↓
-requiredInteractions = 3
-↓
-Runtime interaction behavior
-```
-
-## Documentation
-
-* [`Docs/Pipeline_V1.md`](Docs/Pipeline_V1.md) — Detailed end-to-end pipeline, validation stages, Unity loading path, runtime flow, verification procedure, and current scope boundaries.
-* [`Docs/Pipeline_V1.zh-CN.md`](Docs/Pipeline_V1.zh-CN.md) — Simplified Chinese version.
-* [`STATUS.md`](STATUS.md) — Current project status and milestone handoff context.
-* [`TODO.md`](TODO.md) — Sprint execution checklist and upcoming work.
+---
 
 ## Project Structure
 
@@ -292,7 +426,8 @@ TD-Pipeline-Demo/
 │   │   └── interactables.json
 │   ├── Prefabs/
 │   ├── Scenes/
-│   │   └── Prototype_01.unity
+│   │   ├── Prototype_01.unity
+│   │   └── VerticalSlice_01.unity
 │   ├── Scripts/
 │   └── Settings/
 │
@@ -318,263 +453,161 @@ Designer-facing source configuration.
 
 ### `Tools`
 
-Python validation, conversion, and pipeline tooling.
+Python validation, conversion, and content-pipeline tooling.
 
 ### `Assets/Data`
 
-Generated configuration consumed by Unity.
+Generated runtime configuration consumed by Unity.
 
 ### `Assets/Scripts`
 
-Current gameplay and configuration systems, including:
+Gameplay and pipeline integration code, including:
 
-* Player movement
-* Raycast interaction
-* Configuration data classes
-* Configuration database
-* Config-driven interactable behavior
-* Mission / objective flow
+- player movement / gravity
+- camera follow
+- generic raycast interaction
+- inventory
+- pickup behavior
+- device behavior
+- configuration data classes
+- configuration database
+- gate control
+- HUD
+- objective / mission flow
 
 ### `Assets/Scenes`
 
-Contains the active prototype scene:
-
-```text
-Prototype_01.unity
-```
+- `Prototype_01.unity` — Pipeline V1 / Week 1 baseline
+- `VerticalSlice_01.unity` — current gameplay Vertical Slice scene
 
 ### `Docs`
 
-Technical and pipeline documentation intended to describe the project itself rather than sprint-management state.
+Technical documentation for the project itself.
 
-## Current Runtime Behavior
+---
 
-### Player Movement
+## Documentation
 
-```text
-WASD input
-→ movement vector
-→ normalization
-→ CharacterController.Move()
-→ player movement
-```
+- [`Docs/Pipeline_V1.md`](Docs/Pipeline_V1.md) — Pipeline V1 end-to-end flow, validation, Unity loading, verification, and current boundaries
+- [`Docs/Pipeline_V1.zh-CN.md`](Docs/Pipeline_V1.zh-CN.md) — Simplified Chinese version
+- [`STATUS.md`](STATUS.md) — current project state and handoff context
+- [`TODO.md`](TODO.md) — current V2 sprint execution checklist
 
-### Interaction
+Pipeline V2 documentation will be added after the D9 architecture and validation model are stable.
 
-```text
-E input
-→ forward Physics.Raycast
-→ Interactable tag check
-→ ConfigurableInteractable.Interact()
-```
-
-### Config-Driven Objective
-
-```text
-ConfigurableInteractable
-→ configId lookup
-→ requiredInteractions
-→ interaction progress
-→ Completed event
-```
-
-### Mission Flow
-
-```text
-StartTrigger
-→ Mission Start
-→ Complete 2 Objectives
-→ Completed Events
-→ DemoFlowController
-→ ExitDoor Opens
-→ EndTrigger
-→ Demo Complete
-```
+---
 
 ## Tech
 
-* Unity 6.3 LTS
-* C#
-* Python
-* CSV / JSON
-* Git / GitHub
+- Unity 6.3 LTS
+- C#
+- TextMeshPro
+- Python
+- CSV / JSON
+- Git / GitHub
+
+---
 
 ## Development Log
 
 ### Day 1 — Minimal Unity Prototype
 
-* Set up the Unity 6.3 LTS project
-* Created the initial graybox scene
-* Implemented WASD movement using `CharacterController`
-* Normalized movement input to avoid faster diagonal movement
-* Made the player face the movement direction
-* Implemented E-key interaction using `Physics.Raycast`
-* Added `Interactable` tag checking
-* Used Console logging and `Debug.DrawRay` to debug the interaction chain
-
-Verified:
-
-```text
-Input
-→ Raycast
-→ Tag Check
-→ Interaction
-```
+- Set up Unity 6.3 LTS, movement, raycast interaction, debugging, and Git.
 
 ### Day 2 — First Config-Driven Gameplay Chain
 
-* Added external JSON configuration
-* Added serializable C# configuration classes
-* Loaded JSON using `JsonUtility`
-* Stored configuration entries in `List<InteractableConfig>`
-* Built `Dictionary<string, InteractableConfig>` for runtime ID lookup
-* Added `ConfigurableInteractable`
-* Allowed GameObjects to select configuration through `configId`
-* Verified configuration values change runtime behavior without rewriting gameplay logic
-
-Initial configuration chain:
-
-```text
-interactables.json
-→ JsonUtility
-→ List<InteractableConfig>
-→ Dictionary lookup
-→ ConfigurableInteractable
-→ Runtime behavior
-```
+- Added external JSON configuration and runtime dictionary lookup.
 
 ### Day 3 — Python Tool V0
 
-* Added `ConfigSource/interactables.csv`
-* Added `Tools/config_tool.py`
-* Used `pathlib` for project-relative paths
-* Used `csv.DictReader` to read source data
-* Added a Python `InteractableConfig` dataclass
-* Converted CSV strings into typed values
-* Generated Unity-consumable JSON using `json.dump`
-* Verified CSV changes propagate through Python and JSON into Unity runtime
-
-First designer-facing pipeline:
-
-```text
-CSV Source Data
-→ Python Config Tool
-→ Generated JSON
-→ Unity Config Database
-→ Runtime Gameplay
-```
+- Added designer-facing CSV and CSV → Python → JSON → Unity generation.
 
 ### Day 4 — Demo V0
 
-* Built a complete graybox gameplay loop
-* Created a reusable `StartGate` Prefab
-* Added trigger-based mission start
-* Added `Completed` events to configurable interactables
-* Added `DemoFlowController`
-* Reused QuickCube and SturdyCube as config-driven objectives
-* Opened `ExitDoor` after both objectives were completed
-* Added `EndTrigger`
-* Verified objective completion works in either order
-* Verified re-entering StartGate does not restart the mission
-
-Gameplay loop:
-
-```text
-Start Trigger
-→ Mission Start
-→ Complete 2 Config-Driven Objectives
-→ Completed Events
-→ Exit Unlock
-→ End Trigger
-→ Demo Complete
-```
+- Built the first complete graybox mission loop.
 
 ### Day 5 — Python Tool V1
 
-Upgraded the Python conversion script into a validation-aware content tool.
-
-Added:
-
-* Schema / missing-field validation
-* Type validation
-* Range validation
-* Duplicate-ID validation
-* `ERROR` / `WARNING` separation
-* Actionable file / row / field error messages
-* Unity Scene `configId` reference validation
-* Fail-safe generation
-* Input normalization before JSON generation
-
-Verified detection of:
-
-* Missing values
-* Missing required columns
-* Invalid integers
-* Invalid ranges
-* Invalid booleans
-* Duplicate IDs
-* Broken Scene references
-* Multiple independent validation problems in a single run
+- Added schema, type, range, duplicate-ID, severity, reference, and fail-safe validation behavior.
 
 ### Day 6 — Pipeline V1
 
-Re-verified the complete source-data-to-runtime workflow.
+- Verified complete source → validation → JSON → Unity → runtime propagation.
+- Added `Docs/Pipeline_V1.md`.
 
-Test:
+### Day 7 — Week 1 Wrap-up
+
+- Stabilized the Week 1 milestone.
+- Added bilingual portfolio documentation.
+- Rebuilt D8–D14 around Vertical Slice + Pipeline V2.
+
+### Day 8 — Gameplay Vertical Slice + Content Model V2 Core
+
+- Created `VerticalSlice_01.unity`
+- Preserved `Prototype_01.unity` as the V1 baseline
+- Built a multi-room facility graybox
+- Added CharacterController gravity
+- Added a smooth follow camera
+- Introduced `IInteractable`
+- Preserved compatibility with V1 `ConfigurableInteractable`
+- Added `PlayerInventory`
+- Added `PickupInteractable`
+- Added reusable `DeviceInteractable`
+- Added item requirements and prerequisite-device logic
+- Added event-driven `GateController`
+- Added TextMeshPro Objective / Feedback / Prompt HUD
+- Added event-driven Vertical Slice objective progression
+- Added final mission completion trigger
+- Expanded the configuration model with interaction / item / feedback fields
+- Connected PowerCell and PowerNode behavior back to CSV-generated data
+- Verified `requiredInteractions: 3 → 5` propagates into runtime gameplay
+- Intentionally tested `requiredItemId = fake_cell`
+- Identified missing cross-record reference validation as the next Pipeline V2 problem
+
+Current Day 8 gameplay chain:
 
 ```text
-cube_sturdy.requiredInteractions
-3 → 5
+PowerCell
+→ PlayerInventory
+→ PowerNode
+→ ControlTerminal
+→ ExitDoor
+→ EndMarker
+→ Mission Complete
 ```
 
-Procedure:
-
-1. Modified only the designer-facing CSV.
-2. Ran `Tools/config_tool.py`.
-3. Validation passed.
-4. JSON was regenerated automatically.
-5. Unity loaded the new configuration.
-6. SturdyCube required exactly 5 interactions.
-7. Objective completion and exit unlocking still worked.
-8. The demo reached `Demo Complete`.
-9. Restored the source value to 3 and regenerated the valid baseline.
-
-Added:
-
-```text
-Docs/Pipeline_V1.md
-```
-
-to document the complete pipeline and its current scope.
-
-### Day 7 — Milestone 1 Wrap-up
-
-Current wrap-up work includes:
-
-* Re-tested Demo V1 and Tool V1 with no blocking errors
-* Cleaned Unity template / tutorial assets that were not part of the project
-* Updated the Unity Build Scene List to use `Prototype_01.unity`
-* Re-ran the Python pipeline successfully after cleanup
-* Re-ran the complete Unity gameplay loop successfully after cleanup
-* Reorganized project documentation toward an external-reader / portfolio structure
+---
 
 ## Current Scope
 
-The current implementation is intentionally small and focused on proving the complete content-production chain.
-
 Known limitations include:
 
-* Scene reference validation currently targets the current prototype scene rather than all Scenes and Prefabs
-* Missing or completely malformed source files are not yet handled comprehensively
-* Unity-side configuration robustness is still minimal
-* The current Python tool is CLI-based
-* The gameplay demo is intentionally graybox and mechanically simple
-* Validation functions currently read the CSV separately rather than sharing a single parsed intermediate representation
+- The current Vertical Slice is still visually graybox
+- The final 5–8 minute target has not yet been formally timed
+- The current Content Model V2 is still stored in one CSV
+- Cross-record references such as `requiredItemId` are not yet validated before runtime
+- `interactionType` is stored but not yet validated as a legal enum / value
+- V1 Unity reference validation is still specific to the existing `ConfigurableInteractable.configId` structure
+- Validation still reads source CSV data in multiple passes instead of using one shared parsed intermediate model
+- The Python tool remains CLI-based
 
-These limitations are treated as future iteration opportunities rather than hidden behind broader claims about the current implementation.
+These are active iteration targets rather than hidden claims about the current implementation.
+
+---
 
 ## Next
 
-The first complete Pipeline V1 milestone is now available.
+### Day 9 — Pipeline V2
 
-The immediate focus is to finish the Week 1 wrap-up and then reassess the scope and depth of the remaining sprint work before continuing the next implementation phase.
+The next milestone is to upgrade the current single-table Content Model V2 into a stronger content pipeline.
+
+Planned work includes:
+
+- introduce multi-table source data where it has real value
+- parse source data once into a Typed Intermediate Model
+- make validation and generation consume the same parsed model
+- validate legal `interactionType` values
+- add cross-record / cross-table reference validation
+- reject invalid IDs such as `requiredItemId = fake_cell` before runtime
+- preserve existing schema, type, range, duplicate-ID, and Unity-reference validation
+- add at least one genuine batch-processing workflow

@@ -9,7 +9,12 @@ import re
 class InteractableConfig:
     id: str
     displayName: str
+    interactionType: str
     requiredInteractions: int
+    requiredItemId: str
+    grantedItemId: str
+    blockedMessage: str
+    completionMessage: str
     deactivateOnComplete: bool
 
 
@@ -27,6 +32,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 REQUIRED_FIELDS = [
     "id",
     "displayName",
+    "interactionType",
     "requiredInteractions",
     "deactivateOnComplete",
 ]
@@ -257,8 +263,15 @@ def load_configs(csv_path: Path) -> list[InteractableConfig]:
             config = InteractableConfig(
                 id=row["id"].strip(),
                 displayName=row["displayName"].strip(),
+                interactionType=row["interactionType"].strip(),
                 requiredInteractions=int(row["requiredInteractions"]),
-                deactivateOnComplete=parse_bool(row["deactivateOnComplete"]),
+                requiredItemId=row.get("requiredItemId", "").strip(),
+                grantedItemId=row.get("grantedItemId", "").strip(),
+                blockedMessage=row.get("blockedMessage", "").strip(),
+                completionMessage=row.get("completionMessage", "").strip(),
+                deactivateOnComplete=parse_bool(
+                    row["deactivateOnComplete"]
+                ),
             )
 
             configs.append(config)

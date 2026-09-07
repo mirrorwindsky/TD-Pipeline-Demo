@@ -3,14 +3,57 @@
     {
       "id": "cube_quick",
       "displayName": "Quick Cube",
+      "interactionType": "Device",
       "requiredInteractions": 1,
+      "requiredItemId": "",
+      "grantedItemId": "",
+      "blockedMessage": "",
+      "completionMessage": "",
       "deactivateOnComplete": true
     },
     {
       "id": "cube_sturdy",
       "displayName": "Sturdy Cube",
+      "interactionType": "Device",
       "requiredInteractions": 3,
+      "requiredItemId": "",
+      "grantedItemId": "",
+      "blockedMessage": "",
+      "completionMessage": "",
       "deactivateOnComplete": true
+    },
+    {
+      "id": "power_cell",
+      "displayName": "Power Cell",
+      "interactionType": "Pickup",
+      "requiredInteractions": 1,
+      "requiredItemId": "",
+      "grantedItemId": "power_cell",
+      "blockedMessage": "",
+      "completionMessage": "Power Cell acquired.",
+      "deactivateOnComplete": true
+    },
+    {
+      "id": "power_node",
+      "displayName": "Power Node",
+      "interactionType": "Device",
+      "requiredInteractions": 3,
+      "requiredItemId": "power_cell",
+      "grantedItemId": "",
+      "blockedMessage": "A Power Cell is required.",
+      "completionMessage": "Power restored.",
+      "deactivateOnComplete": false
+    },
+    {
+      "id": "control_terminal",
+      "displayName": "Control Terminal",
+      "interactionType": "Device",
+      "requiredInteractions": 2,
+      "requiredItemId": "",
+      "grantedItemId": "",
+      "blockedMessage": "Restore the Power Node first.",
+      "completionMessage": "Exit unlocked.",
+      "deactivateOnComplete": false
     }
   ]
 }

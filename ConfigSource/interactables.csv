@@ -1,3 +1,6 @@
-id,displayName,requiredInteractions,deactivateOnComplete
-cube_quick,Quick Cube,1,true
-cube_sturdy,Sturdy Cube,3,true
+id,displayName,interactionType,requiredInteractions,requiredItemId,grantedItemId,blockedMessage,completionMessage,deactivateOnComplete
+cube_quick,Quick Cube,Device,1,,,,,true
+cube_sturdy,Sturdy Cube,Device,3,,,,,true
+power_cell,Power Cell,Pickup,1,,power_cell,,Power Cell acquired.,true
+power_node,Power Node,Device,3,power_cell,,A Power Cell is required.,Power restored.,false
+control_terminal,Control Terminal,Device,2,,,Restore the Power Node first.,Exit unlocked.,false

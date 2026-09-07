@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class ConfigurableInteractable : MonoBehaviour
+public class ConfigurableInteractable : MonoBehaviour, IInteractable
 {
     [SerializeField] private string configId;
     [SerializeField] private InteractableConfigDatabase database;
@@ -48,5 +48,10 @@ public class ConfigurableInteractable : MonoBehaviour
                 gameObject.SetActive(false);
             }
         }
+    }
+
+    public void Interact(GameObject interactor)
+    {
+    Interact();
     }
 }

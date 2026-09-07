@@ -4,10 +4,13 @@ using UnityEngine.InputSystem;
 public class SimpleInteraction : MonoBehaviour
 {
     [SerializeField] private float interactionDistance = 2f;
+    [SerializeField] private PlayerHUD hud;
 
     private void Update()
     {
-        Vector3 origin = transform.position + Vector3.down * 0.5f;
+        Vector3 origin =
+            transform.position + Vector3.down * 0.5f;
+
         Vector3 direction = transform.forward;
 
         Debug.DrawRay(
@@ -16,38 +19,43 @@ public class SimpleInteraction : MonoBehaviour
             Color.red
         );
 
-        if (Keyboard.current.eKey.wasPressedThisFrame)
+        IInteractable interactable =
+            FindInteractable(origin, direction);
+
+        if (interactable != null)
         {
-            Debug.Log("E pressed");
-            TryInteract(origin, direction);
-        }
-    }
-
-    private void TryInteract(Vector3 origin, Vector3 direction)
-    {
-        if (Physics.Raycast(
-            origin,
-            direction,
-            out RaycastHit hit,
-            interactionDistance))
-        {
-            Debug.Log($"Raycast hit: {hit.collider.name}");
-
-            if (hit.collider.CompareTag("Interactable"))
-            {
-                Debug.Log($"Interacted with {hit.collider.name}");
-                ConfigurableInteractable interactable = 
-                    hit.collider.GetComponent<ConfigurableInteractable>();
-
-                if (interactable != null)
-                {
-                    interactable.Interact();
-                }
-            }
+            hud?.SetPrompt("Press E to interact");
         }
         else
         {
-            Debug.Log("Raycast hit nothing");
+            hud?.SetPrompt("");
         }
+
+        if (Keyboard.current.eKey.wasPressedThisFrame &&
+            interactable != null)
+        {
+            interactable.Interact(gameObject);
+        }
+    }
+
+    private IInteractable FindInteractable(
+        Vector3 origin,
+        Vector3 direction)
+    {
+        if (!Physics.Raycast(
+                origin,
+                direction,
+                out RaycastHit hit,
+                interactionDistance))
+        {
+            return null;
+        }
+
+        if (!hit.collider.CompareTag("Interactable"))
+        {
+            return null;
+        }
+
+        return hit.collider.GetComponent<IInteractable>();
     }
 }
