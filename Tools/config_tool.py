@@ -31,6 +31,13 @@ class ContentModel:
 
 
 @dataclass
+class BatchInteractionUpdate:
+    id: str
+    oldRequiredInteractions: int
+    newRequiredInteractions: int
+
+
+@dataclass
 class ValidationIssue:
     level: str
     message: str
@@ -360,10 +367,11 @@ def validate_item_references(
     return issues
 
 
-def preview_batch_interaction_updates(
+def prepare_batch_interaction_updates(
     update_table: SourceTable,
     content: ContentModel,
-) -> list[ValidationIssue]:
+) -> tuple[list[BatchInteractionUpdate], list[ValidationIssue]]:
+    updates = []
     issues = []
 
     interactable_by_id = {
@@ -412,13 +420,27 @@ def preview_batch_interaction_updates(
 
         config = interactable_by_id[config_id]
 
-        print(
-            f"[BATCH] {config_id}: "
-            f"requiredInteractions "
-            f"{config.requiredInteractions} -> {new_value}"
+        updates.append(
+            BatchInteractionUpdate(
+                id=config_id,
+                oldRequiredInteractions=config.requiredInteractions,
+                newRequiredInteractions=new_value,
+            )
         )
 
-    return issues
+    return updates, issues
+
+
+def print_batch_preview(
+    updates: list[BatchInteractionUpdate],
+) -> None:
+    for update in updates:
+        print(
+            f"[BATCH] {update.id}: "
+            f"requiredInteractions "
+            f"{update.oldRequiredInteractions} "
+            f"-> {update.newRequiredInteractions}"
+        )
 
 
 def load_items(table: SourceTable) -> list[ItemConfig]:
@@ -495,8 +517,12 @@ def run_batch_preview():
         BATCH_UPDATE_REQUIRED_FIELDS,
     )
 
-    if issues:
+    if not any(issue.level == ERROR for issue in issues):
+        issues.extend(validate_duplicate_ids(update_table))
+
+    if any(issue.level == ERROR for issue in issues):
         print_issues(issues)
+        print("Batch preview failed. No changes were made.")
         return
 
     item_table = parse_csv_table(ITEMS_SOURCE_PATH)
@@ -506,14 +532,19 @@ def run_batch_preview():
         interactable_table,
     )
 
-    issues.extend(
-        preview_batch_interaction_updates(
-            update_table,
-            content,
-        )
+    updates, batch_issues = prepare_batch_interaction_updates(
+        update_table,
+        content,
     )
 
-    print_issues(issues)
+    issues.extend(batch_issues)
+
+    if any(issue.level == ERROR for issue in issues):
+        print_issues(issues)
+        print("Batch preview failed. No changes were made.")
+        return
+
+    print_batch_preview(updates)
 
 
 def main():
