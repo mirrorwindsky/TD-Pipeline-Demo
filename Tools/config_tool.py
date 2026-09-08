@@ -64,6 +64,11 @@ INTERACTABLE_REQUIRED_FIELDS = [
 MIN_REQUIRED_INTERACTIONS = 1
 RECOMMENDED_MAX_INTERACTIONS = 10
 
+VALID_INTERACTION_TYPES = {
+    "Pickup",
+    "Device",
+}
+
 ITEMS_SOURCE_PATH = ROOT_DIR / "ConfigSource" / "items.csv"
 INTERACTABLES_SOURCE_PATH = ROOT_DIR / "ConfigSource" / "interactables.csv"
 OUTPUT_PATH = ROOT_DIR / "Assets" / "Data" / "interactables.json"
@@ -189,6 +194,33 @@ def validate_values(table: SourceTable) -> list[ValidationIssue]:
                     f"field 'deactivateOnComplete': "
                     f"expected 'true' or 'false', "
                     f"got '{row['deactivateOnComplete']}'."
+                )
+            )
+
+    return issues
+
+
+def validate_interaction_types(
+    table: SourceTable,
+) -> list[ValidationIssue]:
+    issues = []
+
+    for row_number, row in enumerate(table.rows, start=2):
+        interaction_type = (row.get("interactionType") or "").strip()
+
+        if not interaction_type:
+            continue
+
+        if interaction_type not in VALID_INTERACTION_TYPES:
+            valid_values = ", ".join(sorted(VALID_INTERACTION_TYPES))
+
+            issues.append(
+                ValidationIssue(
+                    ERROR,
+                    f"{table.path.name} row {row_number} "
+                    f"field 'interactionType': "
+                    f"unknown value '{interaction_type}'. "
+                    f"Expected one of: {valid_values}."
                 )
             )
 
@@ -410,6 +442,7 @@ def main():
 
     if not any(issue.level == ERROR for issue in interactable_schema_issues):
         issues.extend(validate_values(interactable_table))
+        issues.extend(validate_interaction_types(interactable_table))
         issues.extend(validate_duplicate_ids(interactable_table))
         issues.extend(
             validate_references(
