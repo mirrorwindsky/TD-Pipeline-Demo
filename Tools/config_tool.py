@@ -24,6 +24,13 @@ class ValidationIssue:
     message: str
 
 
+@dataclass
+class SourceTable:
+    path: Path
+    fieldnames: list[str]
+    rows: list[dict[str, str | None]]
+
+
 ERROR = "ERROR"
 WARNING = "WARNING"
 
@@ -45,6 +52,24 @@ OUTPUT_PATH = ROOT_DIR / "Assets" / "Data" / "interactables.json"
 SCENE_PATH = ROOT_DIR / "Assets" / "Scenes" / "Prototype_01.unity"
 
 
+def parse_csv_table(csv_path: Path) -> SourceTable:
+    with csv_path.open(
+        "r",
+        encoding="utf-8-sig",
+        newline="",
+    ) as file:
+        reader = csv.DictReader(file)
+
+        fieldnames = reader.fieldnames or []
+        rows = list(reader)
+
+    return SourceTable(
+        path=csv_path,
+        fieldnames=fieldnames,
+        rows=rows,
+    )
+
+
 def parse_bool(value: str) -> bool:
     return value.strip().lower() == "true"
 
@@ -54,148 +79,134 @@ def print_issues(issues: list[ValidationIssue]) -> None:
         print(f"[{issue.level}] {issue.message}")
 
 
-def validate_schema(csv_path: Path) -> list[ValidationIssue]:    # 验证CSV文件的结构和必需字段
+def validate_schema(table: SourceTable) -> list[ValidationIssue]:
     issues = []
 
-    with csv_path.open("r", encoding="utf-8-sig", newline="") as file:
-        reader = csv.DictReader(file)
+    if not table.fieldnames:
+        issues.append(
+            ValidationIssue(
+                ERROR,
+                f"{table.path.name}: CSV header is missing."
+            )
+        )
+        return issues
 
-        if reader.fieldnames is None:    # 检查CSV文件是否有表头
+    for field in REQUIRED_FIELDS:
+        if field not in table.fieldnames:
             issues.append(
                 ValidationIssue(
                     ERROR,
-                    f"{csv_path.name}: CSV header is missing."
+                    f"{table.path.name}: missing required column '{field}'."
                 )
             )
-            return issues
 
-        for field in REQUIRED_FIELDS:    # 检查必需的字段是否存在于表头中
-            if field not in reader.fieldnames:
+    for row_number, row in enumerate(table.rows, start=2):
+        for field in REQUIRED_FIELDS:
+            if field not in row:
+                continue
+
+            value = row[field]
+
+            if value is None or not value.strip():
                 issues.append(
                     ValidationIssue(
                         ERROR,
-                        f"{csv_path.name}: missing required column '{field}'."
+                        f"{table.path.name} row {row_number} "
+                        f"field '{field}': value is required."
                     )
                 )
-
-        for row_number, row in enumerate(reader, start=2):
-            for field in REQUIRED_FIELDS:    # 检查每一行的必需字段是否有值
-                if field not in row:
-                    continue
-
-                value = row[field]
-
-                if value is None or not value.strip():    # 检查字段值是否为空或仅包含空白字符
-                    issues.append(
-                        ValidationIssue(
-                            ERROR,
-                            f"{csv_path.name} row {row_number} "
-                            f"field '{field}': value is required."
-                        )
-                    )
 
     return issues
 
 
-def validate_values(csv_path: Path) -> list[ValidationIssue]:    #
+def validate_values(table: SourceTable) -> list[ValidationIssue]:
     issues = []
 
-    with csv_path.open("r", encoding="utf-8-sig", newline="") as file:
-        reader = csv.DictReader(file)
+    for row_number, row in enumerate(table.rows, start=2):
+        required_interactions_raw = row["requiredInteractions"].strip()
+        deactivate_raw = row["deactivateOnComplete"].strip().lower()
 
-        for row_number, row in enumerate(reader, start=2):
-            required_interactions_raw = row["requiredInteractions"].strip()
-            deactivate_raw = row["deactivateOnComplete"].strip().lower()
-
-            try:
-                required_interactions = int(required_interactions_raw)
-            except ValueError:    # 检查'requiredInteractions'字段是否为整数
+        try:
+            required_interactions = int(required_interactions_raw)
+        except ValueError:
+            issues.append(
+                ValidationIssue(
+                    ERROR,
+                    f"{table.path.name} row {row_number} "
+                    f"field 'requiredInteractions': "
+                    f"expected integer, got '{required_interactions_raw}'."
+                )
+            )
+        else:
+            if required_interactions < MIN_REQUIRED_INTERACTIONS:
                 issues.append(
                     ValidationIssue(
                         ERROR,
-                        f"{csv_path.name} row {row_number} "
+                        f"{table.path.name} row {row_number} "
                         f"field 'requiredInteractions': "
-                        f"expected integer, got "
-                        f"'{required_interactions_raw}'."
+                        f"must be >= {MIN_REQUIRED_INTERACTIONS}, "
+                        f"got {required_interactions}."
                     )
                 )
-            else:    # 检查'requiredInteractions'字段的值是否在有效范围内
-                if required_interactions < MIN_REQUIRED_INTERACTIONS:    # 检查值是否小于最小值，若小于则添加错误信息
-                    issues.append(
-                        ValidationIssue(
-                            ERROR,
-                            f"{csv_path.name} row {row_number} "
-                            f"field 'requiredInteractions': "
-                            f"must be >= {MIN_REQUIRED_INTERACTIONS}, "
-                            f"got {required_interactions}."
-                        )
-                    )
 
-                elif required_interactions > RECOMMENDED_MAX_INTERACTIONS:    # 检查值是否大于推荐最大值，若大于则添加警告信息
-                    issues.append(
-                        ValidationIssue(
-                            WARNING,
-                            f"{csv_path.name} row {row_number} "
-                            f"field 'requiredInteractions': "
-                            f"value {required_interactions} is unusually high "
-                            f"for the current interaction design."
-                        )
-                    )
-
-            if deactivate_raw not in {"true", "false"}:    # 检查'deactivateOnComplete'字段的值是否为'true'或'false'
+            elif required_interactions > RECOMMENDED_MAX_INTERACTIONS:
                 issues.append(
                     ValidationIssue(
-                        ERROR,
-                        f"{csv_path.name} row {row_number} "
-                        f"field 'deactivateOnComplete': "
-                        f"expected 'true' or 'false', "
-                        f"got '{row['deactivateOnComplete']}'."
+                        WARNING,
+                        f"{table.path.name} row {row_number} "
+                        f"field 'requiredInteractions': "
+                        f"value {required_interactions} is unusually high "
+                        f"for the current interaction design."
                     )
                 )
+
+        if deactivate_raw not in {"true", "false"}:
+            issues.append(
+                ValidationIssue(
+                    ERROR,
+                    f"{table.path.name} row {row_number} "
+                    f"field 'deactivateOnComplete': "
+                    f"expected 'true' or 'false', "
+                    f"got '{row['deactivateOnComplete']}'."
+                )
+            )
 
     return issues
 
 
-def validate_duplicate_ids(csv_path: Path) -> list[ValidationIssue]:
+def validate_duplicate_ids(table: SourceTable) -> list[ValidationIssue]:
     issues = []
     seen_ids = set()
 
-    # 检查CSV文件中是否有重复的'id'字段值
-    with csv_path.open("r", encoding="utf-8-sig", newline="") as file:
-        reader = csv.DictReader(file)
+    for row_number, row in enumerate(table.rows, start=2):
+        config_id = row["id"].strip()
 
-        for row_number, row in enumerate(reader, start=2):
-            config_id = row["id"].strip()
-
-            if config_id in seen_ids:
-                issues.append(
-                    ValidationIssue(
-                        ERROR,
-                        f"{csv_path.name} row {row_number} "
-                        f"field 'id': duplicate id '{config_id}'."
-                    )
+        if config_id in seen_ids:
+            issues.append(
+                ValidationIssue(
+                    ERROR,
+                    f"{table.path.name} row {row_number} "
+                    f"field 'id': duplicate id '{config_id}'."
                 )
-            else:
-                seen_ids.add(config_id)
+            )
+        else:
+            seen_ids.add(config_id)
 
     return issues
 
 
 def validate_references(
-    csv_path: Path,
+    table: SourceTable,
     scene_path: Path,
 ) -> list[ValidationIssue]:
     issues = []
 
-    valid_ids = set()
+    valid_ids = {
+        row["id"].strip()
+        for row in table.rows
+    }
 
-    with csv_path.open("r", encoding="utf-8-sig", newline="") as file:
-        reader = csv.DictReader(file)
-
-        for row in reader:
-            valid_ids.add(row["id"].strip())
-
-    if not scene_path.exists():    # 检查场景文件是否存在
+    if not scene_path.exists():
         issues.append(
             ValidationIssue(
                 ERROR,
@@ -209,16 +220,16 @@ def validate_references(
     component_blocks = scene_text.split("--- !u!114")
 
     for block in component_blocks:
-        if "Assembly-CSharp::ConfigurableInteractable" not in block:    # 检查是否包含ConfigurableInteractable组件
+        if "Assembly-CSharp::ConfigurableInteractable" not in block:
             continue
 
         match = re.search(
-            r"^[ \t]*configId:[ \t]*(.*?)[ \t]*$",    # 匹配configId字段的正则表达式，形如 "configId: some_id"
+            r"^[ \t]*configId:[ \t]*(.*?)[ \t]*$",
             block,
             re.MULTILINE,
         )
 
-        if match is None:    # 检查是否匹配到configId字段
+        if match is None:
             issues.append(
                 ValidationIssue(
                     ERROR,
@@ -230,7 +241,7 @@ def validate_references(
 
         config_id = match.group(1).strip()
 
-        if not config_id:    # 检查configId字段是否为空
+        if not config_id:
             issues.append(
                 ValidationIssue(
                     ERROR,
@@ -240,7 +251,7 @@ def validate_references(
             )
             continue
 
-        if config_id not in valid_ids:    # 检查configId字段的值是否在有效的id集合中
+        if config_id not in valid_ids:
             issues.append(
                 ValidationIssue(
                     ERROR,
@@ -253,28 +264,23 @@ def validate_references(
     return issues
 
 
-def load_configs(csv_path: Path) -> list[InteractableConfig]:
+def load_configs(table: SourceTable) -> list[InteractableConfig]:
     configs = []
 
-    with csv_path.open("r", encoding="utf-8-sig", newline="") as file:
-        reader = csv.DictReader(file)
+    for row in table.rows:
+        config = InteractableConfig(
+            id=row["id"].strip(),
+            displayName=row["displayName"].strip(),
+            interactionType=row["interactionType"].strip(),
+            requiredInteractions=int(row["requiredInteractions"]),
+            requiredItemId=(row.get("requiredItemId") or "").strip(),
+            grantedItemId=(row.get("grantedItemId") or "").strip(),
+            blockedMessage=(row.get("blockedMessage") or "").strip(),
+            completionMessage=(row.get("completionMessage") or "").strip(),
+            deactivateOnComplete=parse_bool(row["deactivateOnComplete"]),
+        )
 
-        for row in reader:
-            config = InteractableConfig(
-                id=row["id"].strip(),
-                displayName=row["displayName"].strip(),
-                interactionType=row["interactionType"].strip(),
-                requiredInteractions=int(row["requiredInteractions"]),
-                requiredItemId=row.get("requiredItemId", "").strip(),
-                grantedItemId=row.get("grantedItemId", "").strip(),
-                blockedMessage=row.get("blockedMessage", "").strip(),
-                completionMessage=row.get("completionMessage", "").strip(),
-                deactivateOnComplete=parse_bool(
-                    row["deactivateOnComplete"]
-                ),
-            )
-
-            configs.append(config)
+        configs.append(config)
 
     return configs
 
@@ -300,14 +306,16 @@ def write_json(
 
 
 def main():
-    issues = validate_schema(SOURCE_PATH)
+    interactable_table = parse_csv_table(SOURCE_PATH)
+
+    issues = validate_schema(interactable_table)
 
     if not any(issue.level == ERROR for issue in issues):
-        issues.extend(validate_values(SOURCE_PATH))
-        issues.extend(validate_duplicate_ids(SOURCE_PATH))
+        issues.extend(validate_values(interactable_table))
+        issues.extend(validate_duplicate_ids(interactable_table))
         issues.extend(
             validate_references(
-                SOURCE_PATH,
+                interactable_table,
                 SCENE_PATH,
             )
         )
@@ -323,7 +331,7 @@ def main():
         print("Validation failed. JSON was not generated.")
         return
 
-    configs = load_configs(SOURCE_PATH)
+    configs = load_configs(interactable_table)
     write_json(configs, OUTPUT_PATH)
 
     print(f"Loaded {len(configs)} interactable configs.")
