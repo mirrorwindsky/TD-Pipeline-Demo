@@ -1,0 +1,29 @@
+{
+  "objectives": [
+    {
+      "id": "find_power_cell",
+      "displayName": "Find Power Cell",
+      "description": "Objective: Find a Power Cell in Storage."
+    },
+    {
+      "id": "repair_power_node",
+      "displayName": "Repair Power Node",
+      "description": "Objective: Repair the Power Node in Maintenance."
+    },
+    {
+      "id": "activate_control_terminal",
+      "displayName": "Activate Control Terminal",
+      "description": "Objective: Activate the Control Terminal."
+    },
+    {
+      "id": "reach_exit",
+      "displayName": "Reach Exit",
+      "description": "Objective: Reach the Exit."
+    },
+    {
+      "id": "mission_complete",
+      "displayName": "Mission Complete",
+      "description": "Mission Complete"
+    }
+  ]
+}

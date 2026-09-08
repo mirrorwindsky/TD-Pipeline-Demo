@@ -12,6 +12,13 @@ class ItemConfig:
 
 
 @dataclass
+class ObjectiveConfig:
+    id: str
+    displayName: str
+    description: str
+
+
+@dataclass
 class InteractableConfig:
     id: str
     displayName: str
@@ -27,6 +34,7 @@ class InteractableConfig:
 @dataclass
 class ContentModel:
     items: list[ItemConfig]
+    objectives: list[ObjectiveConfig]
     interactables: list[InteractableConfig]
 
 
@@ -60,6 +68,12 @@ ITEM_REQUIRED_FIELDS = [
     "displayName",
 ]
 
+OBJECTIVE_REQUIRED_FIELDS = [
+    "id",
+    "displayName",
+    "description",
+]
+
 INTERACTABLE_REQUIRED_FIELDS = [
     "id",
     "displayName",
@@ -86,6 +100,8 @@ INTERACTABLES_SOURCE_PATH = ROOT_DIR / "ConfigSource" / "interactables.csv"
 OUTPUT_PATH = ROOT_DIR / "Assets" / "Data" / "interactables.json"
 SCENE_PATH = ROOT_DIR / "Assets" / "Scenes" / "Prototype_01.unity"
 BATCH_UPDATE_PATH = ROOT_DIR / "ConfigSource" / "batch_interaction_updates.csv"
+OBJECTIVES_SOURCE_PATH = ROOT_DIR / "ConfigSource" / "objectives.csv"
+OBJECTIVES_OUTPUT_PATH = ROOT_DIR / "Assets" / "Data" / "objectives.json"
 
 
 def parse_csv_table(csv_path: Path) -> SourceTable:
@@ -502,6 +518,21 @@ def load_items(table: SourceTable) -> list[ItemConfig]:
     return items
 
 
+def load_objectives(table: SourceTable) -> list[ObjectiveConfig]:
+    objectives = []
+
+    for row in table.rows:
+        objective = ObjectiveConfig(
+            id=row["id"].strip(),
+            displayName=row["displayName"].strip(),
+            description=row["description"].strip(),
+        )
+
+        objectives.append(objective)
+
+    return objectives
+
+
 def load_interactables(table: SourceTable) -> list[InteractableConfig]:
     configs = []
 
@@ -525,10 +556,12 @@ def load_interactables(table: SourceTable) -> list[InteractableConfig]:
 
 def build_content_model(
     item_table: SourceTable,
+    objective_table: SourceTable,
     interactable_table: SourceTable,
 ) -> ContentModel:
     return ContentModel(
         items=load_items(item_table),
+        objectives=load_objectives(objective_table),
         interactables=load_interactables(interactable_table),
     )
 
@@ -541,6 +574,26 @@ def write_json(
         "interactables": [
             asdict(config)
             for config in content.interactables
+        ]
+    }
+
+    with output_path.open("w", encoding="utf-8") as file:
+        json.dump(
+            data,
+            file,
+            ensure_ascii=False,
+            indent=2,
+        )
+
+
+def write_objectives_json(
+    content: ContentModel,
+    output_path: Path,
+) -> None:
+    data = {
+        "objectives": [
+            asdict(objective)
+            for objective in content.objectives
         ]
     }
 
@@ -571,9 +624,11 @@ def run_batch_preview():
         return
 
     item_table = parse_csv_table(ITEMS_SOURCE_PATH)
+    objective_table = parse_csv_table(OBJECTIVES_SOURCE_PATH)
 
     content = build_content_model(
         item_table,
+        objective_table,
         interactable_table,
     )
 
@@ -610,9 +665,11 @@ def run_batch_apply():
         return
 
     item_table = parse_csv_table(ITEMS_SOURCE_PATH)
+    objective_table = parse_csv_table(OBJECTIVES_SOURCE_PATH)
 
     content = build_content_model(
         item_table,
+        objective_table,
         interactable_table,
     )
 
@@ -645,6 +702,7 @@ def run_batch_apply():
 
 def main():
     item_table = parse_csv_table(ITEMS_SOURCE_PATH)
+    objective_table = parse_csv_table(OBJECTIVES_SOURCE_PATH)
     interactable_table = parse_csv_table(INTERACTABLES_SOURCE_PATH)
 
     issues = []
@@ -653,16 +711,24 @@ def main():
         item_table,
         ITEM_REQUIRED_FIELDS,
     )
+    objective_schema_issues = validate_schema(
+        objective_table,
+        OBJECTIVE_REQUIRED_FIELDS,
+    )
     interactable_schema_issues = validate_schema(
         interactable_table,
         INTERACTABLE_REQUIRED_FIELDS,
     )
 
     issues.extend(item_schema_issues)
+    issues.extend(objective_schema_issues)
     issues.extend(interactable_schema_issues)
 
     if not any(issue.level == ERROR for issue in item_schema_issues):
         issues.extend(validate_duplicate_ids(item_table))
+
+    if not any(issue.level == ERROR for issue in objective_schema_issues):
+        issues.extend(validate_duplicate_ids(objective_table))
 
     if not any(issue.level == ERROR for issue in interactable_schema_issues):
         issues.extend(validate_values(interactable_table))
@@ -677,11 +743,12 @@ def main():
 
     if any(issue.level == ERROR for issue in issues):
         print_issues(issues)
-        print("Validation failed. JSON was not generated.")
+        print("Validation failed. Generated JSON files were not updated.")
         return
 
     content = build_content_model(
         item_table,
+        objective_table,
         interactable_table,
     )
 
@@ -695,17 +762,20 @@ def main():
     print_issues(issues)
 
     if any(issue.level == ERROR for issue in issues):
-        print("Validation failed. JSON was not generated.")
+        print("Validation failed. Generated JSON files were not updated.")
         return
 
     write_json(content, OUTPUT_PATH)
+    write_objectives_json(content, OBJECTIVES_OUTPUT_PATH)
 
     print(f"Loaded {len(content.items)} item configs.")
+    print(f"Loaded {len(content.objectives)} objective configs.")
     print(
         f"Loaded {len(content.interactables)} "
         f"interactable configs."
     )
     print(f"Generated: {OUTPUT_PATH}")
+    print(f"Generated: {OBJECTIVES_OUTPUT_PATH}")
 
 
 if __name__ == "__main__":

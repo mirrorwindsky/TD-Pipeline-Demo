@@ -1,0 +1,6 @@
+id,displayName,description
+find_power_cell,Find Power Cell,Objective: Find a Power Cell in Storage.
+repair_power_node,Repair Power Node,Objective: Repair the Power Node in Maintenance.
+activate_control_terminal,Activate Control Terminal,Objective: Activate the Control Terminal.
+reach_exit,Reach Exit,Objective: Reach the Exit.
+mission_complete,Mission Complete,Mission Complete

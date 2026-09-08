@@ -3,6 +3,7 @@ using UnityEngine;
 public class VerticalSliceFlowController : MonoBehaviour
 {
     [SerializeField] private PlayerHUD hud;
+    [SerializeField] private ObjectiveConfigDatabase objectiveDatabase;
 
     [SerializeField] private PickupInteractable powerCell;
     [SerializeField] private DeviceInteractable powerNode;
@@ -26,30 +27,22 @@ public class VerticalSliceFlowController : MonoBehaviour
 
     private void Start()
     {
-        hud.SetObjective(
-            "Objective: Find a Power Cell in Storage."
-        );
+        SetObjective("find_power_cell");
     }
 
     private void OnPowerCellPickedUp()
     {
-        hud.SetObjective(
-            "Objective: Repair the Power Node in Maintenance."
-        );
+        SetObjective("repair_power_node");
     }
 
     private void OnPowerNodeCompleted()
     {
-        hud.SetObjective(
-            "Objective: Activate the Control Terminal."
-        );
+        SetObjective("activate_control_terminal");
     }
 
     private void OnControlTerminalCompleted()
     {
-        hud.SetObjective(
-            "Objective: Reach the Exit."
-        );
+        SetObjective("reach_exit");
     }
 
     public void TryCompleteMission()
@@ -68,7 +61,7 @@ public class VerticalSliceFlowController : MonoBehaviour
 
         missionCompleted = true;
 
-        hud.SetObjective("Mission Complete");
+        SetObjective("mission_complete");
 
         hud.ShowFeedback(
             "Facility restored. Exit reached.",
@@ -76,5 +69,21 @@ public class VerticalSliceFlowController : MonoBehaviour
         );
 
         Debug.Log("Vertical Slice Complete!");
+    }
+
+    private void SetObjective(string objectiveId)
+    {
+        if (!objectiveDatabase.TryGetObjective(
+            objectiveId,
+            out ObjectiveConfig objective))
+        {
+            Debug.LogError(
+                $"Objective config not found: {objectiveId}",
+                this
+            );
+            return;
+        }
+
+        hud.SetObjective(objective.description);
     }
 }
