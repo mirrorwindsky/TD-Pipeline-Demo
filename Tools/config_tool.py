@@ -61,6 +61,11 @@ INTERACTABLE_REQUIRED_FIELDS = [
     "deactivateOnComplete",
 ]
 
+BATCH_UPDATE_REQUIRED_FIELDS = [
+    "id",
+    "requiredInteractions",
+]
+
 MIN_REQUIRED_INTERACTIONS = 1
 RECOMMENDED_MAX_INTERACTIONS = 10
 
@@ -73,6 +78,7 @@ ITEMS_SOURCE_PATH = ROOT_DIR / "ConfigSource" / "items.csv"
 INTERACTABLES_SOURCE_PATH = ROOT_DIR / "ConfigSource" / "interactables.csv"
 OUTPUT_PATH = ROOT_DIR / "Assets" / "Data" / "interactables.json"
 SCENE_PATH = ROOT_DIR / "Assets" / "Scenes" / "Prototype_01.unity"
+BATCH_UPDATE_PATH = ROOT_DIR / "ConfigSource" / "batch_interaction_updates.csv"
 
 
 def parse_csv_table(csv_path: Path) -> SourceTable:
@@ -354,6 +360,67 @@ def validate_item_references(
     return issues
 
 
+def preview_batch_interaction_updates(
+    update_table: SourceTable,
+    content: ContentModel,
+) -> list[ValidationIssue]:
+    issues = []
+
+    interactable_by_id = {
+        config.id: config
+        for config in content.interactables
+    }
+
+    for row_number, row in enumerate(update_table.rows, start=2):
+        config_id = row["id"].strip()
+        value_raw = row["requiredInteractions"].strip()
+
+        if config_id not in interactable_by_id:
+            issues.append(
+                ValidationIssue(
+                    ERROR,
+                    f"{update_table.path.name} row {row_number} "
+                    f"field 'id': unknown interactable id '{config_id}'."
+                )
+            )
+            continue
+
+        try:
+            new_value = int(value_raw)
+        except ValueError:
+            issues.append(
+                ValidationIssue(
+                    ERROR,
+                    f"{update_table.path.name} row {row_number} "
+                    f"field 'requiredInteractions': "
+                    f"expected integer, got '{value_raw}'."
+                )
+            )
+            continue
+
+        if new_value < MIN_REQUIRED_INTERACTIONS:
+            issues.append(
+                ValidationIssue(
+                    ERROR,
+                    f"{update_table.path.name} row {row_number} "
+                    f"field 'requiredInteractions': "
+                    f"must be >= {MIN_REQUIRED_INTERACTIONS}, "
+                    f"got {new_value}."
+                )
+            )
+            continue
+
+        config = interactable_by_id[config_id]
+
+        print(
+            f"[BATCH] {config_id}: "
+            f"requiredInteractions "
+            f"{config.requiredInteractions} -> {new_value}"
+        )
+
+    return issues
+
+
 def load_items(table: SourceTable) -> list[ItemConfig]:
     items = []
 
@@ -417,6 +484,36 @@ def write_json(
             ensure_ascii=False,
             indent=2,
         )
+
+
+def run_batch_preview():
+    update_table = parse_csv_table(BATCH_UPDATE_PATH)
+    interactable_table = parse_csv_table(INTERACTABLES_SOURCE_PATH)
+
+    issues = validate_schema(
+        update_table,
+        BATCH_UPDATE_REQUIRED_FIELDS,
+    )
+
+    if issues:
+        print_issues(issues)
+        return
+
+    item_table = parse_csv_table(ITEMS_SOURCE_PATH)
+
+    content = build_content_model(
+        item_table,
+        interactable_table,
+    )
+
+    issues.extend(
+        preview_batch_interaction_updates(
+            update_table,
+            content,
+        )
+    )
+
+    print_issues(issues)
 
 
 def main():
