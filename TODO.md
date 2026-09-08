@@ -74,69 +74,161 @@
 
 ---
 
-## Day 9 — Multi-Table Pipeline V2 + Cross-Reference + Batch
+## Day 9 — Multi-Table Pipeline V2 + Cross-Reference + Batch ✅
 
 ### Source Model / Architecture
 
-- [ ] Decide the minimum useful multi-table split
-- [ ] Introduce `items.csv`
-- [ ] Introduce `objectives.csv`
-- [ ] Keep `interactables.csv` for interaction content
-- [ ] Remove or defer fields that are not actually used
-- [ ] Read all source tables through one unified pipeline
-- [ ] Parse source data once
-- [ ] Build a Typed Intermediate Model
-- [ ] Make validation and generation consume the same parsed representation
+- [x] Decide the minimum useful multi-table split
+- [x] Introduce `items.csv`
+- [x] Introduce `objectives.csv`
+- [x] Keep `interactables.csv` for interaction content
+- [x] Keep the content model limited to fields with real runtime / pipeline value
+- [x] Read the real source tables through one unified pipeline
+- [x] Parse each source table once
+- [x] Build a Typed Intermediate Model with `ItemConfig`, `ObjectiveConfig`, `InteractableConfig`, and `ContentModel`
+- [x] Make validation and generation reuse parsed / typed representations instead of re-reading source CSV files
+- [x] Preserve the existing `interactables.json` runtime contract while adding `objectives.json`
+
+Current designer-facing source model:
+
+    ConfigSource/
+    ├── items.csv
+    ├── objectives.csv
+    ├── interactables.csv
+    └── batch_interaction_updates.csv
+
+Current typed content model:
+
+    ContentModel
+    ├── items: list[ItemConfig]
+    ├── objectives: list[ObjectiveConfig]
+    └── interactables: list[InteractableConfig]
 
 ### Preserve Existing Validation
 
-- [ ] Preserve schema validation
-- [ ] Preserve type validation
-- [ ] Preserve range validation
-- [ ] Preserve duplicate-ID validation
-- [ ] Preserve `ERROR` / `WARNING`
-- [ ] Preserve fail-safe generation
-- [ ] Preserve current Unity reference validation until a broader replacement exists
+- [x] Preserve schema validation
+- [x] Preserve type validation
+- [x] Preserve range validation
+- [x] Preserve duplicate-ID validation
+- [x] Preserve `ERROR` / `WARNING`
+- [x] Preserve fail-safe generation
+- [x] Preserve current Unity scene reference validation until a broader replacement exists
 
 ### New Validation
 
-- [ ] Validate legal `interactionType` values
-- [ ] Add item/content ID registry validation
-- [ ] Reject `requiredItemId = fake_cell` before JSON generation
-- [ ] Add cross-record / cross-table reference validation
-- [ ] Validate real references such as:
-  - [ ] `requiredItemId`
-  - [ ] `grantedItemId`
-  - [ ] prerequisite-device references if externalized
-  - [ ] `objectiveId` if introduced
-  - [ ] unlock-target references if introduced
-- [ ] Produce clear file / row / field / reference errors
+- [x] Validate legal `interactionType` values
+- [x] Add a real Item ID registry through `items.csv`
+- [x] Reject `requiredItemId = fake_cell` before JSON generation
+- [x] Add cross-record / cross-table item-reference validation
+- [x] Validate `requiredItemId`
+- [x] Validate `grantedItemId`
+- [x] Produce clear file / row / field / reference errors
+
+Scope notes:
+
+- prerequisite-device dependency remains a Unity serialized `DeviceInteractable` reference and was not externalized on D9
+- Objective IDs are consumed by `VerticalSliceFlowController` through `ObjectiveConfigDatabase`; no `objectiveId` field was added to `interactables.csv`
+- unlock-target IDs were not introduced because the current ExitDoor flow is already handled by the existing event-driven `GateController`
+
+### Objective Content Pipeline
+
+- [x] Parse and validate `objectives.csv`
+- [x] Add typed `ObjectiveConfig`
+- [x] Include objectives in the shared `ContentModel`
+- [x] Generate `Assets/Data/objectives.json`
+- [x] Add Unity `ObjectiveConfigDatabase`
+- [x] Replace hard-coded HUD objective descriptions with ID-based runtime lookup
+- [x] Verify a source-only objective text edit changes the Unity HUD without C# changes
+- [x] Keep objective progression timing event-driven in C# rather than over-expanding into a data-driven quest system
+
+Verified runtime chain:
+
+    objectives.csv
+    → Python parse / validation
+    → ObjectiveConfig / ContentModel
+    → objectives.json
+    → ObjectiveConfigDatabase
+    → VerticalSliceFlowController
+    → PlayerHUD
 
 ### Runtime / Config Integration
 
-- [ ] Make multi-table output Unity-consumable
-- [ ] Keep the existing Vertical Slice chain working
-- [ ] Verify source-only dependency edits change real gameplay
-- [ ] Verify invalid references are blocked before runtime
+- [x] Make multi-table generated data Unity-consumable
+- [x] Keep the existing Vertical Slice chain working
+- [x] Verify source-only dependency edits change real gameplay behavior
+- [x] Verify source-only objective text edits change real HUD content
+- [x] Verify invalid references are blocked before runtime
+- [x] Complete a full Vertical Slice regression test after restoring the normal baseline
+
+Cross-reference verification:
+
+- `requiredItemId = fake_cell`
+  - rejected by Python cross-reference validation
+  - JSON generation blocked
+  - previous valid generated data preserved
+
+Valid dependency-change verification:
+
+- temporarily added valid Item ID `backup_cell`
+- changed `power_node.requiredItemId` from `power_cell` to `backup_cell`
+- Python validation succeeded because the reference was valid
+- Unity correctly blocked PowerNode after the player picked up only `power_cell`
+- restored the normal `power_cell` dependency afterward
+
+Objective source-only verification:
+
+- changed only the `find_power_cell` description in `objectives.csv`
+- regenerated configuration data
+- Unity HUD displayed the changed objective text
+- no gameplay C# modification was required
+- restored the normal objective text afterward
 
 ### Batch Processing
 
-- [ ] Choose one genuine batch use case
-- [ ] Implement at least one:
-  - [ ] Batch validation
-  - [ ] Batch modification
-  - [ ] Batch export
-- [ ] Ensure it solves a real content-production task
+- [x] Choose one genuine batch-processing use case
+- [x] Implement batch modification of `requiredInteractions`
+- [x] Add dry-run batch preview
+- [x] Convert validated source rows into prepared typed batch updates
+- [x] Validate the entire batch before displaying successful preview results
+- [x] Reject duplicate or invalid batch targets before application
+- [x] Apply valid batches with all-or-nothing behavior
+- [x] Write source CSV changes through a temporary file and atomic replace
+- [x] Verify one invalid batch entry causes zero source modifications
+- [x] Verify one valid batch updates multiple real gameplay parameters
+- [x] Propagate batch changes through the normal Pipeline into Unity Runtime
+
+Real Batch V1 verification:
+
+    cube_sturdy.requiredInteractions:      3 → 4
+    power_node.requiredInteractions:       3 → 2
+    control_terminal.requiredInteractions: 2 → 1
+
+Verified pipeline:
+
+    batch_interaction_updates.csv
+    → full-batch validation
+    → prepared BatchInteractionUpdate objects
+    → atomic update of interactables.csv
+    → normal Pipeline V2 validation / generation
+    → interactables.json
+    → Unity runtime
+
+Unity verified that PowerNode changed from 3 interactions to 2 and ControlTerminal changed from 2 interactions to 1.
+
+The project was then restored to the normal `3 / 3 / 2` gameplay baseline while retaining the Batch V1 workflow and example batch source.
 
 ### Day 9 Acceptance
 
-- [ ] Multi-table source data generates Unity-consumable output
-- [ ] Cross-reference errors are blocked before runtime
-- [ ] `requiredItemId = fake_cell` is caught before runtime
-- [ ] Source-config changes alter real gameplay dependencies
-- [ ] Generated structured data does not require manual editing
-- [ ] Batch V1 works on real project data
-- [ ] Solve 1 DFS / BFS problem
+- [x] Multi-table source data generates Unity-consumable output
+- [x] `items.csv`, `objectives.csv`, and `interactables.csv` all participate in the real content pipeline
+- [x] Cross-reference errors are blocked before runtime
+- [x] `requiredItemId = fake_cell` is caught before runtime
+- [x] Valid source-config dependency changes alter real gameplay behavior
+- [x] Source-only objective edits alter real HUD content
+- [x] Generated structured data does not require manual editing
+- [x] Batch V1 works on real project data and reaches Unity Runtime
+- [x] Full Vertical Slice regression test passes after restoring the baseline
+- [x] Solve 1 DFS / BFS problem — LeetCode 994, Rotting Oranges
 
 ---
 
@@ -266,17 +358,18 @@
 
 ### Content Model / Pipeline
 
-- [ ] Pipeline processes real multi-table content data
-- [ ] At least one cross-object / cross-table dependency exists
-- [ ] Source config changes dependency / gameplay conditions
-- [ ] Schema / type / range / duplicate / cross-reference / Unity-reference errors are detected
-- [ ] At least one genuine batch operation exists
-- [ ] Generated Unity data is not manually edited
+- [x] Pipeline processes real multi-table content data
+- [x] At least one cross-object / cross-table dependency exists
+- [x] Source config changes dependency / gameplay conditions
+- [x] Objective content is source-config-driven through the Pipeline
+- [x] Schema / type / range / duplicate / cross-reference / Unity-reference errors are detected
+- [x] At least one genuine batch operation exists
+- [x] Generated Unity data is not manually edited
 
 ### Verification / Iteration
 
 - [ ] 30–50 records used for Scale Test
-- [ ] Real V1 → problem → V2/V3 iteration exists
+- [x] Real V1 → problem → V2/V3 iteration exists
 - [ ] At least one efficiency or error-risk improvement measured
 - [ ] Before / After Pipeline documented
 - [ ] At least one AI-assisted debugging case documented

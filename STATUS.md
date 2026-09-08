@@ -1,7 +1,7 @@
 # Current Status
 
-**Last updated:** 2026-09-07  
-**Sprint stage:** Day 8 Gameplay Vertical Slice + Content Model V2 core completed  
+**Last updated:** 2026-09-08  
+**Sprint stage:** Day 9 Multi-Table Pipeline V2 + Cross-Reference + Batch completed
 **Repository:** `TD-Pipeline-Demo`
 
 ## Current Direction
@@ -319,165 +319,476 @@ This provides:
 
 ---
 
-## Content Model V2 — Initial Single-Table Integration
+## Completed — Day 9
 
-Expanded `InteractableConfig` beyond the Week 1 four-field model.
+### Starting Point: Real Pipeline V2 Failure
 
-Current fields include:
+Day 8 ended with a real content-production failure rather than a hypothetical feature request.
+
+The source model could already express:
+
+    power_node.requiredItemId = power_cell
+
+but an intentional test changed it to:
+
+    power_node.requiredItemId = fake_cell
+
+The Day 8 tool still generated JSON successfully, and the invalid dependency was only exposed through Unity runtime behavior.
+
+This established the concrete Day 9 problem:
+
+**content dependencies could be authored, but invalid references could not yet be rejected before generation.**
+
+Day 9 upgraded the existing Pipeline V1 / initial Content Model V2 rather than replacing it.
+
+### Multi-Table Source Model
+
+The designer-facing content source is now split into real content domains:
+
+    ConfigSource/
+    ├── items.csv
+    ├── objectives.csv
+    ├── interactables.csv
+    └── batch_interaction_updates.csv
+
+Current roles:
+
+- `items.csv` — authoritative Item ID registry
+- `objectives.csv` — player-facing objective content
+- `interactables.csv` — Pickup / Device interaction content and gameplay parameters
+- `batch_interaction_updates.csv` — designer-facing batch modification instructions
+
+The split is intentionally limited to content that currently has real pipeline or runtime value.
+
+No unused quest framework, unlock-target table, dependency graph, or generalized content schema was added.
+
+### Parse Once Architecture
+
+The original tool repeatedly reopened `interactables.csv` for schema, value, duplicate-ID, Unity-reference, and config-loading passes.
+
+Day 9 introduced:
+
+    SourceTable
+    ├── path
+    ├── fieldnames
+    └── rows
+
+Each source CSV is now parsed once into a shared in-memory representation.
+
+Validation and typed-model construction reuse that parsed representation rather than independently re-reading the same source file.
+
+This preserves the original validation behavior while removing repeated source parsing.
+
+### Typed Intermediate Model
+
+The Python pipeline now uses typed content representations:
+
+    ItemConfig
+    ObjectiveConfig
+    InteractableConfig
+
+combined through:
+
+    ContentModel
+    ├── items
+    ├── objectives
+    └── interactables
+
+The pipeline therefore separates:
+
+    CSV source text
+    → SourceTable
+    → structural / value validation
+    → typed ContentModel
+    → semantic / cross-reference validation
+    → generated Unity data
+
+This model is shared by generation and semantic validation.
+
+### Preserved Validation
+
+Pipeline V2 preserves the existing Tool V1 validation behavior:
+
+- schema validation
+- required-column validation
+- required-value validation
+- integer type validation
+- boolean type validation
+- interaction range validation
+- unusually high interaction-count warnings
+- duplicate-ID validation
+- `ERROR` / `WARNING` severity
+- fail-safe generation
+- existing Unity Scene `ConfigurableInteractable.configId` reference validation
+
+Invalid source data still does not overwrite the previous valid generated runtime data.
+
+### Interaction-Type Validation
+
+Added explicit legal-value validation for:
+
+    interactionType
+
+Current valid runtime-driven values are:
+
+    Pickup
+    Device
+
+Values outside the supported set are rejected before generation with file / row / field information.
+
+### Item Registry and Cross-Table Reference Validation
+
+`items.csv` now provides the authoritative Item ID registry.
+
+The tool validates non-empty:
+
+    requiredItemId
+    grantedItemId
+
+against real Item IDs before generated data is written.
+
+The original Day 8 failure was re-tested:
+
+    power_node.requiredItemId = fake_cell
+
+Current behavior:
+
+    invalid item reference
+    → Python ERROR
+    → generation blocked
+    → previous valid JSON preserved
+    → invalid dependency never reaches Unity runtime
+
+This closes the concrete Pipeline V2 limitation discovered on Day 8.
+
+### Valid Dependency-Change Verification
+
+Cross-reference validation was also tested with a valid dependency rather than only a failure case.
+
+A temporary Item was added:
+
+    backup_cell
+
+Then only the source dependency was changed:
+
+    power_node.requiredItemId
+    power_cell → backup_cell
+
+Because `backup_cell` existed in the Item registry:
+
+    validation passed
+    → generated data updated
+    → Unity loaded the new dependency
+
+The player still acquired only:
+
+    power_cell
+
+so PowerNode correctly remained blocked and displayed the configured missing-item feedback.
+
+The source was then restored to the normal:
+
+    requiredItemId = power_cell
+
+baseline.
+
+This verifies that Cross-Reference Validation does not lock dependencies to fixed values; it permits valid designer-authored dependency changes while rejecting broken references.
+
+### Config-Driven Objective Pipeline
+
+Day 9 also added a real third runtime content table:
+
+    ConfigSource/objectives.csv
+
+Current objective fields:
 
 - `id`
 - `displayName`
-- `interactionType`
-- `requiredInteractions`
-- `requiredItemId`
-- `grantedItemId`
-- `blockedMessage`
-- `completionMessage`
-- `deactivateOnComplete`
+- `description`
 
-The Python `InteractableConfig` dataclass and generated JSON now carry the same data.
+Python now parses and validates objective source data through:
 
-Current source records include V1 baseline records plus:
+    objectives.csv
+    → ObjectiveConfig
+    → ContentModel
+    → objectives.json
 
-- `power_cell`
-- `power_node`
-- `control_terminal`
+Unity now includes:
 
-`PickupInteractable` and `DeviceInteractable` now retrieve relevant runtime values through:
+- `ObjectiveConfig`
+- `ObjectiveConfigCollection`
+- `ObjectiveConfigDatabase`
 
-`InteractableConfigDatabase`
+`VerticalSliceFlowController` retains control over when objective progression occurs, but player-facing objective descriptions are now resolved through Objective IDs rather than hard-coded HUD strings.
 
-### Source-to-Runtime Verification
+Current flow:
 
-Test 1:
+    gameplay event
+    → objective ID
+    → ObjectiveConfigDatabase
+    → ObjectiveConfig.description
+    → PlayerHUD
 
-Changed only:
+Source-only verification changed the first objective description in `objectives.csv`, regenerated data, and confirmed the Unity HUD displayed the new text without any C# modification.
 
-`power_node.requiredInteractions: 3 → 5`
+The source text was then restored and the normal mission flow was re-tested successfully.
 
-Then ran:
+### Generated Runtime Data
 
-`CSV`
-`→ Python`
-`→ JSON`
-`→ Unity`
+The Pipeline currently generates:
 
-Verified PowerNode required exactly five interactions.
+    Assets/Data/
+    ├── interactables.json
+    └── objectives.json
 
-No manual generated-JSON edit was performed.
+The existing `interactables.json` contract was preserved rather than replaced with a new generalized output format.
 
-No gameplay C# change was required.
+Current runtime consumers include:
 
-Test 2:
+    InteractableConfigDatabase
+    ├── ConfigurableInteractable
+    ├── PickupInteractable
+    └── DeviceInteractable
 
-Changed only:
+and:
 
-`power_node.requiredItemId: power_cell → fake_cell`
+    ObjectiveConfigDatabase
+    └── VerticalSliceFlowController
+        └── PlayerHUD
 
-The current pipeline generated the invalid dependency successfully.
+Generated JSON is never manually edited as part of the normal content workflow.
 
-At runtime, PowerNode could no longer find the required item.
+### Genuine Batch Processing — Batch V1
 
-This exposes the next real pipeline limitation:
+Day 9 added a real batch-modification workflow for interaction-count tuning.
 
-**source data can now express gameplay dependencies, but invalid cross-record references are not yet validated before runtime.**
+Designer-facing batch source:
 
-After the test, source data was restored to:
+    ConfigSource/batch_interaction_updates.csv
 
-- `requiredInteractions = 3`
-- `requiredItemId = power_cell`
+Example batch:
 
-JSON was regenerated and the complete Vertical Slice was re-tested successfully.
+    cube_sturdy.requiredInteractions:      3 → 4
+    power_node.requiredInteractions:       3 → 2
+    control_terminal.requiredInteractions: 2 → 1
+
+The initial dry-run implementation exposed a usability issue: valid preview lines could be printed before a later invalid row was discovered.
+
+The batch workflow was therefore refined into:
+
+    parse batch source
+    → validate entire batch
+    → prepare typed BatchInteractionUpdate objects
+    → reject whole batch on any ERROR
+    → preview only after full validation
+    → apply only after full validation
+
+Batch targets and values are checked before application.
+
+Duplicate batch target IDs are also rejected to avoid ambiguous updates.
+
+### Atomic Batch Apply
+
+Valid prepared updates are applied to the parsed `interactables.csv` representation in memory.
+
+The source file is then written through:
+
+    interactables.csv.tmp
+    → complete temporary write
+    → atomic replace of interactables.csv
+
+The workflow therefore provides two layers of all-or-nothing behavior:
+
+1. any invalid batch entry prevents all logical updates;
+2. the original source file is not incrementally overwritten during file writing.
+
+Verified invalid-batch behavior:
+
+    valid row
+    + invalid fake_device row
+    + valid row
+    → ERROR
+    → zero source modifications
+
+Verified valid-batch behavior:
+
+    three valid updates
+    → all three source values changed
+    → normal Pipeline generation
+    → interactables.json updated
+    → Unity runtime behavior changed
+
+Unity verified:
+
+    PowerNode:       3 interactions → 2
+    ControlTerminal: 2 interactions → 1
+
+The project was then restored to the normal gameplay baseline:
+
+    cube_sturdy       = 3
+    power_node        = 3
+    control_terminal  = 2
+
+while retaining the Batch V1 implementation and example batch source.
+
+### Day 9 Regression Verification
+
+After all Pipeline V2 work, the project was restored to the intended baseline and the complete Vertical Slice was played from beginning to end.
+
+Verified final gameplay chain:
+
+    PowerCell
+    → PlayerInventory
+    → PowerNode
+    → ControlTerminal
+    → ExitDoor
+    → EndMarker
+    → Mission Complete
+
+Verified player-facing flow:
+
+    Find Power Cell
+    → Repair Power Node
+    → Activate Control Terminal
+    → Reach Exit
+    → Mission Complete
+
+Confirmed:
+
+- PowerCell pickup works
+- PowerNode requires `power_cell`
+- PowerNode completes after 3 interactions
+- ControlTerminal prerequisite behavior still works
+- ControlTerminal completes after 2 interactions
+- ExitDoor unlocks correctly
+- Objective UI progresses through config-driven objective descriptions
+- Prompt / blocked / progress / completion feedback remains functional
+- EndMarker completes the mission
+- no Console dependency is required to understand the intended flow
+- Pipeline V1 baseline scene remains preserved
+
+Day 9 coding warm-up was also completed with LeetCode 994 — Rotting Oranges using BFS.
 
 ---
 
 ## Current Runtime State
 
-Current gameplay chain:
+Current gameplay dependency chain:
 
-`PowerCell`
-`→ PlayerInventory`
-`→ PowerNode`
-`→ ControlTerminal`
-`→ ExitDoor`
-`→ EndMarker`
-`→ Mission Complete`
+    PowerCell
+    → PlayerInventory
+    → PowerNode
+    → ControlTerminal
+    → ExitDoor
+    → EndMarker
+    → Mission Complete
 
 Current player-facing layer:
 
-`Objective UI`
-`+ Interaction Prompt`
-`+ Blocked Feedback`
-`+ Progress Feedback`
-`+ Completion Feedback`
+    Config-Driven Objective UI
+    + Interaction Prompt
+    + Blocked Feedback
+    + Progress Feedback
+    + Completion Feedback
 
-Current content-data chain:
+Current content pipeline:
 
-`ConfigSource/interactables.csv`
-`→ Python validation / generation`
-`→ Assets/Data/interactables.json`
-`→ InteractableConfigDatabase`
-`→ Pickup / Device runtime behavior`
+    items.csv
+    + objectives.csv
+    + interactables.csv
+            ↓
+    Parse Once SourceTables
+            ↓
+    Schema / Type / Range / Duplicate Validation
+            ↓
+    Typed ContentModel
+            ↓
+    interactionType / Cross-Table Reference / Unity Reference Validation
+            ↓
+    ERROR Gate
+            ↓
+    interactables.json + objectives.json
+            ↓
+    Unity Config Databases
+            ↓
+    Runtime Gameplay / HUD
 
-Preserved baseline:
+Current optional batch workflow:
 
-`Prototype_01.unity`
+    batch_interaction_updates.csv
+            ↓
+    Full-Batch Validation
+            ↓
+    Prepared BatchInteractionUpdate objects
+            ↓
+    Dry-Run Preview or Atomic Apply
+            ↓
+    interactables.csv
+            ↓
+    Normal Pipeline V2
+
+Preserved Week 1 baseline:
+
+    Assets/Scenes/Prototype_01.unity
 
 Current Vertical Slice development scene:
 
-`VerticalSlice_01.unity`
+    Assets/Scenes/VerticalSlice_01.unity
 
 ---
 
 ## Current Milestone
 
-Day 8 core milestone completed:
+Day 9 milestone completed:
 
-**The project now has a complete graybox gameplay dependency loop with multiple interaction types, Inventory, player-facing HUD, objective progression, and an initial source-config-driven Content Model V2.**
+**The project now has a real multi-table Content Pipeline V2 that parses source data once, builds a typed intermediate content model, validates gameplay references before runtime, drives both interaction and objective content in Unity, and supports a verified atomic batch-modification workflow.**
 
-The remaining work has been intentionally moved into the next milestones rather than left as unfinished Day 8 tasks.
+The most important V1 → V2 iteration is now complete:
 
-### Moved to Day 9
+    Day 8:
+    requiredItemId = fake_cell
+    → generation succeeds
+    → failure reaches Unity runtime
 
-- multi-table source data
-- field cleanup based on the real content model
-- unified Parse Once architecture
-- Typed Intermediate Model
-- `interactionType` validation
-- cross-record / cross-table reference validation
-- catching `requiredItemId = fake_cell` before runtime
-- genuine batch processing
+    Day 9:
+    requiredItemId = fake_cell
+    → Cross-Reference ERROR
+    → generation blocked
+    → invalid dependency never reaches Unity
 
-### Moved to Day 10
-
-- formal gameplay timing against the 5–8 minute target
-- visual presentation beyond graybox
-- materials
-- lighting
-- stronger spatial readability
-- UI / feedback polish
-- standalone Build verification
+Pipeline complexity continues to come from real gameplay-content needs rather than standalone tooling features.
 
 ---
 
-## Next — Day 9
+## Next — Day 10
 
 Main objective:
 
-**Upgrade the current single-table Content Model V2 into Pipeline V2 with unified parsing, stronger source modeling, cross-reference validation, and a genuine batch-processing workflow.**
+**Turn the current technically complete graybox Vertical Slice + Pipeline V2 into a presentation-ready Demo V2 without expanding the core gameplay scope.**
 
-The first concrete Pipeline V2 failure to solve is:
+Day 10 priorities:
 
-`requiredItemId = fake_cell`
+- formally time the complete gameplay loop
+- tune pacing toward the approximate 5–8 minute target
+- improve room / route readability
+- add basic materials and visual differentiation
+- improve lighting
+- make interactable content visually identifiable
+- add visible interaction / completion state changes where useful
+- polish Objective / Prompt / Feedback presentation
+- produce and test a standalone Build
+- confirm Pipeline V2 still drives the final runtime Demo
+- improve CLI validation summary / error readability only where it shortens the real workflow
+- only add Unity Editor integration if it genuinely reduces designer operation cost
 
-Expected future behavior:
+Explicitly avoid:
 
-`invalid source reference`
-`→ Python validation ERROR`
-`→ generation blocked`
-`→ invalid dependency never reaches Unity runtime`
-
----
+- new gameplay systems
+- generalized quest frameworks
+- unnecessary new content tables
+- dependency visualization
+- Editor GUI work without demonstrated workflow value
+- large art-production scope
 
 ## Current Blockers
 
