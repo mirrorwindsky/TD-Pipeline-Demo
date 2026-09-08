@@ -6,6 +6,12 @@ import re
 
 
 @dataclass
+class ItemConfig:
+    id: str
+    displayName: str
+
+
+@dataclass
 class InteractableConfig:
     id: str
     displayName: str
@@ -16,6 +22,12 @@ class InteractableConfig:
     blockedMessage: str
     completionMessage: str
     deactivateOnComplete: bool
+
+
+@dataclass
+class ContentModel:
+    items: list[ItemConfig]
+    interactables: list[InteractableConfig]
 
 
 @dataclass
@@ -36,7 +48,12 @@ WARNING = "WARNING"
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
-REQUIRED_FIELDS = [
+ITEM_REQUIRED_FIELDS = [
+    "id",
+    "displayName",
+]
+
+INTERACTABLE_REQUIRED_FIELDS = [
     "id",
     "displayName",
     "interactionType",
@@ -47,7 +64,8 @@ REQUIRED_FIELDS = [
 MIN_REQUIRED_INTERACTIONS = 1
 RECOMMENDED_MAX_INTERACTIONS = 10
 
-SOURCE_PATH = ROOT_DIR / "ConfigSource" / "interactables.csv"
+ITEMS_SOURCE_PATH = ROOT_DIR / "ConfigSource" / "items.csv"
+INTERACTABLES_SOURCE_PATH = ROOT_DIR / "ConfigSource" / "interactables.csv"
 OUTPUT_PATH = ROOT_DIR / "Assets" / "Data" / "interactables.json"
 SCENE_PATH = ROOT_DIR / "Assets" / "Scenes" / "Prototype_01.unity"
 
@@ -79,7 +97,10 @@ def print_issues(issues: list[ValidationIssue]) -> None:
         print(f"[{issue.level}] {issue.message}")
 
 
-def validate_schema(table: SourceTable) -> list[ValidationIssue]:
+def validate_schema(
+    table: SourceTable,
+    required_fields: list[str],
+) -> list[ValidationIssue]:
     issues = []
 
     if not table.fieldnames:
@@ -91,7 +112,7 @@ def validate_schema(table: SourceTable) -> list[ValidationIssue]:
         )
         return issues
 
-    for field in REQUIRED_FIELDS:
+    for field in required_fields:
         if field not in table.fieldnames:
             issues.append(
                 ValidationIssue(
@@ -101,7 +122,7 @@ def validate_schema(table: SourceTable) -> list[ValidationIssue]:
             )
 
     for row_number, row in enumerate(table.rows, start=2):
-        for field in REQUIRED_FIELDS:
+        for field in required_fields:
             if field not in row:
                 continue
 
@@ -264,7 +285,21 @@ def validate_references(
     return issues
 
 
-def load_configs(table: SourceTable) -> list[InteractableConfig]:
+def load_items(table: SourceTable) -> list[ItemConfig]:
+    items = []
+
+    for row in table.rows:
+        item = ItemConfig(
+            id=row["id"].strip(),
+            displayName=row["displayName"].strip(),
+        )
+
+        items.append(item)
+
+    return items
+
+
+def load_interactables(table: SourceTable) -> list[InteractableConfig]:
     configs = []
 
     for row in table.rows:
@@ -285,14 +320,24 @@ def load_configs(table: SourceTable) -> list[InteractableConfig]:
     return configs
 
 
+def build_content_model(
+    item_table: SourceTable,
+    interactable_table: SourceTable,
+) -> ContentModel:
+    return ContentModel(
+        items=load_items(item_table),
+        interactables=load_interactables(interactable_table),
+    )
+
+
 def write_json(
-    configs: list[InteractableConfig],
+    content: ContentModel,
     output_path: Path,
 ) -> None:
     data = {
         "interactables": [
             asdict(config)
-            for config in configs
+            for config in content.interactables
         ]
     }
 
@@ -306,11 +351,27 @@ def write_json(
 
 
 def main():
-    interactable_table = parse_csv_table(SOURCE_PATH)
+    item_table = parse_csv_table(ITEMS_SOURCE_PATH)
+    interactable_table = parse_csv_table(INTERACTABLES_SOURCE_PATH)
 
-    issues = validate_schema(interactable_table)
+    issues = []
 
-    if not any(issue.level == ERROR for issue in issues):
+    item_schema_issues = validate_schema(
+        item_table,
+        ITEM_REQUIRED_FIELDS,
+    )
+    interactable_schema_issues = validate_schema(
+        interactable_table,
+        INTERACTABLE_REQUIRED_FIELDS,
+    )
+
+    issues.extend(item_schema_issues)
+    issues.extend(interactable_schema_issues)
+
+    if not any(issue.level == ERROR for issue in item_schema_issues):
+        issues.extend(validate_duplicate_ids(item_table))
+
+    if not any(issue.level == ERROR for issue in interactable_schema_issues):
         issues.extend(validate_values(interactable_table))
         issues.extend(validate_duplicate_ids(interactable_table))
         issues.extend(
@@ -331,10 +392,18 @@ def main():
         print("Validation failed. JSON was not generated.")
         return
 
-    configs = load_configs(interactable_table)
-    write_json(configs, OUTPUT_PATH)
+    content = build_content_model(
+        item_table,
+        interactable_table,
+    )
 
-    print(f"Loaded {len(configs)} interactable configs.")
+    write_json(content, OUTPUT_PATH)
+
+    print(f"Loaded {len(content.items)} item configs.")
+    print(
+        f"Loaded {len(content.interactables)} "
+        f"interactable configs."
+    )
     print(f"Generated: {OUTPUT_PATH}")
 
 
