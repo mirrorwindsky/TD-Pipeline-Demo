@@ -285,6 +285,43 @@ def validate_references(
     return issues
 
 
+def validate_item_references(
+    content: ContentModel,
+    source_path: Path,
+) -> list[ValidationIssue]:
+    issues = []
+
+    valid_item_ids = {
+        item.id
+        for item in content.items
+    }
+
+    for row_number, config in enumerate(
+        content.interactables,
+        start=2,
+    ):
+        references = [
+            ("requiredItemId", config.requiredItemId),
+            ("grantedItemId", config.grantedItemId),
+        ]
+
+        for field_name, item_id in references:
+            if not item_id:
+                continue
+
+            if item_id not in valid_item_ids:
+                issues.append(
+                    ValidationIssue(
+                        ERROR,
+                        f"{source_path.name} row {row_number} "
+                        f"field '{field_name}': "
+                        f"unknown item id '{item_id}'."
+                    )
+                )
+
+    return issues
+
+
 def load_items(table: SourceTable) -> list[ItemConfig]:
     items = []
 
@@ -381,14 +418,8 @@ def main():
             )
         )
 
-    print_issues(issues)
-
-    has_errors = any(
-        issue.level == ERROR
-        for issue in issues
-    )
-
-    if has_errors:
+    if any(issue.level == ERROR for issue in issues):
+        print_issues(issues)
         print("Validation failed. JSON was not generated.")
         return
 
@@ -396,6 +427,19 @@ def main():
         item_table,
         interactable_table,
     )
+
+    issues.extend(
+        validate_item_references(
+            content,
+            INTERACTABLES_SOURCE_PATH,
+        )
+    )
+
+    print_issues(issues)
+
+    if any(issue.level == ERROR for issue in issues):
+        print("Validation failed. JSON was not generated.")
+        return
 
     write_json(content, OUTPUT_PATH)
 
