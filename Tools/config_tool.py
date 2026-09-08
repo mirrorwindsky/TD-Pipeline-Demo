@@ -443,6 +443,51 @@ def print_batch_preview(
         )
 
 
+def apply_batch_interaction_updates(
+    table: SourceTable,
+    updates: list[BatchInteractionUpdate],
+) -> None:
+    update_by_id = {
+        update.id: update.newRequiredInteractions
+        for update in updates
+    }
+
+    for row in table.rows:
+        config_id = (row.get("id") or "").strip()
+
+        if config_id in update_by_id:
+            row["requiredInteractions"] = str(
+                update_by_id[config_id]
+            )
+
+
+def write_csv_table_atomic(table: SourceTable) -> None:
+    temp_path = table.path.with_name(
+        f"{table.path.name}.tmp"
+    )
+
+    try:
+        with temp_path.open(
+            "w",
+            encoding="utf-8",
+            newline="",
+        ) as file:
+            writer = csv.DictWriter(
+                file,
+                fieldnames=table.fieldnames,
+                lineterminator="\n",
+            )
+
+            writer.writeheader()
+            writer.writerows(table.rows)
+
+        temp_path.replace(table.path)
+
+    finally:
+        if temp_path.exists():
+            temp_path.unlink()
+
+
 def load_items(table: SourceTable) -> list[ItemConfig]:
     items = []
 
@@ -545,6 +590,57 @@ def run_batch_preview():
         return
 
     print_batch_preview(updates)
+
+
+def run_batch_apply():
+    update_table = parse_csv_table(BATCH_UPDATE_PATH)
+    interactable_table = parse_csv_table(INTERACTABLES_SOURCE_PATH)
+
+    issues = validate_schema(
+        update_table,
+        BATCH_UPDATE_REQUIRED_FIELDS,
+    )
+
+    if not any(issue.level == ERROR for issue in issues):
+        issues.extend(validate_duplicate_ids(update_table))
+
+    if any(issue.level == ERROR for issue in issues):
+        print_issues(issues)
+        print("Batch apply failed. No changes were made.")
+        return
+
+    item_table = parse_csv_table(ITEMS_SOURCE_PATH)
+
+    content = build_content_model(
+        item_table,
+        interactable_table,
+    )
+
+    updates, batch_issues = prepare_batch_interaction_updates(
+        update_table,
+        content,
+    )
+
+    issues.extend(batch_issues)
+
+    if any(issue.level == ERROR for issue in issues):
+        print_issues(issues)
+        print("Batch apply failed. No changes were made.")
+        return
+
+    print_batch_preview(updates)
+
+    apply_batch_interaction_updates(
+        interactable_table,
+        updates,
+    )
+
+    write_csv_table_atomic(interactable_table)
+
+    print(
+        f"Applied {len(updates)} batch updates to "
+        f"{INTERACTABLES_SOURCE_PATH}"
+    )
 
 
 def main():
