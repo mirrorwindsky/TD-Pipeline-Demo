@@ -4,6 +4,10 @@
 
 Day 9 is complete and sealed.
 
+D10 Task 1 is Completed with user acceptance. Task 2's first indoor structure
+pass is complete and functionally verified; user wayfinding / camera comfort
+review is the remaining acceptance step. Task 3 has not started.
+
 The current stable gameplay chain is:
 
 `PowerCell → PlayerInventory → PowerNode → ControlTerminal → ExitDoor → EndMarker → Mission Complete`
@@ -37,9 +41,12 @@ This timing revealed a presentation and spatial-structure problem more than a co
 
 ## Current Key Problem
 
-The current camera is a fixed high follow camera with no mouse-controlled view rotation.
-
-In Play Mode, the opening view can see nearly the entire map from start to finish. The current scene still reads as an open graybox test space rather than an enclosed facility-style game environment.
+Task 1's third-person mouse camera and natural movement are complete and have
+passed user acceptance. Task 2 has now addressed the open room boundaries,
+missing ceilings and long sightlines with an enclosed primitive structure pass.
+The remaining review is whether an unfamiliar player can read the route and
+comfortably steer the camera through its entrances and turns. Materials,
+lighting and UI presentation have not been worked on in this pass.
 
 Therefore, the 27-second timing should **not** be corrected by artificial padding such as:
 
@@ -66,7 +73,125 @@ Do not jump directly to later presentation tasks before validating earlier struc
 
 ## Active Task
 
-### D10 Task 1 — Third-Person Camera + Movement
+### D10 Task 2 — Vertical Slice Spatial Restructure
+
+**First structure pass complete; pending user walkthrough.** This run stops here.
+The active acceptance task remains Task 2; Task 3 has not been started.
+
+### Task 2 Structure / Verification — 2026-09-09
+
+The compact route is now:
+
+`Airlock offset doorway → left turn in the main connector → Storage entry return
+→ back to the connector → Maintenance work bay → Control entry turn
+→ unlocked Exit vestibule → EndMarker`
+
+The six existing floor GameObjects and all existing room groups were reused.
+East is +X and north is +Z. The overall footprint remains approximately the same;
+there are no added long corridors, extra objectives or interaction-count changes.
+
+| Space | First-pass structure |
+| --- | --- |
+| Airlock | Existing 6 × 5 m floor; enclosed front wall with a right-offset 2.2 m opening |
+| Main connector | Floor narrowed from 10 to 8 m; one return wall directs a short left turn toward Storage |
+| Storage | Existing 6 × 6 m room; east-side doorway and an internal return hide PowerCell until the player enters and turns |
+| Maintenance | Floor deepened from 6 to 8 m; north-side approach and a structural service corner create a narrower work bay |
+| Control | 8 × 5.6 m broad room; offset south entry and a short internal return conceal the terminal from the connector |
+| Exit | Existing 4 × 8 m floor moved 2 m east; fitted gate opening and short internal return form a narrow final vestibule |
+
+Walls meet ceilings at 4.2 m. The six ceiling slabs are 0.3 m thick, with edges
+overlapping the enclosing walls. Door openings are 2.2–2.4 m wide and 3.3 m high.
+No material, lighting, UI, camera-script or movement-parameter edits were made.
+
+Gameplay Transform changes, preserving the original GameObjects and components:
+
+| Object | Previous position | New position | Reason |
+| --- | --- | --- | --- |
+| PowerCell | (-8, 0.5, -4) | (-8, 0.5, -2.4) | Place it behind Storage's entry return |
+| PowerNode | (8, 1, -4) | (8.2, 1, -5.6) | Place it inside the Maintenance work bay |
+| ExitDoor | (0, 1.5, 5.6) | (2, 1.65, 5.6) | Align it with the offset Exit opening |
+| EndMarker_V2 | (0, 1.5, 12.5) | (2, 1.5, 12) | Keep the completion trigger inside the relocated Exit |
+
+ExitDoor scale changed from (4, 3, 0.3) to (2.4, 3.3, 0.3) to fit the opening.
+ControlTerminal remains at (2.7, 1, 3). Player and Main Camera serialized values
+are unchanged from the accepted Task 1 configuration.
+
+Authoring / reference checks:
+
+- All construction used Unity MCP with scene-scoped Unity Primitive, Transform
+  and Undo APIs. The temporary authoring script lives under ignored
+  `Temp/D10Task2`; no generic Editor tool or runtime component was added.
+- Added 23 Cube primitives: 17 walls / returns / headers and six ceilings.
+  Added two empty groups, `Level_Geo/Walls/Hall` and `Level_Geo/Ceilings`.
+- Deleted no GameObjects. Existing twenty wall primitives were extended / fitted;
+  four existing floor Transforms were adjusted.
+- All existing serialized object IDs remain present. All 27 persisted
+  MonoBehaviour blocks are unchanged, including config IDs, database references,
+  prerequisite Device, gate source, flow-controller, HUD and camera target links.
+- No missing scripts were found. `Prototype_01.unity` SHA-256 is unchanged.
+- Git changes are limited to `VerticalSlice_01.unity` and this handoff document.
+
+Play Mode validation through Unity MCP:
+
+- Unity reports scripts up to date; no C# source changed. Final Console Error
+  count is zero. The scene was saved and Unity was left out of Play Mode.
+- A continuous input-driven walkthrough moved from the original spawn through
+  every doorway and room, picked up PowerCell, completed PowerNode in three E
+  presses, completed ControlTerminal in two E presses, passed the unlocked gate
+  and entered EndMarker. The final HUD displayed `Mission Complete` and
+  `Facility restored. Exit reached.`
+- The walkthrough queued mouse / W / E input through the existing Input System;
+  it did not teleport the player, call `Interact` directly, modify gameplay
+  state, lower movement speed or change configuration data.
+- Start occlusion checks covered the center and eight bounds corners of
+  PowerCell, PowerNode, ControlTerminal, ExitDoor and EndMarker from both the
+  camera and player-head positions; all were blocked by Level_Geo.
+- PowerCell was also occluded from both viewpoints outside Storage's entrance.
+  It became visible after entering and rounding the return, as confirmed by
+  the runtime camera captures.
+- Objective progression, interaction prompts, item consumption, device feedback,
+  gate unlocking and mission-completion feedback all worked through the existing
+  gameplay chain. The upper pitch clamp also stayed below the new ceiling.
+- Across 8,044 sampled route frames, a 0.08 m camera-center overlap probe detected
+  zero overlaps with environment colliders; the controller remained grounded.
+  Camera follow distance ranged from approximately 0.55 to 3.5 m as obstacles
+  shortened the boom. This is not exhaustive frustum / corner collision testing.
+- The first automated attempt used a waypoint inside the terminal's collider.
+  That test waypoint was corrected to the adjacent aisle, then the entire route
+  passed from a fresh Play session. No scene change was needed for that correction.
+- Runtime captures and the temporary input probe / reports are under
+  `Temp/D10Task2`. These are local verification artifacts, not shipped assets.
+
+Remaining user review:
+
+- Whether the first-time Storage → Maintenance → Control route is understandable
+  without knowing the layout: **该项仍需要用户手动验证**.
+- Camera comfort during fast turns, doorway approaches and close device exits,
+  especially where the boom retracts toward 0.55 m:
+  **该项仍需要用户手动验证**. No camera-center penetration was detected on the
+  tested route, but subjective comfort cannot be certified by the input probe.
+- Check that the room-size / entry-direction differences are perceptible in the
+  untextured graybox. Existing ambient lighting is unchanged; this pass deliberately
+  leaves lighting and material readability for their later authorized tasks.
+- The V1 baseline was not opened for runtime testing and was not edited.
+
+The next human timing should include room entry, short turns and orientation
+instead of a direct open-floor traversal. No duration is promised and the
+5–8-minute target has not been validated. The functional walkthrough was not a
+Task 3 pacing measurement; no Task 3 work, commit or push was performed.
+
+## Completed Task
+
+### D10 Task 1 — Third-Person Camera + Movement — Completed
+
+User acceptance passed on 2026-09-09:
+
+- mouse yaw / pitch work normally;
+- the third-person camera experience is good;
+- WASD controls feel natural;
+- E interaction works;
+- the cursor locks and hides correctly when Game View has focus;
+- the user considers Task 1 successful and has authorized Task 2.
 
 Current relevant scripts include:
 
@@ -84,12 +209,13 @@ Task 1 acceptance criteria:
 - Unity compiles with no new red Console errors;
 - the change is verified in Play Mode, not only by code inspection.
 
-After Task 1, stop and report results before beginning spatial reconstruction.
+Task 1 was stopped and reported before spatial work. Task 2 is now separately
+authorized by the user.
 
 ### Task 1 Implementation / Verification — 2026-09-09
 
-Task 1 is implemented. The active follow-up is **manual acceptance of Task 1**;
-Task 2 has not started. Unity was left out of Play Mode. No commit or push was made.
+Task 1 implementation and user acceptance are complete. The technical checks
+below record the Task 1 implementation pass; the active task is now Task 2.
 
 Implementation:
 
@@ -159,18 +285,17 @@ Validation performed through Unity MCP in Unity 6000.3.23f1:
   serialized object references remain intact. `Prototype_01.unity` SHA-256 was
   unchanged before/after the task.
 
-Remaining manual acceptance / risks:
+Task 1 verification history / remaining regression boundaries:
 
-- Real mouse sensitivity, sustained turning while moving, and overall control
-  comfort still need user testing: **该项仍需要用户手动验证**.
-- Real application focus loss / return and camera behavior at all wall corners
-  still need user testing: **该项仍需要用户手动验证**. The initial wall constraint
-  was verified, but exhaustive camera collision coverage was not performed.
-- The complete route through ControlTerminal, ExitDoor and EndMarker was not
-  replayed during Task 1; nor was the V1 baseline opened for runtime regression.
-  These remain manual regression checks. No broken serialized references were
-  introduced or observed; the shared player script still carries a small
-  unverified V1 regression risk despite retaining its default movement mode.
+- The user subsequently accepted mouse control, third-person feel, natural WASD,
+  E interaction and Game View focus / cursor behavior. These are no longer
+  outstanding Task 1 acceptance items.
+- Camera behavior in the new walls / ceilings will be checked again in Task 2;
+  the Task 1 tests did not provide exhaustive wall-corner collision coverage.
+- The Task 1 implementation probe did not replay the route through ControlTerminal,
+  ExitDoor and EndMarker. Task 2 subsequently verified the complete chain in the
+  new layout. The V1 baseline has not been opened for runtime regression; the
+  shared player script retains its default V1 movement mode.
 - The opening no longer presents a top-down map overview. Open sky and distant
   sightlines in the existing graybox remain; room geometry was not changed.
 
