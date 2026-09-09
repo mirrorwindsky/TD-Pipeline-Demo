@@ -2,10 +2,13 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController))]
+[DefaultExecutionOrder(-50)]
 public class SimplePlayerController : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float gravity = -20f;
+    [Tooltip("Enable with the mouse camera: W/S move forward/back, A/D strafe. Leave off for the V1 fixed-camera baseline.")]
+    [SerializeField] private bool usePlayerRelativeMovement;
 
     private CharacterController controller;
     private float verticalVelocity;
@@ -18,20 +21,27 @@ public class SimplePlayerController : MonoBehaviour
     private void Update()
     {
         Vector2 input = Vector2.zero;
+        Keyboard keyboard = Keyboard.current;
 
-        if (Keyboard.current.wKey.isPressed)
-            input.y += 1f;
+        if (keyboard != null && (!usePlayerRelativeMovement || Cursor.lockState == CursorLockMode.Locked))
+        {
+            if (keyboard.wKey.isPressed)
+                input.y += 1f;
 
-        if (Keyboard.current.sKey.isPressed)
-            input.y -= 1f;
+            if (keyboard.sKey.isPressed)
+                input.y -= 1f;
 
-        if (Keyboard.current.dKey.isPressed)
-            input.x += 1f;
+            if (keyboard.dKey.isPressed)
+                input.x += 1f;
 
-        if (Keyboard.current.aKey.isPressed)
-            input.x -= 1f;
+            if (keyboard.aKey.isPressed)
+                input.x -= 1f;
+        }
 
         Vector3 move = new Vector3(input.x, 0f, input.y).normalized;
+
+        if (usePlayerRelativeMovement)
+            move = transform.right * move.x + transform.forward * move.z;
 
         // CharacterController does not apply gravity automatically.
         if (controller.isGrounded && verticalVelocity < 0f)
@@ -46,7 +56,8 @@ public class SimplePlayerController : MonoBehaviour
 
         controller.Move(velocity * Time.deltaTime);
 
-        if (move.sqrMagnitude > 0.001f)
+        // The third-person camera owns facing, including while backing up / strafing.
+        if (!usePlayerRelativeMovement && move.sqrMagnitude > 0.001f)
         {
             transform.forward = move;
         }
