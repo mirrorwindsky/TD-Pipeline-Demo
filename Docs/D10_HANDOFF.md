@@ -4,7 +4,7 @@
 
 Day 9 is complete and sealed.
 
-D10 Task 1 and Task 2 are complete with user acceptance. Task 3 re-timing / pacing diagnosis is also complete. The current active task is **D10 Task 4 — Basic Materials + Lighting + Visual Readability**.
+D10 Task 1 and Task 2 are complete with user acceptance. Task 3 re-timing / pacing diagnosis is also complete. The current active task is **D10 Task 4 — Basic Materials + Lighting + Visual Readability**. Its first static visual pass is implemented and MCP-verified, and is awaiting user visual acceptance. Task 5 has not started.
 
 The current stable gameplay chain is:
 
@@ -70,11 +70,12 @@ Task 1's third-person mouse camera and natural movement are complete and have pa
 
 Task 2 has replaced the previous open graybox with an enclosed indoor primitive layout featuring real room boundaries, ceilings, door openings, turns, and occlusion. The user reports that the result feels substantially better: all areas now read as indoor spaces with proper doorways, the structure is more complex, and the camera behaves normally inside the new layout.
 
-The current remaining presentation gap is visual rather than structural:
+Task 4 has now added the first static facility material / lighting pass:
 
-- environment geometry still reads as a graybox;
-- room identity is weak without materials / lighting;
-- interactables need stronger static visual readability;
+- floors, walls, ceilings and entrance frames have distinct material roles;
+- room identity uses restrained cool / warm tints and local indoor lighting;
+- key interactables have contrasting bodies and fixed emissive surfaces;
+- brightness comfort, first-glance recognition and video readiness await user review;
 - completion-state feedback and HUD polish have not yet received their presentation pass.
 
 ## D10 Execution Order
@@ -84,7 +85,7 @@ Proceed in this order unless a verified blocker requires otherwise:
 1. third-person mouse camera + natural movement — **Completed**;
 2. restructure `VerticalSlice_01` for real indoor spatial separation — **Completed**;
 3. re-time the complete flow and diagnose pacing — **Completed**;
-4. add basic materials, room / area visual differentiation, lighting, and interactable readability — **Active**;
+4. add basic materials, room / area visual differentiation, lighting, and interactable readability — **First pass complete; active user acceptance**;
 5. add necessary visible completion-state changes for PowerNode / ControlTerminal / ExitDoor and polish Objective / Prompt / Feedback;
 6. produce a standalone Build and run the full Smoke Test while confirming Pipeline V2 still drives the real Demo;
 7. improve Tool UX only for real operation problems; add Editor Integration only if it demonstrably shortens the workflow.
@@ -116,6 +117,140 @@ Task 4 should stay deliberately small:
 - no Pipeline / ConfigSource / Tool changes.
 
 After the first visual pass, stop for user Play Mode review before continuing to Task 5.
+
+### Task 4 Static Visual Pass / Verification — 2026-09-09
+
+**Status: first static pass complete, awaiting user visual acceptance.** Unity is
+out of Play Mode, the scene is saved, and this run stops here. No commit, push,
+Task 5 work, Build or Build Settings change was performed.
+
+Baseline inspection confirmed `VerticalSlice_01`, PC URP / Linear color space,
+the supported `Universal Render Pipeline/Lit` shader, and one enabled white
+Directional Light at intensity 2. All 60 existing mesh renderers, including the
+inactive legacy objects, used the packaged default Lit material. There was no
+project environment-material library; the other material assets belonged to TMP.
+
+Fifteen new opaque URP Lit materials are in `Assets/Materials/D10Facility/`:
+
+| Material | Responsibility |
+| --- | --- |
+| M_Floor_Graphite | Dark, rough industrial floor; metallic 0.05 / smoothness 0.18 |
+| M_Wall_Facility | Neutral facility walls and main connector |
+| M_Ceiling_Cool | Darker, cooler ceiling surface |
+| M_Structure_Metal | Dark metal entrance trim, panel surrounds, cell end caps and gate seam |
+| M_Wall_Storage | Muted blue-gray Storage walls |
+| M_Wall_Maintenance | Warm gray / taupe Maintenance walls |
+| M_Wall_Control | Lighter, cleaner cool-gray Control walls |
+| M_Accent_Amber | Restrained warm Maintenance doorway accent |
+| M_Accent_Cyan | Storage / Control doorway accents |
+| M_Accent_Exit | Muted green Exit gate and entrance accents |
+| M_Equipment_Metal | Shared metal body for PowerNode and ControlTerminal |
+| M_Energy_Amber | Bright warm PowerCell body and fixed PowerNode panel |
+| M_Screen_Cyan | Fixed cyan ControlTerminal screen surface |
+| M_Light_Diffuser | Ceiling fixture diffuser surfaces |
+| M_Player_Shell | Neutral light player shell replacing the default material |
+
+Emission is fixed, with color multipliers 0.45 for Energy, 0.65 for Screen and
+1.2 for Diffuser. No event changes these values. URP 17.3's material validation
+requires an emissive GI eligibility flag to retain `_EMISSION`; these three
+materials use `BakedEmissive` and have the keyword enabled. No lightmap bake or
+runtime GI / emission-state system was added.
+
+Region direction:
+
+- Storage: cooler blue-gray walls and cooler local light; the warm bright cell
+  contrasts with the surroundings and has two dark end caps.
+- Maintenance: warmer walls / doorway accent and a warm work light; PowerNode's
+  dark metal body surrounds a fixed warm energy panel.
+- Control: lighter walls and cool-white illumination; the terminal has a cyan
+  screen facing the existing interaction approach. The closed green gate is
+  already identifiable before terminal completion.
+- Exit: green entrance / gate accents, a central gate seam and a pale green-white
+  local light establish a consistent exit direction. The existing gate behavior
+  remains unchanged.
+
+Seven local lights live under `Visual_Presentation/Indoor_Lighting`:
+
+| Light | Type | Position | Intensity / range | Color |
+| --- | --- | --- | --- | --- |
+| Light_Airlock | Spot, 145 degrees | (0, 3.9, -12) | 12 / 7 m | #E1EBF2 |
+| Light_Hall_Entry | Spot, 145 degrees | (-0.7, 3.9, -8.2) | 14 / 7 m | #E4EBEE |
+| Light_Hall_Junction | Spot, 150 degrees | (0.7, 3.9, -2.4) | 14 / 8 m | #E4EBEE |
+| Light_Storage | Point | (-7.8, 3.25, -3.6) | 4.3 / 6 m | #C5DCEF |
+| Light_Maintenance | Point | (8, 3.25, -3.3) | 5.5 / 6.5 m | #F1DAB8 |
+| Light_Control | Point | (0.8, 3.35, 3.1) | 6 / 7 m | #DDEDF0 |
+| Light_Exit | Spot, 120 degrees | (2.2, 3.9, 9.8) | 12 / 6 m | #D6EADD |
+
+All seven are stationary Realtime lights with soft shadows. Storage and
+Maintenance use the existing URP low shadow tier (256); the other lights use
+medium (512). No render-pipeline asset or global quality setting was changed.
+The original Directional Light object is retained but its Light component is
+disabled. Scene ambient lighting uses Trilight fill with sky (0.48, 0.52, 0.58),
+equator (0.34, 0.38, 0.42), ground (0.20, 0.23, 0.27), and reflection intensity
+0.35. The existing Volume profile and post-processing settings are unchanged.
+
+Scene scope / reference checks:
+
+- Added 24 non-colliding Cube details: ten entrance jambs, seven ceiling fixtures
+  and seven static device details. Added seven Light GameObjects and three groups.
+- The new visual details have no Collider and use Ignore Raycast. Door jambs sit
+  outside the existing clear openings. No doorway size or route was changed.
+- Existing Gameplay Renderer materials changed intentionally. Existing gameplay
+  scripts and logic components did not change; the 27 pre-existing serialized
+  MonoBehaviour blocks match the pre-pass scene exactly.
+- Every pre-existing Transform retains its position, rotation, scale and parent.
+  Gameplay objects were not moved. Their added visual children inherit only the
+  existing pickup / gate visibility behavior; no new state switching was added.
+- The final Editor audit found 78 active mesh renderers, zero active default
+  material users, zero missing material slots, zero unsupported / error shaders
+  and zero missing scripts. Inactive legacy / Ground default materials were left
+  intact, and the shared packaged Lit material was never edited.
+- `Prototype_01.unity` SHA-256 is unchanged. Gameplay source, ConfigSource, Tools,
+  generated JSON, Assets/Settings and ProjectSettings have no final changes.
+
+Verification / visual iteration:
+
+- Unity reported scripts up to date; there were no C# source edits. Final Console
+  Error and Warning counts are both zero, including material / shader errors.
+- The complete route was replayed through queued mouse / W / E input from the
+  original spawn, with no teleports or direct calls to `Interact`. PowerCell,
+  inventory consumption, PowerNode 3/3, ControlTerminal 2/2, gate opening,
+  EndMarker and Mission Complete all passed with the original architecture.
+- Objective, Prompt and Feedback updated normally. The final run passed all 44
+  checks; 6,633 sampled frames showed no environment overlap at the camera center
+  and no lost grounding. Task 1's accepted camera / movement values are unchanged.
+- A separate per-key WASD probe did not reliably deliver movement while the
+  Editor lacked application focus. A controlled input-routing retry also produced
+  zero displacement, so neither is counted as a passing test. The temporary input
+  routing was restored to `PointersAndKeyboardsRespectGameViewFocus`. The earlier
+  continuous mouse/W/E walkthrough remains a passing functional route test.
+- Game View captures were actually inspected for Opening/Airlock, Storage entry
+  and reveal, Maintenance, Control, the closed gate, Exit and Mission Complete.
+- The first visual pass was too dark and URP had cleared the emission keywords
+  because of the initial GI flag. The flag was corrected, floor / frame and
+  ambient visibility were lifted, and entry illumination was adjusted.
+- Wide-angle shadow banding was reduced by improving local shadow resolution /
+  bias and narrowing the Exit spot angle. The final images retain dark corners
+  while making floors, openings and interactable surfaces readable.
+- Temporary authoring / input probes, audit evidence and screenshots are under
+  ignored `Temp/D10Task4`; no deliverable Editor tool or GUI was added.
+
+Known limits / user acceptance:
+
+- Normal hardware A/S/D/W input and control comfort after focusing Game View:
+  **该项仍需要用户手动验证**. The supplementary per-key MCP probe was inconclusive;
+  no gameplay code or persistent input settings were changed.
+- Overall brightness comfort and any glare: **该项仍需要用户手动验证**.
+- Whether room differences feel natural and each interactable is identifiable
+  at first glance: **该项仍需要用户手动验证**.
+- Shadows and wall appearance during prolonged camera rotation, especially at
+  close / grazing angles: **该项仍需要用户手动验证**. The simple 256/512 shadow
+  settings are not a guarantee of perfect edges from every angle.
+- Whether the scene is ready for a demo-video recording:
+  **该项仍需要用户手动验证**. The scene deliberately retains primitive silhouettes
+  and untextured surfaces; this is a basic facility presentation pass.
+- No new completion-color changes, dynamic emission, gate animation, VFX, audio,
+  HUD/Prompt/Feedback polish, Tool UX or Build work has been started.
 
 ## Completed Task
 
