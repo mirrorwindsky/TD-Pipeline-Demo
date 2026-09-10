@@ -16,7 +16,7 @@
 
 ---
 
-## Day 8 — Gameplay Vertical Slice + Content Model V2 Core
+## Day 8 — Gameplay Vertical Slice + Content Model V2 Core ✅
 
 ### Gameplay
 
@@ -70,212 +70,130 @@
 - [x] A real Pipeline V2 limitation was discovered from testing
 - [x] DFS / BFS practice covered by previous day's extra problems
 
-> The final timing target, visual presentation, multi-table source model, field cleanup, `interactionType` validation, and cross-reference validation are intentionally moved to D9–D10.
-
 ---
 
 ## Day 9 — Multi-Table Pipeline V2 + Cross-Reference + Batch ✅
 
 ### Source Model / Architecture
 
-- [x] Decide the minimum useful multi-table split
-- [x] Introduce `items.csv`
-- [x] Introduce `objectives.csv`
-- [x] Keep `interactables.csv` for interaction content
-- [x] Keep the content model limited to fields with real runtime / pipeline value
+- [x] Introduce `items.csv`, `objectives.csv`, and retain `interactables.csv`
+- [x] Keep only fields with real runtime / pipeline value
 - [x] Read the real source tables through one unified pipeline
-- [x] Parse each source table once
-- [x] Build a Typed Intermediate Model with `ItemConfig`, `ObjectiveConfig`, `InteractableConfig`, and `ContentModel`
-- [x] Make validation and generation reuse parsed / typed representations instead of re-reading source CSV files
-- [x] Preserve the existing `interactables.json` runtime contract while adding `objectives.json`
+- [x] Parse each source table once into `SourceTable`
+- [x] Build typed `ItemConfig`, `ObjectiveConfig`, `InteractableConfig`, and `ContentModel`
+- [x] Reuse parsed / typed representations across validation and generation
+- [x] Preserve `interactables.json` while adding `objectives.json`
 
-Current designer-facing source model:
+### Validation
 
-    ConfigSource/
-    ├── items.csv
-    ├── objectives.csv
-    ├── interactables.csv
-    └── batch_interaction_updates.csv
-
-Current typed content model:
-
-    ContentModel
-    ├── items: list[ItemConfig]
-    ├── objectives: list[ObjectiveConfig]
-    └── interactables: list[InteractableConfig]
-
-### Preserve Existing Validation
-
-- [x] Preserve schema validation
-- [x] Preserve type validation
-- [x] Preserve range validation
-- [x] Preserve duplicate-ID validation
-- [x] Preserve `ERROR` / `WARNING`
-- [x] Preserve fail-safe generation
-- [x] Preserve current Unity scene reference validation until a broader replacement exists
-
-### New Validation
-
+- [x] Preserve schema / type / range / duplicate-ID validation
+- [x] Preserve `ERROR` / `WARNING` and fail-safe generation
+- [x] Preserve current Unity scene-reference validation boundary
 - [x] Validate legal `interactionType` values
-- [x] Add a real Item ID registry through `items.csv`
+- [x] Add Item ID registry
+- [x] Validate `requiredItemId` and `grantedItemId`
 - [x] Reject `requiredItemId = fake_cell` before JSON generation
-- [x] Add cross-record / cross-table item-reference validation
-- [x] Validate `requiredItemId`
-- [x] Validate `grantedItemId`
 - [x] Produce clear file / row / field / reference errors
-
-Scope notes:
-
-- prerequisite-device dependency remains a Unity serialized `DeviceInteractable` reference and was not externalized on D9
-- Objective IDs are consumed by `VerticalSliceFlowController` through `ObjectiveConfigDatabase`; no `objectiveId` field was added to `interactables.csv`
-- unlock-target IDs were not introduced because the current ExitDoor flow is already handled by the existing event-driven `GateController`
 
 ### Objective Content Pipeline
 
 - [x] Parse and validate `objectives.csv`
 - [x] Add typed `ObjectiveConfig`
-- [x] Include objectives in the shared `ContentModel`
 - [x] Generate `Assets/Data/objectives.json`
 - [x] Add Unity `ObjectiveConfigDatabase`
-- [x] Replace hard-coded HUD objective descriptions with ID-based runtime lookup
-- [x] Verify a source-only objective text edit changes the Unity HUD without C# changes
-- [x] Keep objective progression timing event-driven in C# rather than over-expanding into a data-driven quest system
-
-Verified runtime chain:
-
-    objectives.csv
-    → Python parse / validation
-    → ObjectiveConfig / ContentModel
-    → objectives.json
-    → ObjectiveConfigDatabase
-    → VerticalSliceFlowController
-    → PlayerHUD
-
-### Runtime / Config Integration
-
-- [x] Make multi-table generated data Unity-consumable
-- [x] Keep the existing Vertical Slice chain working
-- [x] Verify source-only dependency edits change real gameplay behavior
-- [x] Verify source-only objective text edits change real HUD content
-- [x] Verify invalid references are blocked before runtime
-- [x] Complete a full Vertical Slice regression test after restoring the normal baseline
-
-Cross-reference verification:
-
-- `requiredItemId = fake_cell`
-  - rejected by Python cross-reference validation
-  - JSON generation blocked
-  - previous valid generated data preserved
-
-Valid dependency-change verification:
-
-- temporarily added valid Item ID `backup_cell`
-- changed `power_node.requiredItemId` from `power_cell` to `backup_cell`
-- Python validation succeeded because the reference was valid
-- Unity correctly blocked PowerNode after the player picked up only `power_cell`
-- restored the normal `power_cell` dependency afterward
-
-Objective source-only verification:
-
-- changed only the `find_power_cell` description in `objectives.csv`
-- regenerated configuration data
-- Unity HUD displayed the changed objective text
-- no gameplay C# modification was required
-- restored the normal objective text afterward
+- [x] Replace hard-coded HUD descriptions with ID-based runtime lookup
+- [x] Verify a source-only Objective edit changes the HUD without C# changes
+- [x] Keep progression timing event-driven instead of building a generalized quest system
 
 ### Batch Processing
 
-- [x] Choose one genuine batch-processing use case
-- [x] Implement batch modification of `requiredInteractions`
-- [x] Add dry-run batch preview
-- [x] Convert validated source rows into prepared typed batch updates
-- [x] Validate the entire batch before displaying successful preview results
-- [x] Reject duplicate or invalid batch targets before application
+- [x] Implement genuine batch modification of `requiredInteractions`
+- [x] Add dry-run preview
+- [x] Validate the entire batch before successful preview / apply
+- [x] Reject duplicate or invalid targets
+- [x] Add typed prepared batch updates
 - [x] Apply valid batches with all-or-nothing behavior
-- [x] Write source CSV changes through a temporary file and atomic replace
-- [x] Verify one invalid batch entry causes zero source modifications
-- [x] Verify one valid batch updates multiple real gameplay parameters
-- [x] Propagate batch changes through the normal Pipeline into Unity Runtime
-
-Real Batch V1 verification:
-
-    cube_sturdy.requiredInteractions:      3 → 4
-    power_node.requiredInteractions:       3 → 2
-    control_terminal.requiredInteractions: 2 → 1
-
-Verified pipeline:
-
-    batch_interaction_updates.csv
-    → full-batch validation
-    → prepared BatchInteractionUpdate objects
-    → atomic update of interactables.csv
-    → normal Pipeline V2 validation / generation
-    → interactables.json
-    → Unity runtime
-
-Unity verified that PowerNode changed from 3 interactions to 2 and ControlTerminal changed from 2 interactions to 1.
-
-The project was then restored to the normal `3 / 3 / 2` gameplay baseline while retaining the Batch V1 workflow and example batch source.
+- [x] Write source CSV through temporary file + atomic replace
+- [x] Verify invalid batch input causes zero source modifications
+- [x] Verify valid batch changes multiple real gameplay parameters
+- [x] Restore the normal `3 / 3 / 2` baseline after verification
 
 ### Day 9 Acceptance
 
 - [x] Multi-table source data generates Unity-consumable output
-- [x] `items.csv`, `objectives.csv`, and `interactables.csv` all participate in the real content pipeline
 - [x] Cross-reference errors are blocked before runtime
-- [x] `requiredItemId = fake_cell` is caught before runtime
-- [x] Valid source-config dependency changes alter real gameplay behavior
-- [x] Source-only objective edits alter real HUD content
-- [x] Generated structured data does not require manual editing
-- [x] Batch V1 works on real project data and reaches Unity Runtime
-- [x] Full Vertical Slice regression test passes after restoring the baseline
+- [x] Valid source dependency edits alter real gameplay
+- [x] Source-only Objective edits alter real HUD content
+- [x] Generated data requires no manual editing
+- [x] Batch V1 reaches Unity Runtime
+- [x] Full Vertical Slice regression passes after restoring baseline
 - [x] Solve 1 DFS / BFS problem — LeetCode 994, Rotting Oranges
 
 ---
 
-## Day 10 — Game Presentation + Tool UX / Optional Editor Integration
+## Day 10 — Game Presentation + Tool UX / Optional Editor Integration ✅
 
 ### Gameplay Timing / Presentation
 
-- [ ] Time the current full gameplay loop
-- [ ] Adjust pacing toward the approximate 5–8 minute target
-- [ ] Improve scene layout / spatial readability
-- [ ] Add basic materials / visual differentiation
-- [ ] Improve lighting
-- [ ] Make interactable objects visually identifiable
-- [ ] Add visible state changes
-- [ ] Polish Prompt / Objective / Feedback
-- [ ] Add sound / VFX only if core work is complete
+- [x] Time the current full gameplay loop — familiar-player run measured `0:46`
+- [x] Diagnose pacing and document the decision **not** to force the old 5–8 minute target through filler
+- [x] Replace the fixed high camera with mouse-controlled third-person camera behavior
+- [x] Add player-relative movement while preserving the V1 baseline mode
+- [x] Improve scene layout / spatial readability with enclosed rooms, ceilings, doorways, turns, and occlusion
+- [x] Add basic materials / visual differentiation
+- [x] Improve indoor lighting
+- [x] Make interactable objects visually identifiable
+- [x] Add visible state changes for PowerNode / ControlTerminal / Exit
+- [x] Polish Objective / Prompt / Feedback / Mission Complete presentation
+- [x] Evaluate sound / VFX and intentionally defer them because core presentation is already sufficient for the current slice
 
 ### Tool UX
 
-- [ ] Improve validation summary
-- [ ] Improve error readability / information hierarchy
-- [ ] Make the normal designer workflow obvious
-- [ ] Reduce unnecessary manual steps
+- [x] Add a concise successful validation / generation summary
+- [x] Confirm existing validation errors already provide actionable file / row / field / value context
+- [x] Add discoverable `argparse` CLI commands
+- [x] Keep the no-argument command backward-compatible with normal generation
+- [x] Replace `py -c` Batch entry points with `batch-preview` / `batch-apply`
+- [x] Make Preview explicitly state that no source files were changed
+- [x] Verify `batch-apply` still performs real source updates, then restore the baseline and regenerate
+
+Current CLI:
+
+```powershell
+py Tools/config_tool.py --help
+py Tools/config_tool.py
+py Tools/config_tool.py generate
+py Tools/config_tool.py batch-preview
+py Tools/config_tool.py batch-apply
+```
 
 ### Optional Unity Editor Integration
 
-- [ ] Only implement if it genuinely shortens the workflow
+- [x] Evaluate whether Editor Integration genuinely shortens the current workflow
+- [x] Intentionally skip Editor GUI integration: the unified CLI solves the demonstrated problem with much lower process / path / maintenance cost
 
 ### Build Verification
 
-- [ ] Update Build Scene configuration to the Vertical Slice
-- [ ] Produce a standalone Build
-- [ ] Play it from beginning to end
-- [ ] Confirm no Console dependency
-- [ ] Confirm Pipeline V2 still drives the real Demo
+- [x] Update Build Scene configuration to `VerticalSlice_01.unity`
+- [x] Produce a Windows x86-64 standalone Build
+- [x] Keep Build artifacts ignored by Git
+- [x] Play the standalone executable from beginning to end
+- [x] Confirm no Unity Console dependency
+- [x] Confirm Pipeline V2 generated data is included in and drives the real standalone Demo
+- [x] Confirm `Prototype_01.unity` remains unchanged
 
-### D10 Hard Acceptance
+### D10 Acceptance
 
-- [ ] Demo is approximately 5–8 minutes
-- [ ] Demo visibly resembles a small game
-- [ ] At least 3 content types participate
-- [ ] At least 1 config-driven dependency exists
-- [ ] Invalid references are detected before runtime
-- [ ] Generated data is not manually edited
-- [ ] Scene has materials, lighting, spatial structure, UI, prompts, and feedback
-- [ ] Current state is visually strong enough for the final demo video
-- [ ] Solve 1 basic linked-list / tree problem
+- [x] Duration was measured and the old 5–8 minute target was explicitly retired rather than padded artificially
+- [x] Demo visibly resembles a small game rather than a default Unity test scene
+- [x] At least 3 content types participate
+- [x] At least 1 config-driven dependency exists
+- [x] Invalid references are detected before runtime
+- [x] Generated data is not manually edited
+- [x] Scene has materials, lighting, spatial structure, UI, prompts, feedback, and persistent world-state changes
+- [x] Standalone Demo runs from launch to Mission Complete
+- [x] Current state is visually strong enough for the later final demo-video pass
+- [x] Solve linked-list / tree practice — LeetCode 206 Reverse Linked List + 141 Linked List Cycle
 
 ---
 
@@ -289,8 +207,8 @@ The project was then restored to the normal `3 / 3 / 2` gameplay baseline while 
 - [ ] Fix real bugs discovered by QA
 - [ ] Record reproducible test cases
 - [ ] Preserve and document at least one AI-generated-code failure case
-- [ ] Optional: dependency-cycle / unreachable-objective detection
-- [ ] Solve 1 basic coding problem
+- [ ] Optional: dependency-cycle / unreachable-objective detection only if the expanded test data creates a real need
+- [x] Solve 1 basic coding problem — LeetCode 2265, Count Nodes Equal to Average of Subtree
 
 ---
 
@@ -349,12 +267,13 @@ The project was then restored to the normal `3 / 3 / 2` gameplay baseline while 
 
 ### Unity Vertical Slice
 
-- [ ] Demo is approximately 5–8 minutes
-- [ ] Demo looks like a small game rather than a test scene
-- [ ] Clear objective and complete beginning → middle → ending flow
-- [ ] At least 3 different content-object types
-- [ ] Prompt / Objective UI / Feedback work without Console
-- [ ] Basic materials, lighting, environment layout, and state feedback
+- [x] Compact end-to-end Demo is playable; measured familiar-player duration and scope decision are documented
+- [x] Demo looks like a small game rather than a test scene
+- [x] Clear objective and complete beginning → middle → ending flow
+- [x] At least 3 different content-object types
+- [x] Prompt / Objective UI / Feedback work without Console
+- [x] Basic materials, lighting, environment layout, and state feedback
+- [x] Windows standalone build passes manual smoke test
 
 ### Content Model / Pipeline
 
@@ -362,14 +281,15 @@ The project was then restored to the normal `3 / 3 / 2` gameplay baseline while 
 - [x] At least one cross-object / cross-table dependency exists
 - [x] Source config changes dependency / gameplay conditions
 - [x] Objective content is source-config-driven through the Pipeline
-- [x] Schema / type / range / duplicate / cross-reference / Unity-reference errors are detected
+- [x] Schema / type / range / duplicate / cross-reference / current Unity-reference errors are detected
 - [x] At least one genuine batch operation exists
 - [x] Generated Unity data is not manually edited
+- [x] Designer-facing CLI exposes generate / preview / apply without internal Python imports
 
 ### Verification / Iteration
 
 - [ ] 30–50 records used for Scale Test
-- [x] Real V1 → problem → V2/V3 iteration exists
+- [x] Real V1 → problem → V2 iteration exists
 - [ ] At least one efficiency or error-risk improvement measured
 - [ ] Before / After Pipeline documented
 - [ ] At least one AI-assisted debugging case documented
@@ -377,9 +297,8 @@ The project was then restored to the normal `3 / 3 / 2` gameplay baseline while 
 
 ### Portfolio / Applications
 
-- [ ] README clearly explains the project
-- [ ] Pipeline documentation clearly explains the technical flow
-- [ ] Case Study explains problem, solution, validation, and results
+- [x] README clearly explains the current project milestone
+- [ ] Dedicated Pipeline V2 / Case Study documentation clearly explains the final technical flow
 - [ ] Core external docs have Chinese / English versions where appropriate
 - [ ] Final video shows gameplay and Pipeline
 - [ ] Resume V2 contains truthful, verifiable project bullets
@@ -397,6 +316,6 @@ The project was then restored to the normal `3 / 3 / 2` gameplay baseline while 
 - Build one small but complete Vertical Slice, not a large game.
 - Complexity must come from real content-production needs.
 - Editor Tool / GUI / dependency visualization are optional unless they shorten a real workflow.
-- D11–D14 must shift from feature expansion to QA, measurement, Case Study, Resume, video, feedback, and applications.
+- D11–D14 shift from feature expansion to QA, measurement, Case Study, Resume, video, feedback, and applications.
 - Finishing early is allowed; do not add low-value features merely to fill time.
 - Anything entering README / Case Study / Resume / video must be independently explainable without Codex.
