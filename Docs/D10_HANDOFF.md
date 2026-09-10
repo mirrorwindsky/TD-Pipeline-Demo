@@ -4,9 +4,11 @@
 
 Day 9 is complete and sealed.
 
-D10 Tasks 1–4 are complete with user acceptance. The current active task is:
+D10 Tasks 1–4 and Task 5A are complete with user acceptance. The latest completed task is:
 
-**D10 Task 5A — Visible Completion States**
+**D10 Task 5A — Visible Completion States — Completed**
+
+Task 5A user acceptance was recorded on 2026-09-10. No next task has been started; Task 5B remains pending an explicit user request.
 
 The current stable gameplay chain is:
 
@@ -158,7 +160,7 @@ Task 4 also added static non-colliding device / entrance / ceiling-fixture detai
 3. Re-time and pacing diagnosis — **Completed**
 4. Basic materials + lighting + static visual readability — **Completed**
 5. Presentation feedback:
-   - **5A Visible Completion States — Active**
+   - **5A Visible Completion States — Completed; user acceptance passed**
    - 5B Objective / Prompt / Feedback polish — Pending
 6. Standalone Build + full Smoke Test + Pipeline V2 runtime confirmation — Pending
 7. Tool UX / optional Editor Integration decision — Pending; only do work if a real workflow problem justifies it
@@ -169,7 +171,9 @@ Sound / VFX remain optional and should not displace the remaining core D10 work.
 
 ## Active Task
 
-### D10 Task 5A — Visible Completion States
+### D10 Task 5A — Visible Completion States — Completed
+
+User acceptance passed on 2026-09-10. Task 5A is closed; no subsequent task has been started. Task 5B remains pending an explicit user request.
 
 Task 5A should make the **world itself visibly respond** when the player completes the current devices / unlocks the exit.
 
@@ -211,9 +215,57 @@ Acceptance criteria:
 - No new gameplay stage, content table, Pipeline feature, VFX framework, animation framework, or generalized state machine is introduced.
 - Unity compiles with no new red Console errors.
 - A complete Play Mode route is tested after implementation.
-- User manual visual acceptance is still required before beginning Task 5B.
+- User manual visual acceptance passed; beginning Task 5B still requires an explicit user request.
 
 Task 5A must stop after implementation / verification and must **not** continue into HUD / Prompt / Feedback polish.
+
+---
+
+### Task 5A implementation and verification — 2026-09-10
+
+Status: **Completed — user acceptance passed on 2026-09-10**. The user reported: “我手动测完了，三处都符合你的描述。” This confirms the PowerNode, ControlTerminal, and Exit world-state presentation. Task 5B has not started.
+
+Implementation:
+
+- Added `Assets/Scripts/CompletionVisualFeedback.cs` (53 lines). This presentation-only component subscribes to `DeviceInteractable.Completed` in `OnEnable`, unsubscribes in `OnDisable`, and swaps only the specified renderers' material references. It reads `IsCompleted` when enabled so re-enabling after completion restores the correct appearance. Disabling restores idle references. It never edits shared material properties, creates runtime material instances, or changes gameplay state.
+- Three instances: PowerNode listens to itself; ControlTerminal listens to itself; `Visual_Presentation/Portal_Accents` listens to ControlTerminal. Exit presentation therefore remains active when the existing GateController deactivates ExitDoor.
+- The existing energy panel and terminal screen retain their idle materials. Each device also has one small `Completion_StatusStrip` visual child along its top front edge, reusing the built-in Cube mesh. The strips are 0.16 m high and have no Collider, Light, or gameplay component. They address a verified camera-view issue: the centered player capsule obscures the lower panel when looking straight at the device to press E. No camera or device pose changes were needed.
+- Exit targets are the existing `Exit_Jamb_A`, `Exit_Jamb_B`, and `Level_Geo/Walls/Exit/Header_Exit_Entry`. They are outside the disappearing Gate object.
+
+All three new materials are URP Lit assets under `Assets/Materials/D10Facility/`:
+
+| Target | Idle state | Completed state |
+|---|---|---|
+| PowerNode panel + top strip | Existing warm `M_Energy_Amber` | `M_PowerNode_Active`: powered cyan `#69BFC8`, emission multiplier 1.2 |
+| ControlTerminal screen + top strip | Existing `M_Screen_Cyan` | `M_Terminal_Active`: success green `#389C55`, emission multiplier 1.0 |
+| Exit jambs + header | Existing muted, non-emissive `M_Accent_Exit`; Gate blocks the path | `M_Exit_Unlocked`: lighter green `#70B88B`, emission multiplier 0.55; original Gate behavior opens the path |
+
+No Light was added or modified. Task 4 room lighting, disabled Directional Light, equipment bodies, room geometry, and all original materials remain intact. `DeviceInteractable`, `GateController`, `VerticalSliceFlowController`, and every other gameplay script remain unchanged. Interaction requirements remain 3 and 2. Existing gameplay component serialization and object poses are preserved; only two visual children and three presentation components were added.
+
+Validation:
+
+- Two complete queued-input Play routes passed before the final top-strip additions: pickup; PowerNode 1/3, 2/3, 3/3; Terminal 1/2, 2/2; Gate open; EndMarker; Mission Complete. PowerCell was consumed exactly once, both Completed events fired once, and Objective/Prompt/Feedback progressed correctly. Basic W/A/S/D, mouse yaw, pitch (12 to 19.2 degrees and back), and camera follow were exercised.
+- Game View before/after comparisons were observed for PowerNode, Terminal, and Exit. Terminal green was refined once. Straight-on interaction screenshots then revealed that the player capsule covered the lower panels; the two top strips were added to address this. Subsequent automated attempts stalled at spawn because Editor input was not reliably delivered; those attempts are not passes. The user then completed manual testing and confirmed that all three presentations match the described behavior, closing final visual acceptance.
+- Core panel/Exit reset passed between the first two full sessions: both devices returned to incomplete/count 0, inventory was empty, Gate was active, and all five original target renderers used idle materials. Both new strips were also observed with idle materials at the start of the later session. A separate completed-strip-to-fresh-session reset result was not captured automatically or individually stated in the user's three-target confirmation; do not describe that specific check as an independently verified automated pass.
+- The verification uses queued Unity Input System mouse/WASD/E events, the existing CharacterController, and the existing player-forward Raycast. It does not call Interact/Completed/gameplay completion methods or teleport the player.
+- Editor audit: compilation idle after successful script compilation; 0 Console errors and warnings; 0 Missing Script, Missing Material, or unsupported/error shaders; both new strips have zero Colliders.
+- Original serialized gameplay components, renderer assignments, lights, and object poses were compared against the pre-task scene. Original child references were preserved when the two strips were appended.
+- `Prototype_01.unity` SHA-256 remains `E1FD2876B99B0605382791477377391E9DF47425EFFD5A67A1CDA149D3AFEA63`.
+- All 15 original Task 4 material assets remained byte-identical in the implementation audit. After URP finished normalizing the new Terminal material's legacy `_Color` field, a new baseline was taken; all 18 material assets remained byte-identical through subsequent verification attempts. No runtime code writes material properties. Final three-target completion presentation was subsequently accepted by the user; the specific reset evidence limit is recorded above.
+
+Temporary authoring, input verification, logs, and Game View screenshots are under the existing ignored `Temp/D10Task5A/` workspace. None are deliverable Assets. Some MCP calls timed out during automatic approval; successful Unity MCP operations and the same Editor API accessed through the installed Unity CLI were used. No approval timeout was counted as a completed check.
+
+Automation has stopped. The temporary input harness restored `PointersAndKeyboardsRespectGameViewFocus` and `ResetAndDisableNonBackgroundDevices` in its `finally` block. It did not change or save an input asset. The subsequent user manual test is the final visual acceptance evidence; no further automation or Unity edits were performed to record that acceptance.
+
+User acceptance / known limits:
+
+- User-confirmed PowerNode behavior: after the third effective E interaction, the panel/top strip changes from warm amber to powered cyan and retains that appearance.
+- User-confirmed ControlTerminal behavior: after the second effective E interaction, the screen/top strip changes from cyan to success green.
+- User-confirmed Exit behavior: the existing Gate opens and the brighter green frame cue persists after the door disappears.
+- The user's confirmation accepts the three described presentations. It is not an exhaustive test of every camera angle, lighting preference, or an individually documented final strip-reset test.
+- New presentation references were valid in the Editor audit. The implementation depends only on the existing Completed events and the assigned renderers/materials; it introduces no new gameplay dependency or state framework.
+
+Stop here. No commit, push, Task 5B, HUD/Prompt polish, Build, or Tool UX work was performed.
 
 ---
 
