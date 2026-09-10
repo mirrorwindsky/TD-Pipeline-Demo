@@ -3,6 +3,7 @@ import csv
 import json
 from dataclasses import dataclass, asdict
 import re
+import argparse
 
 
 @dataclass
@@ -644,7 +645,12 @@ def run_batch_preview():
         print("Batch preview failed. No changes were made.")
         return
 
+    print("=== Batch Preview ===")
     print_batch_preview(updates)
+    print(
+        f"Validated {len(updates)} batch updates. "
+        "No source files were changed."
+    )
 
 
 def run_batch_apply():
@@ -685,6 +691,7 @@ def run_batch_apply():
         print("Batch apply failed. No changes were made.")
         return
 
+    print("=== Batch Apply ===")
     print_batch_preview(updates)
 
     apply_batch_interaction_updates(
@@ -765,6 +772,9 @@ def main():
         print("Validation failed. Generated JSON files were not updated.")
         return
 
+    print("=== Content Pipeline ===")
+    print("Validation: PASSED")
+
     write_json(content, OUTPUT_PATH)
     write_objectives_json(content, OBJECTIVES_OUTPUT_PATH)
 
@@ -778,5 +788,41 @@ def main():
     print(f"Generated: {OBJECTIVES_OUTPUT_PATH}")
 
 
+def run_cli():
+    parser = argparse.ArgumentParser(
+        description="TD Pipeline content configuration tool."
+    )
+
+    subparsers = parser.add_subparsers(
+        dest="command"
+    )
+
+    subparsers.add_parser(
+        "generate",
+        help="Validate source configs and generate Unity JSON data.",
+    )
+
+    subparsers.add_parser(
+        "batch-preview",
+        help="Preview batch requiredInteractions updates without modifying source files.",
+    )
+
+    subparsers.add_parser(
+        "batch-apply",
+        help="Validate and apply batch requiredInteractions updates.",
+    )
+
+    args = parser.parse_args()
+
+    command = args.command or "generate"
+
+    if command == "generate":
+        main()
+    elif command == "batch-preview":
+        run_batch_preview()
+    elif command == "batch-apply":
+        run_batch_apply()
+
+
 if __name__ == "__main__":
-    main()
+    run_cli()
