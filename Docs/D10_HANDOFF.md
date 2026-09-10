@@ -4,11 +4,15 @@
 
 Day 9 is complete and sealed.
 
-D10 Tasks 1–4, Task 5A, and Task 5B are complete with user acceptance.
+D10 Tasks 1–4, Task 5A, Task 5B, and Task 6 are complete with user acceptance.
 
-The current active task is:
+The most recently completed task is:
 
 **D10 Task 6 — Standalone Build + Full Smoke Test + Pipeline V2 Runtime Confirmation**
+
+**Task 6 — Completed — user standalone smoke test passed (2026-09-10)**
+
+**Active Task: none.** Task 7 remains pending and requires an explicit user instruction to begin.
 
 The stable gameplay chain is:
 
@@ -137,16 +141,77 @@ Files changed in Task 5B:
 5. Presentation feedback:
    - 5A Visible Completion States — **Completed**
    - 5B Objective / Prompt / Feedback Polish — **Completed**
-6. **Standalone Build + Full Smoke Test + Pipeline V2 runtime confirmation — Active**
+6. **Standalone Build + Full Smoke Test + Pipeline V2 runtime confirmation — Completed; user standalone smoke test passed**
 7. Tool UX / optional Editor Integration decision — Pending; implementation only if a real workflow problem justifies it
 
 Sound / VFX remain optional and must not displace core D10 acceptance work.
 
 ---
 
-## Active Task
+## Task 6 Completion Record
 
 ### D10 Task 6 — Standalone Build + Full Smoke Test + Pipeline V2 Runtime Confirmation
+
+### Current result — 2026-09-10
+
+**Task 6 — Completed — user standalone smoke test passed**
+
+The Windows build succeeded, and the user explicitly confirmed the complete standalone smoke test passed on 2026-09-10. The launch, controls, presentation, and full route to Mission Complete were verified manually by the user. Automated preparation, build, and reference checks are recorded separately below.
+
+#### Build configuration and output
+
+- Unity: `6000.3.23f1` (Unity 6.3 LTS).
+- Target: `StandaloneWindows64`, Windows x86-64; existing Mono backend retained.
+- Non-Development build, without script debugging, profiler connection, or automatic player launch; `DetailedBuildReport` enabled.
+- No custom Build Profile was present or active. The existing global `EditorBuildSettings` scene list was updated and persisted through Unity Editor APIs.
+- `Assets/Scenes/VerticalSlice_01.unity` is the sole enabled scene, at build index `0`.
+- Removed the old disabled SampleScene entry and Prototype_01 entry from the build list only. Neither scene asset was edited or deleted.
+- Executable: `D:/UnityProjects/TD-Pipeline-Demo/Builds/Windows/TD-Pipeline-Demo.exe`.
+- Verified the executable, matching `TD-Pipeline-Demo_Data/`, `UnityPlayer.dll`, Mono runtime, `Assembly-CSharp.dll`, `boot.config`, and `level0` exist.
+- Build result: `Succeeded`, `0` errors, `2` warnings, approximately `151` seconds, `116,111,516` reported bytes across `186` reported files.
+- Local detailed report: `Temp/D10Task6/build-report.json` (ignored verification evidence).
+
+#### Pipeline V2 confirmation
+
+- Re-read README and `Tools/config_tool.py`, then ran the documented normal command: `py Tools/config_tool.py`.
+- Item / Objective / Interactable validation and Item cross-reference validation passed. Generation reported `1` Item, `5` Objectives, and `5` Interactables.
+- The Pipeline regenerated `Assets/Data/interactables.json` and `Assets/Data/objectives.json`; both matched their pre-run hashes and produced no Git diff. No generated JSON or CSV source was edited manually.
+- A fresh Editor Play session read those exact TextAsset references through the existing runtime databases. PowerNode remained `3` interactions with required item `power_cell`; ControlTerminal remained `2` interactions. The initial config objective and displayed HUD objective matched.
+- The detailed standalone BuildReport confirms both generated JSON TextAssets were packed into `sharedassets0.assets`.
+- Generation, Editor runtime loading, and standalone inclusion were verified automatically. The user then confirmed the configured interaction counts, PowerCell consumption, and Objective progression in the standalone demo. No temporary config content or dependency testcase was introduced.
+
+#### Reliable checks and warnings
+
+- Unity compilation check passed; no scripts required recompilation. The V2 scene entered and exited a fresh Play session successfully. No gameplay methods were called to simulate a completed route.
+- Read-only scene audit: `0` missing scripts, missing materials, broken serialized references, missing TMP references, unsupported/error shaders, or bad UI materials. Required gameplay, HUD, camera, and config references were present.
+- Unity Console Error inspection after the build: `0` entries. Editor returned to ready, not compiling, with Play Mode stopped.
+- Warning 1: the installed `com.unity.pipeline` Unity MCP package has no `RuntimePipelineConfig`, so its remote runtime server is disabled in Player builds. This is separate from the project's Python Content Pipeline V2; the gameplay databases read the bundled JSON directly. No Player-side MCP server was enabled.
+- Warning 2: Unity's built-in URP `Hidden/Core/DebugOccluder` shader reports an implicit vector truncation on D3D11. The build succeeded, and the user subsequently confirmed standalone materials and lighting behaved normally. The warning remains recorded in the build report.
+- No gameplay or standalone-blocking regression was found by these checks. No code, data model, scene, material, or lighting fix was made.
+- Evidence remains under ignored `Temp/D10Task6/`: Pipeline log, hash snapshots, prebuild reference/runtime audit, and detailed build report. No permanent build tool or input harness was added.
+
+#### Source-control and protected baseline
+
+- Branch: `main`; working tree was clean at task start.
+- Persistent changes are limited to `ProjectSettings/EditorBuildSettings.asset` and this document.
+- Unity's incidental build-derived URP / default-settings serialization changes were inspected and restored to the pre-task contents; their diff was retained only in ignored Temp evidence.
+- Existing `.gitignore` rule `/[Bb]uilds/` covers the entire output. No build binaries are tracked or staged; no `.gitignore` edit was necessary.
+- Both scene assets and generated JSON remain unchanged. `Prototype_01.unity` SHA-256 still matches the initial baseline: `E1FD2876B99B0605382791477377391E9DF47425EFFD5A67A1CDA149D3AFEA63`.
+- No gameplay, ConfigSource, Pipeline V2, or Task 4/5 presentation changes. No commit or push.
+
+#### User standalone acceptance — passed 2026-09-10
+
+The user explicitly confirmed all five smoke-test groups in the built Windows executable:
+
+1. Startup enters V2 directly; materials, lighting, HUD, cursor lock, camera, and WASD are normal.
+2. PowerCell can be picked up with E; Prompt, Feedback, and Objective are normal.
+3. PowerNode progresses `1/3 → 2/3 → 3/3`, consumes PowerCell correctly, and changes to powered cyan.
+4. ControlTerminal turns green after two interactions; Exit Gate opens and the green frame remains visible.
+5. The player passes through Exit to EndMarker; Mission Complete and final Feedback appear.
+
+The standalone route passed with user acceptance. No issue was reported in these checks, and no Task 6 acceptance item remains pending. This acceptance update changes only this document; no additional build, runtime test, scene edit, or gameplay change was performed. Task 7 has not started.
+
+### Task scope and acceptance rules retained for reference
 
 Task 6 is a delivery / regression task, not a feature-development task.
 
@@ -256,9 +321,9 @@ Do not:
 - generated JSON remains produced by the Pipeline rather than manual editing;
 - `Prototype_01.unity` remains unchanged.
 
-### User acceptance
+### User acceptance record
 
-The user should manually verify the built executable from launch to Mission Complete.
+The user manually verified the built executable from launch to Mission Complete and reported success on 2026-09-10, as recorded above.
 
 The final acceptance report should explicitly distinguish:
 
@@ -266,7 +331,7 @@ The final acceptance report should explicitly distinguish:
 - checks performed manually by the user in the standalone executable;
 - anything not verified.
 
-Do not claim the standalone route passed until the user actually reports that it passed.
+The standalone route is recorded as passed based on that explicit user report.
 
 ### Handoff maintenance
 
@@ -278,11 +343,11 @@ After implementation / build preparation and reliable checks, update this docume
 - build result;
 - Git status / whether build artifacts are ignored;
 - any regression fixed;
-- items awaiting standalone user testing.
+- the user's standalone acceptance result.
 
-Until the user reports the standalone smoke test passed, Task 6 status should be:
+The user has reported that the standalone smoke test passed. Task 6 status is:
 
-**implementation/build complete — awaiting user standalone acceptance**
+**Completed — user standalone smoke test passed**
 
 Do not advance to Task 7 automatically.
 
