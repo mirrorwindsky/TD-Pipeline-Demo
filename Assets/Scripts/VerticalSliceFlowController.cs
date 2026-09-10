@@ -62,6 +62,7 @@ public class VerticalSliceFlowController : MonoBehaviour
         missionCompleted = true;
 
         SetObjective("mission_complete");
+        hud.ShowMissionComplete();
 
         hud.ShowFeedback(
             "Facility restored. Exit reached.",

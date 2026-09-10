@@ -4,9 +4,11 @@
 
 Day 9 is complete and sealed.
 
-D10 Tasks 1–4 and Task 5A are complete with user acceptance. The current active task is:
+D10 Tasks 1–4, Task 5A, and Task 5B are complete with user acceptance. The latest completed task is:
 
-**D10 Task 5B — Objective / Prompt / Feedback Polish**
+**D10 Task 5B — Objective / Prompt / Feedback Polish — Completed**
+
+Task 5B user manual acceptance passed on 2026-09-10. No subsequent task has been started; Task 6 remains pending an explicit user request.
 
 The current stable gameplay chain is:
 
@@ -141,6 +143,12 @@ No changes were made to `DeviceInteractable`, `GateController`, `VerticalSliceFl
 
 The user manually verified all three visible state changes and reported that they look good.
 
+### Task 5B — Objective / Prompt / Feedback Polish — Completed
+
+User manual acceptance passed on 2026-09-10. The user reported: “我已人工验收完成，非常不错，没有问题。”
+
+The accepted presentation includes the config-driven Objective card, compact `[E] Interact` prompt, separate transient Feedback card, and distinct Mission Complete card. Existing gameplay, content data, Pipeline, and world presentation were preserved. Implementation details and the distinction between MCP checks and manual acceptance are recorded below.
+
 ---
 
 ## D10 Execution Order
@@ -151,7 +159,7 @@ The user manually verified all three visible state changes and reported that the
 4. Basic materials + lighting + static visual readability — **Completed**
 5. Presentation feedback:
    - 5A Visible Completion States — **Completed; user acceptance passed**
-   - **5B Objective / Prompt / Feedback Polish — Active**
+   - **5B Objective / Prompt / Feedback Polish — Completed; user manual acceptance passed**
 6. Standalone Build + full Smoke Test + Pipeline V2 runtime confirmation — Pending
 7. Tool UX / optional Editor Integration decision — Pending; implementation only if a real workflow problem justifies it
 
@@ -159,11 +167,15 @@ Sound / VFX remain optional and should not displace the remaining core D10 work.
 
 ---
 
-## Active Task
+## Current Task Status
 
-### D10 Task 5B — Objective / Prompt / Feedback Polish
+### D10 Task 5B — Objective / Prompt / Feedback Polish — Completed
 
-Task 5B should improve the existing player-facing information hierarchy without replacing the current HUD architecture or adding a UI framework.
+**Task 5B Completed — user manual acceptance passed on 2026-09-10**
+
+Implementation, reliable Unity MCP checks, and final user acceptance are recorded below. Task 5B is closed; Task 6 has not started.
+
+Task 5B improved the existing player-facing information hierarchy without replacing the current HUD architecture or adding a UI framework.
 
 Current HUD stack:
 
@@ -257,9 +269,67 @@ Manual user testing is a valid and preferred final acceptance method for Task 5B
 - `SimpleInteraction`, Pickup, Device, Gate, Inventory, and Objective progression continue to work.
 - Unity compiles with no new red Console errors.
 - No Missing Script / broken TMP reference / broken serialized reference is introduced.
-- The user manually accepts the final HUD / Prompt / Feedback presentation before Task 5B is marked complete.
+- The user manually accepted the final HUD / Prompt / Feedback / Mission Complete presentation and reported no issues.
 
-Task 5B must stop after implementation / reliable MCP checks and wait for user manual acceptance. Do not automatically continue to Task 6.
+Task 5B is complete after implementation, reliable MCP checks, and user manual acceptance. Do not automatically continue to Task 6.
+
+---
+
+### Task 5B implementation and reliable checks — 2026-09-10
+
+Files changed:
+
+- `Assets/Scenes/VerticalSlice_01.unity`
+- `Assets/Scripts/PlayerHUD.cs`
+- `Assets/Scripts/VerticalSliceFlowController.cs`
+- this handoff document
+
+The existing Canvas and all three original TMP text components were retained. Their serialized component IDs and PlayerHUD references are preserved; the text objects now sit inside presentation panels.
+
+Final layout (positions and sizes in reference-resolution units):
+
+| Information | Layout / typography | Behavior |
+|---|---|---|
+| Objective | Top left, 32 px edge padding; 720 × 132 dark translucent card; static OBJECTIVE label at 18 pt, description at 32 pt bold | Persistent config-driven description; the display layer removes only the duplicate `Objective: ` prefix because the card already has a label |
+| Prompt | Bottom center, 40 px bottom padding; 280 × 64 card; 28 pt `[E] Interact`, cyan/bold key and cool-white action | Existing SimpleInteraction still supplies the generic prompt; PlayerHUD formats it and immediately hides both text and card for an empty prompt |
+| Feedback | Upper center, 180 px from top; 640 × 68 card; 28 pt centered text | One shared FeedbackText for blocked/progress/completion messages; default 2 seconds retained, with existing coroutine cancellation preserved; card hides when text expires |
+| Mission Complete | Centered horizontally at 62% screen height; 640 × 184 dark green card; config-derived title up to 48 pt and a static END OF DEMO caption | Persistent final presentation, hides normal Objective card and Prompt; final Feedback remains the existing 4-second message; no input lock, results menu, restart, or scene transition |
+
+Canvas remains Screen Space Overlay. Canvas Scaler now uses **Scale With Screen Size**, **1920 × 1080**, **Match Width Or Height = 0.5**. All text reuses the existing LiberationSans SDF font/material. No font, texture, material asset, UI package, or runtime script was added. Every HUD Graphic has Raycast Target disabled.
+
+Nine non-interactive UI GameObjects were added under HUD:
+
+- `ObjectivePanel`, `FeedbackPanel`, `PromptPanel`, `MissionCompletePanel`;
+- `ObjectiveAccent`, `CompletionAccent`;
+- `ObjectiveLabel`, `MissionCompleteText`, `CompletionCaption`.
+
+Runtime changes:
+
+- PlayerHUD has five optional serialized presentation references, card visibility handling, generic prompt formatting, and a small `ShowMissionComplete()` method. Its final title reuses the current config-driven objective text. The original three text references and feedback coroutine structure remain intact. Unassigned optional panels preserve the legacy plain-text behavior.
+- VerticalSliceFlowController adds only `hud.ShowMissionComplete()` after the existing `SetObjective("mission_complete")` call. Prerequisites, completion guard, objective IDs/progression, feedback content, and gameplay state remain unchanged.
+- `SimpleInteraction.cs` is unchanged. No IInteractable expansion, new prompt data field, feedback queue/type system, or UI framework was introduced.
+
+Reliable verification:
+
+- Unity compilation completed successfully with no compiler errors. Console checks and the final UI-reference audit found no new errors, Missing Script, missing HUD/TMP/font/material reference, or unsupported UI shader.
+- All eight PlayerHUD references are assigned; all six TMP objects use the existing font/material; all HUD graphics are non-interactive.
+- Entered Play Mode. The real initial objective was displayed from the current configuration.
+- A short UI-only preview called PlayerHUD APIs to inspect representative Progress, Blocked, pickup-completion, and Mission Complete presentation. Actual Overlay Canvas Game View screenshots were captured with ScreenCapture through Unity MCP. These are **UI previews, not a completed gameplay route**; PowerNode and ControlTerminal remained incomplete and the Gate remained closed.
+- Prompt API formatting and immediate show/clear behavior were checked. Actual facing/moving-away behavior and reading comfort were reserved for the subsequent user manual acceptance, which has now passed.
+- A replacement feedback message survived the old message's expiry time; the new message and its background then cleared after their own duration. Previewed objective/feedback text did not overflow.
+- No keyboard/mouse input injection, focus-routing changes, player teleport, or gameplay completion-method invocation was used. The temporary authoring/audit/preview scripts and screenshots are only in ignored `Temp/D10Task5B/`.
+- Exited Play Mode after previews and saved the initial presentation state. The preview Mission Complete card was not saved as active.
+- The authoring pass compared 393 non-HUD components before and after and found no changes. Saved-scene comparison also found no changes to existing world Transforms, cameras, Renderers, Colliders, Lights, or scene lighting settings.
+- Prototype_01 SHA-256 remains `E1FD2876B99B0605382791477377391E9DF47425EFFD5A67A1CDA149D3AFEA63`. Pipeline, ConfigSource, generated JSON, interaction counts, inventory, movement/camera, and Task 4/5A world presentation are unchanged.
+
+User manual acceptance — passed on 2026-09-10:
+
+- The user completed the requested manual acceptance and reported that the result was very good with no issues.
+- Acceptance covers Objective visibility, Prompt appearance/disappearance and placement, Feedback readability/timing, Mission Complete presentation, and overall HUD fit with the facility scene.
+- No further Task 5B change was requested. The implementation is accepted as delivered.
+- The full gameplay experience and subjective readability are user acceptance evidence, not automated-test claims. The MCP checks remain limited to the compilation, references, UI-state previews, and audits listed above; no new timing or performance measurements were recorded.
+
+Stop at Task 5B. No commit, push, Build/Task 6, or Tool UX work was performed.
 
 ---
 
