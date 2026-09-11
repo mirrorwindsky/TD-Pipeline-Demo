@@ -1,6 +1,8 @@
-# Pipeline V1、
+# Pipeline V1
 
 English | [简体中文](Pipeline_V1.zh-CN.md)
+
+> **Historical milestone snapshot.** This document describes the Week 1 single-table Pipeline V1 architecture and is preserved to show project evolution. It is **not** the current Pipeline specification. For the current V2 design and measured results, see [`Pipeline_Case_Study.md`](Pipeline_Case_Study.md).
 
 ## 1. Overview
 
@@ -8,7 +10,7 @@ This document describes the first complete end-to-end content pipeline of `TD-Pi
 
 The pipeline connects designer-facing configuration data, Python validation and conversion, generated JSON data, Unity configuration loading, and final runtime gameplay behavior.
 
-The current pipeline has been verified through an actual source-data modification test without manually editing generated JSON or gameplay C# code.
+Pipeline V1 was verified through an actual source-data modification test without manually editing generated JSON or gameplay C# code.
 
 ---
 
@@ -101,18 +103,16 @@ The editable source configuration is:
 ConfigSource/interactables.csv
 ```
 
-The CSV currently defines:
+The CSV defines:
 
-* `id`
-* `displayName`
-* `requiredInteractions`
-* `deactivateOnComplete`
+- `id`
+- `displayName`
+- `requiredInteractions`
+- `deactivateOnComplete`
 
 The CSV is treated as the source of truth for interactable configuration.
 
 Generated JSON should not be manually edited as part of the normal workflow.
-
----
 
 ### 3.2 Python Validation
 
@@ -128,18 +128,18 @@ Before generating JSON, the tool performs several validation stages.
 
 Checks:
 
-* CSV header exists
-* Required columns exist
-* Required values are not empty
+- CSV header exists
+- required columns exist
+- required values are not empty
 
 #### Value / Range Validation
 
 Checks:
 
-* `requiredInteractions` can be converted to an integer
-* `requiredInteractions` is not below the valid minimum
-* Unusually high interaction counts are reported
-* `deactivateOnComplete` is either `true` or `false`
+- `requiredInteractions` can be converted to an integer
+- `requiredInteractions` is not below the valid minimum
+- unusually high interaction counts are reported
+- `deactivateOnComplete` is either `true` or `false`
 
 #### Duplicate-ID Validation
 
@@ -149,7 +149,7 @@ Duplicate IDs are treated as `ERROR` because configuration IDs are used as looku
 
 #### Scene Reference Validation
 
-The tool also reads:
+Pipeline V1 reads:
 
 ```text
 Assets/Scenes/Prototype_01.unity
@@ -157,15 +157,15 @@ Assets/Scenes/Prototype_01.unity
 
 and checks serialized `ConfigurableInteractable.configId` values.
 
-Each scene `configId` must correspond to an ID defined in the source CSV.
+Each Scene `configId` must correspond to an ID defined in the source CSV.
 
-This allows broken references caused by deleted or renamed configuration IDs to be detected before Unity runtime.
+This allows broken references caused by deleted or renamed configuration IDs to be detected before Unity Runtime.
 
 ---
 
 ## 4. Validation Gate
 
-Validation issues are represented using two severity levels:
+Validation issues use two severity levels:
 
 ```text
 ERROR
@@ -178,12 +178,12 @@ An `ERROR` means the generated configuration should not be trusted.
 
 Examples include:
 
-* missing required fields
-* invalid integer values
-* invalid boolean values
-* invalid interaction ranges
-* duplicate IDs
-* broken Unity scene references
+- missing required fields
+- invalid integer values
+- invalid boolean values
+- invalid interaction ranges
+- duplicate IDs
+- broken Unity Scene references
 
 If any `ERROR` exists:
 
@@ -205,7 +205,7 @@ For example:
 requiredInteractions = 50
 ```
 
-is currently considered unusually high for the interaction design, but does not make the data structurally invalid.
+is unusually high for the current interaction design, but does not make the data structurally invalid.
 
 Therefore:
 
@@ -229,7 +229,7 @@ Assets/Data/interactables.json
 
 The generated JSON is the Unity-consumable output of the configuration pipeline.
 
-Current transformation:
+Transformation:
 
 ```text
 CSV strings
@@ -253,7 +253,7 @@ Unity consumes the generated JSON through:
 InteractableConfigDatabase
 ```
 
-At runtime:
+At Runtime:
 
 ```text
 interactables.json
@@ -271,9 +271,7 @@ List<InteractableConfig>
 Dictionary<string, InteractableConfig>
 ```
 
-The dictionary uses configuration IDs as keys.
-
-This allows runtime objects to retrieve configuration directly by `configId`.
+The Dictionary uses configuration IDs as keys, allowing runtime objects to retrieve configuration by `configId`.
 
 ---
 
@@ -285,7 +283,7 @@ Each configurable gameplay object contains a serialized:
 configId
 ```
 
-For example:
+Example:
 
 ```text
 SturdyCube
@@ -293,7 +291,7 @@ SturdyCube
 configId = cube_sturdy
 ```
 
-At runtime:
+At Runtime:
 
 ```text
 ConfigurableInteractable
@@ -309,7 +307,7 @@ InteractableConfig
 Apply requiredInteractions
 ```
 
-The gameplay logic itself does not need to change when the configuration value changes.
+Gameplay logic does not need to change when the configuration value changes.
 
 ---
 
@@ -355,64 +353,52 @@ Pipeline V1 was verified through a real source-data modification test.
 
 ### Baseline
 
-The source configuration initially contained:
-
 ```text
 cube_sturdy.requiredInteractions = 3
 ```
 
 ### Test Procedure
 
-1. Ran the Python tool with the valid baseline configuration.
-2. Confirmed validation passed and JSON generation succeeded.
-3. Modified only the designer-facing CSV:
+1. Run the Python tool with the valid baseline configuration.
+2. Confirm validation passes and JSON generation succeeds.
+3. Modify only the designer-facing CSV:
 
 ```text
 cube_sturdy.requiredInteractions
 3 → 5
 ```
 
-4. Did not manually edit the generated JSON.
-5. Did not modify gameplay C# code.
-6. Ran:
+4. Do not manually edit generated JSON.
+5. Do not modify gameplay C# code.
+6. Run:
 
 ```text
 py Tools/config_tool.py
 ```
 
-7. Confirmed generated JSON changed automatically to:
+7. Confirm generated JSON changes automatically to:
 
 ```text
 requiredInteractions = 5
 ```
 
-8. Ran the Unity prototype.
-9. Entered the mission through `StartGate`.
-10. Completed `QuickCube`.
-11. Verified `SturdyCube` required exactly 5 interactions.
-12. Completed both objectives.
-13. Verified the exit opened normally.
-14. Entered the end trigger.
-15. Verified the full gameplay loop reached:
-
-```text
-Demo Complete
-```
-
-16. Restored the source CSV value:
-
-```text
-5 → 3
-```
-
-17. Regenerated JSON.
-18. Confirmed the pipeline returned to the original valid configuration.
+8. Run the Unity prototype.
+9. Enter the mission through `StartGate`.
+10. Complete `QuickCube`.
+11. Verify `SturdyCube` requires exactly 5 interactions.
+12. Complete both objectives.
+13. Verify the exit opens normally.
+14. Enter the end trigger.
+15. Verify the full gameplay loop reaches `Demo Complete`.
+16. Restore the source CSV value from `5 → 3`.
+17. Regenerate JSON.
+18. Confirm the pipeline returns to the original valid configuration.
 
 ---
 
 ## 10. Verified Pipeline
 
-The successful Day 6 test verifies the following complete chain:
+The Day 6 test verifies the following chain:
 
 ```text
 Designer Source Data
@@ -436,32 +422,28 @@ Level Flow
 Demo Complete
 ```
 
-The important result is that changing only the designer-facing source data produced a real runtime gameplay change without manually editing generated data or rewriting gameplay code.
+The important result is that changing only designer-facing source data produced a real runtime gameplay change without manually editing generated data or rewriting gameplay code.
 
 ---
 
-## 11. Current Pipeline Boundaries
+## 11. Pipeline V1 Boundaries
 
-Pipeline V1 is intentionally limited to the current demo scope.
+Pipeline V1 was intentionally limited to the Week 1 demo scope.
 
-Known boundaries include:
+Historical boundaries included:
 
-* Reference validation currently scans `Prototype_01.unity` rather than all scenes and prefabs.
-* Missing or completely malformed source files are not yet handled comprehensively.
-* The Unity configuration database assumes its `TextAsset` reference is correctly assigned.
-* The current pipeline does not provide a graphical user interface.
-* Validation functions currently read the CSV separately rather than sharing one parsed intermediate representation.
-* The current Unity reference validation is specific to this project's serialized `ConfigurableInteractable.configId` structure.
+- reference validation scanned `Prototype_01.unity` rather than all Scenes and Prefabs;
+- missing or completely malformed source files were not handled comprehensively;
+- the Unity configuration database assumed its `TextAsset` reference was correctly assigned;
+- the Pipeline had no graphical user interface;
+- validation functions read the CSV separately rather than sharing one parsed intermediate representation;
+- Unity reference validation was specific to this project's serialized `ConfigurableInteractable.configId` structure.
 
-These are not current blockers.
-
-Further robustness and edge-case testing are deferred to later sprint stages.
+Several of these boundaries were later addressed by Pipeline V2. See the current Case Study for the final architecture and evidence.
 
 ---
 
 ## 12. Pipeline V1 Summary
-
-Pipeline V1 has now reached the following state:
 
 ```text
 Designer-facing CSV
@@ -483,4 +465,4 @@ Config-Driven Gameplay
 Playable Demo Completion
 ```
 
-The project now demonstrates not only a playable Unity prototype, but also a small content-production workflow in which configuration errors can be detected before runtime and source-data changes can propagate into real gameplay behavior.
+Pipeline V1 demonstrated a small content-production workflow in which configuration errors could be detected before Runtime and source-data changes could propagate into real gameplay behavior. It is preserved as the historical baseline from which the later V2 architecture evolved.
