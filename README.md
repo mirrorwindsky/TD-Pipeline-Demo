@@ -32,8 +32,6 @@ Primary supporting documents:
 - Pipeline Case Study: [`English`](Docs/Pipeline_Case_Study.md) | [`简体中文`](Docs/Pipeline_Case_Study.zh-CN.md)
 - Day 11 QA Record: [`English`](Docs/D11_QA.md) | [`简体中文`](Docs/D11_QA.zh-CN.md)
 - [`Docs/README.md`](Docs/README.md) — current vs historical documentation index
-- [`TODO.md`](TODO.md) — sprint execution record
-- [`STATUS.md`](STATUS.md) — current project state
 
 ---
 
@@ -264,18 +262,12 @@ Historical records such as `D10_HANDOFF.md` and `Pipeline_V1.md` are intentional
 
 ## AI-Assisted Development
 
-AI / Codex was used as a development accelerator, not as a substitute for validation or understanding. The two QA-discovered bugs were reproduced from concrete inputs, diagnosed, fixed with narrow changes, regression-tested, and documented. Anything used in the README, Case Study, video, or resume is intended to remain independently explainable without Codex.
+AI / Codex was used as a development accelerator rather than as a substitute for validation or understanding. The two QA-discovered bugs were reproduced from concrete inputs, diagnosed, fixed with narrow changes, regression-tested, and documented. Project claims are backed by repository history, reproducible QA cases, measured results, and manual standalone verification.
 
 ---
 
-## Portfolio / Interview Summary
+## Project Outcome
 
-> I built a Unity Vertical Slice and used its real content dependencies to drive a Python Content Pipeline. The Pipeline parses multi-table CSV into a typed intermediate model, validates schema, values, duplicate IDs, cross-table Item references, and active-Scene config references, then generates Unity-consumable JSON. I added validated atomic Batch updates for repeated interaction tuning, tested the system with a 40-record fixture, and used QA to discover and fix two real validation bugs. In a controlled 8-record execution benchmark, manual equivalent-output editing took 192 seconds while Batch Preview → Apply → Generate took 0.287 seconds; I treat that as execution-stage evidence rather than a claim about the entire production workflow.
+`TD-Pipeline-Demo` demonstrates a compact end-to-end Technical Designer workflow that connects playable content, data-driven configuration, pre-runtime validation, Batch automation, QA, and measurable workflow improvement.
 
----
-
-## Current Status
-
-The technical core, QA evidence, measured Pipeline Case Study, bilingual documentation, and playable **v1.0.0 Windows x64 Release** are complete.
-
-The next priority is **resume, project explanation, and applications**, not additional feature development.
+The repository includes the complete source project, bilingual Case Study and QA documentation, reusable Scale fixtures, and a tested **v1.0.0 Windows x64 playable release**.
