@@ -163,6 +163,19 @@ def validate_schema(
             )
 
     for row_number, row in enumerate(table.rows, start=2):
+        if None in row:
+            extra_values = row[None] or []
+
+            issues.append(
+                ValidationIssue(
+                    ERROR,
+                    f"{table.path.name} row {row_number}: "
+                    f"unexpected extra column value(s) "
+                    f"{extra_values}. "
+                    "Check for an unescaped comma or mismatched column count."
+                )
+            )
+
         for field in required_fields:
             if field not in row:
                 continue
