@@ -263,13 +263,14 @@ The original external-feedback plan was reduced so it does not block application
 
 ### Project Packaging
 
-- [ ] Run one final `main` Pipeline regression and confirm clean Git state
+- [x] Run one final `main` Pipeline regression and confirm clean Git state
 - [x] Pipeline Case Study exists in `Docs/Pipeline_Case_Study.md`
+- [x] Simplified Chinese Case Study exists in `Docs/Pipeline_Case_Study.zh-CN.md`
 - [x] Reusable 40-record QA fixture exists in `QA/Fixtures/scale_valid/`
-- [x] D11 QA evidence exists in `Docs/D11_QA.md`
+- [x] D11 QA evidence exists in English and Simplified Chinese
 - [x] Stable portfolio repository is the GitHub `main` branch
-- [x] English README surfaces the final Case Study / benchmark
-- Chinese README / bilingual final synchronization: optional follow-up after the resume is usable; not an application blocker
+- [x] English / Simplified Chinese README are synchronized to the current portfolio state
+- [x] `Docs/README.md` separates current portfolio evidence from historical milestone records
 - Final demo video: optional follow-up; not a blocker for producing the resume today
 
 ### Applications
@@ -317,7 +318,7 @@ The original external-feedback plan was reduced so it does not block application
 
 - [x] README clearly explains the current portfolio state
 - [x] Dedicated Pipeline Case Study documents the final technical flow and measured benchmark
-- [x] English README surfaces the final Case Study / benchmark
+- [x] Core portfolio documentation is synchronized in English / Simplified Chinese where appropriate
 - [ ] Resume V2 contains truthful, verifiable project bullets
 - [x] Stable GitHub portfolio repository exists
 - [ ] Formal applications started / expanded
