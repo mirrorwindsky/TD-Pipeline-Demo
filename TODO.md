@@ -197,18 +197,28 @@ py Tools/config_tool.py batch-apply
 
 ---
 
-## Day 11 — QA + Scale Test
+## Day 11 — QA + Scale Test ✅
 
-- [ ] Prepare roughly 30–50 content records
-- [ ] Verify the Pipeline processes the full test set
-- [ ] Test missing fields / duplicate IDs / invalid types / invalid ranges
-- [ ] Test broken cross-table and Unity references
-- [ ] Test empty / malformed input
-- [ ] Fix real bugs discovered by QA
-- [ ] Record reproducible test cases
-- [ ] Preserve and document at least one AI-generated-code failure case
-- [ ] Optional: dependency-cycle / unreachable-objective detection only if the expanded test data creates a real need
+- [x] Prepare roughly 30–50 content records — completed with a reusable 40-record fixture
+- [x] Verify the Pipeline processes the full test set
+- [x] Test missing fields / duplicate IDs / invalid types / invalid ranges
+- [x] Test broken cross-table and active Unity references
+- [x] Test empty / malformed input
+- [x] Fix real bugs discovered by QA
+- [x] Record reproducible test cases in `Docs/D11_QA.md`
+- [x] Evaluate optional dependency-cycle / unreachable-objective detection and intentionally skip it because the current architecture did not demonstrate a real need
 - [x] Solve 1 basic coding problem — LeetCode 2265, Count Nodes Equal to Average of Subtree
+
+### AI-Assisted Development Note
+
+No qualifying AI-generated implementation failure occurred during Day 11, so no artificial failure case was created solely to satisfy the original checklist.
+
+Day 11 did include genuine AI-assisted debugging work on two QA-discovered defects:
+
+- active `VerticalSlice_01.unity` config-reference validation coverage;
+- malformed CSV rows causing silent data truncation.
+
+Both defects were reproduced, diagnosed, fixed, regression-tested, and integrated into `main`.
 
 ---
 
@@ -288,11 +298,11 @@ py Tools/config_tool.py batch-apply
 
 ### Verification / Iteration
 
-- [ ] 30–50 records used for Scale Test
+- [x] 40 records used for Scale Test
 - [x] Real V1 → problem → V2 iteration exists
 - [ ] At least one efficiency or error-risk improvement measured
 - [ ] Before / After Pipeline documented
-- [ ] At least one AI-assisted debugging case documented
+- [x] At least one AI-assisted debugging case documented
 - [ ] At least one external feedback cycle completed
 
 ### Portfolio / Applications
