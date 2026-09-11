@@ -268,7 +268,7 @@ The original external-feedback plan was reduced so it does not block application
 - [x] Reusable 40-record QA fixture exists in `QA/Fixtures/scale_valid/`
 - [x] D11 QA evidence exists in `Docs/D11_QA.md`
 - [x] Stable portfolio repository is the GitHub `main` branch
-- [ ] Update the English README to surface the final Case Study / benchmark
+- [x] English README surfaces the final Case Study / benchmark
 - Chinese README / bilingual final synchronization: optional follow-up after the resume is usable; not an application blocker
 - Final demo video: optional follow-up; not a blocker for producing the resume today
 
@@ -315,9 +315,9 @@ The original external-feedback plan was reduced so it does not block application
 
 ### Portfolio / Applications
 
-- [x] README clearly explains the Day 11 technical milestone
+- [x] README clearly explains the current portfolio state
 - [x] Dedicated Pipeline Case Study documents the final technical flow and measured benchmark
-- [ ] English README surfaces the final Case Study / benchmark
+- [x] English README surfaces the final Case Study / benchmark
 - [ ] Resume V2 contains truthful, verifiable project bullets
 - [x] Stable GitHub portfolio repository exists
 - [ ] Formal applications started / expanded
