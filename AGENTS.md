@@ -1,58 +1,58 @@
 # AGENTS.md
 
-This repository is a **Technical Designer portfolio project** for 2027 graduate recruiting. Its purpose is to demonstrate a connected **Game Content Vertical Slice + Content Pipeline** workflow, not to grow into a commercial-scale game.
+This repository is a **Technical Designer portfolio project** demonstrating a connected **Game Content Vertical Slice + Content Pipeline** workflow. It is intentionally scoped as a compact, explainable project rather than a commercial-scale game.
 
 ## Project Context
 
-Core stack is frozen for the current sprint:
+Core stack:
 
 - Unity 6.3 LTS
 - C#
 - Python
 - Git / GitHub
 
-Before starting substantial work, read:
+Before substantial work, read:
 
 1. `STATUS.md`
 2. `TODO.md`
 3. `README.md`
-4. the current handoff document under `Docs/`, if one exists
+4. the relevant document under `Docs/`
 
-These files define the current milestone, scope, and acceptance criteria.
+These files define the current architecture, scope, verification evidence, and historical milestones.
 
 ## Protected Baseline
 
 `Assets/Scenes/Prototype_01.unity` is the Week 1 / Pipeline V1 baseline.
 
-Do not modify, rebuild, or repurpose it unless the task explicitly requires that scene.
+Do not modify, rebuild, or repurpose it unless a task explicitly requires that historical scene.
 
-The active presentation scene is currently:
+The active presentation / build scene is:
 
 `Assets/Scenes/VerticalSlice_01.unity`
 
 ## Stable Pipeline V2 Boundary
 
-Pipeline V2 is already functional and should not be redesigned unless the task explicitly targets it.
+Pipeline V2 is functional and verified. Do not redesign it without a concrete task or reproduced problem.
 
-Do not casually refactor or expand:
+Avoid casual refactors or speculative expansion of:
 
 - `Tools/config_tool.py`
 - the existing `ConfigSource` multi-table model
 - generated JSON contracts under `Assets/Data`
 - the current Inventory / Objective / Gate / interaction architecture
 
-Avoid adding new gameplay systems, generalized quest frameworks, new content tables, dependency visualizers, or GUI tools without a demonstrated content-production or workflow need.
+Do not add generalized quest frameworks, new content tables, dependency visualizers, GUI tools, or other new systems without a demonstrated gameplay, content-production, QA, or workflow need.
 
-Complexity must come from real project problems, not from feature accumulation.
+Complexity must come from real project problems, not feature accumulation.
 
 ## Unity Editing Rules
 
 For scene and presentation work:
 
-- Prefer Unity MCP, Unity Editor APIs, normal Inspector operations, or narrowly scoped Editor scripts.
+- Prefer normal Unity Editor operations, Unity APIs, or narrowly scoped Editor scripts.
 - Avoid large direct edits to `.unity` YAML when normal Unity operations can achieve the same result.
 - Preserve existing serialized references whenever possible.
-- Explicitly report any serialized-reference risk introduced by scene changes.
+- Explicitly report serialized-reference risk introduced by scene changes.
 - Do not silently replace existing gameplay architecture while solving presentation problems.
 
 ## Iteration Rules
@@ -63,19 +63,20 @@ After each structural change:
 
 1. confirm Unity compiles with no new red Console errors;
 2. enter Play Mode when the change affects runtime behavior, controls, camera, scene flow, UI, or interactions;
-3. verify the affected gameplay path before proceeding to the next structural task.
+3. verify the affected gameplay path before proceeding;
+4. run the relevant Python Pipeline command when source / generated-data contracts are affected.
 
-Do not expand the task scope without reporting why the expansion is necessary.
+Do not expand task scope without a demonstrated reason.
 
-## Completion Report
+## Verification Expectations
 
 When finishing a task, report:
 
 - files changed;
-- scene / Inspector changes made through Unity;
-- validation and Play Mode results;
+- scene / Inspector changes;
+- Pipeline validation results;
+- Play Mode / standalone results when relevant;
 - anything not yet verified;
-- serialized-reference or regression risks;
-- what the user should test manually next.
+- serialized-reference or regression risks.
 
-Anything intended for README, Case Study, video, or resume must remain independently explainable without Codex.
+Claims in public project documentation must remain independently explainable and backed by repository history, reproducible QA, measured results, or manual verification.
