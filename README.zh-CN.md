@@ -32,8 +32,6 @@ Python Validation / Batch Pipeline
 - Pipeline Case Study：[`English`](Docs/Pipeline_Case_Study.md) | [`简体中文`](Docs/Pipeline_Case_Study.zh-CN.md)
 - Day 11 QA Record：[`English`](Docs/D11_QA.md) | [`简体中文`](Docs/D11_QA.zh-CN.md)
 - [`Docs/README.md`](Docs/README.md) — 当前文档 / 历史文档索引
-- [`TODO.md`](TODO.md) — 冲刺执行记录
-- [`STATUS.md`](STATUS.md) — 当前项目状态
 
 ---
 
@@ -61,7 +59,7 @@ TD-Pipeline-Demo.exe
 - `Esc` — 释放鼠标
 - 关闭窗口即可退出
 
-该版本已经从启动到 Mission Complete 完成人工测试。Build 产物仍不进入 Git 历史，正式可玩包通过 GitHub Releases 分发。
+该版本已经从启动到 Mission Complete 完成人工测试。Build 产物不进入 Git 历史，正式可玩包通过 GitHub Releases 分发。
 
 ---
 
@@ -264,18 +262,12 @@ QA/Fixtures/scale_valid/
 
 ## AI 辅助开发
 
-AI / Codex 用于加速实现、检查和调试，而不是替代验证和理解。两个 QA Bug 都经历了具体输入复现、原因定位、小范围修复和回归测试。进入 README、Case Study、视频或简历的内容都应能够在不依赖 Codex 的情况下独立解释。
+AI / Codex 用于加速实现、检查和调试，而不是替代验证和理解。两个 QA Bug 都经历了具体输入复现、原因定位、小范围修复和回归测试。项目中的结论由仓库历史、可复现 QA、实测结果和 standalone 人工验证共同支撑。
 
 ---
 
-## 作品集 / 面试一句话说明
+## 项目结果
 
-> 我做了一个 Unity Vertical Slice，并让真实玩法依赖推动 Python Content Pipeline 的演进。Pipeline 将多表 CSV 解析成 Typed Intermediate Model，校验 Schema、数值、重复 ID、跨表 Item 引用和 Active Scene Config 引用，再生成 Unity 可消费 JSON；同时加入经过完整校验的 atomic Batch Update。项目使用 40 条数据完成 Scale / QA，并通过 QA 发现并修复 2 个真实校验 Bug。在受控的 8 条批量修改 execution benchmark 中，人工等价输出耗时 192 秒，而 Batch Preview → Apply → Generate 耗时 0.287 秒；这个数字只用于说明 execution-stage 自动化收益，不代表整个内容生产流程快 670 倍。
+`TD-Pipeline-Demo` 展示了一条紧凑但完整的 Technical Designer 工作流：将可玩内容、数据驱动配置、运行前校验、Batch 自动化、QA 与实际工作流量化连接在同一个项目中。
 
----
-
-## 当前状态
-
-项目技术核心、QA 证据、量化 Case Study、中英文文档以及可玩的 **v1.0.0 Windows x64 Release** 已全部完成。
-
-下一优先级是：**简历、项目讲解和正式投递**，而不是继续增加功能。
+仓库包含完整源码、中英文 Case Study 与 QA 文档、可复用 Scale Fixture，以及经过完整人工测试的 **v1.0.0 Windows x64 可玩版本**。
