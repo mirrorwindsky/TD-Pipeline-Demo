@@ -2,8 +2,6 @@
 
 English | [简体中文](README.zh-CN.md)
 
-> The English README reflects the current portfolio state. The Simplified Chinese README is intentionally frozen at an earlier milestone and points back here until the final bilingual synchronization pass.
-
 A **Technical Designer portfolio project** combining a playable Unity Vertical Slice with a designer-facing content Pipeline, validation tooling, Batch automation, QA evidence, and measured workflow improvement.
 
 The project is intentionally built as one connected workflow rather than as separate gameplay and scripting exercises:
@@ -32,12 +30,13 @@ Current project evidence:
 - reusable **40-record Scale Fixture**;
 - systematic QA with **two real validation bugs found and fixed**;
 - controlled 8-record benchmark: **192.000 s manual vs 0.287 s automated execution**;
-- dedicated QA record and Pipeline Case Study.
+- bilingual QA record and Pipeline Case Study.
 
 Primary supporting documents:
 
-- [`Docs/Pipeline_Case_Study.md`](Docs/Pipeline_Case_Study.md) — problem, design, QA, Before / After benchmark, trade-offs, outcome;
-- [`Docs/D11_QA.md`](Docs/D11_QA.md) — reproducible Scale / bad-data QA evidence and bug-fix history;
+- Pipeline Case Study: [`English`](Docs/Pipeline_Case_Study.md) | [`简体中文`](Docs/Pipeline_Case_Study.zh-CN.md);
+- Day 11 QA Record: [`English`](Docs/D11_QA.md) | [`简体中文`](Docs/D11_QA.zh-CN.md);
+- [`Docs/README.md`](Docs/README.md) — current vs historical documentation index;
 - [`TODO.md`](TODO.md) — sprint execution record;
 - [`STATUS.md`](STATUS.md) — current project state and next focus.
 
@@ -301,7 +300,7 @@ QA coverage included:
 - malformed CSV rows;
 - fail-safe output preservation.
 
-Full evidence: [`Docs/D11_QA.md`](Docs/D11_QA.md)
+Full evidence: [`English`](Docs/D11_QA.md) | [`简体中文`](Docs/D11_QA.zh-CN.md)
 
 ### Real Bug 1 — Active V2 Scene Reference Coverage
 
@@ -399,7 +398,7 @@ This is explicitly an **execution-stage benchmark**. It excludes the time requir
 
 The timing sample produced 0 manual errors and 0 automated errors. Error-risk reduction is therefore supported separately by the QA evidence rather than inferred from this benchmark.
 
-Full analysis: [`Docs/Pipeline_Case_Study.md`](Docs/Pipeline_Case_Study.md)
+Full analysis: [`English`](Docs/Pipeline_Case_Study.md) | [`简体中文`](Docs/Pipeline_Case_Study.zh-CN.md)
 
 ---
 
@@ -454,9 +453,12 @@ TD-Pipeline-Demo/
 │       └── scale_valid/
 │
 ├── Docs/
+│   ├── README.md
 │   ├── D10_HANDOFF.md
 │   ├── D11_QA.md
+│   ├── D11_QA.zh-CN.md
 │   ├── Pipeline_Case_Study.md
+│   ├── Pipeline_Case_Study.zh-CN.md
 │   ├── Pipeline_V1.md
 │   └── Pipeline_V1.zh-CN.md
 │
@@ -491,13 +493,12 @@ A concise explanation of the project:
 
 ## Current Packaging Status
 
-The technical project core, QA evidence, and Pipeline Case Study are complete.
+The technical project core, QA evidence, measured Pipeline Case Study, and bilingual core documentation are complete.
 
 Immediate next work is resume / application packaging rather than more feature development.
 
 Optional follow-up after the resume is usable:
 
-- synchronize the Simplified Chinese README;
 - record a short final demo video;
 - collect external TD / user feedback if available.
 
