@@ -99,7 +99,13 @@ VALID_INTERACTION_TYPES = {
 ITEMS_SOURCE_PATH = ROOT_DIR / "ConfigSource" / "items.csv"
 INTERACTABLES_SOURCE_PATH = ROOT_DIR / "ConfigSource" / "interactables.csv"
 OUTPUT_PATH = ROOT_DIR / "Assets" / "Data" / "interactables.json"
-SCENE_PATH = ROOT_DIR / "Assets" / "Scenes" / "Prototype_01.unity"
+SCENE_PATH = ROOT_DIR / "Assets" / "Scenes" / "VerticalSlice_01.unity"
+
+CONFIG_ID_COMPONENTS = (
+    "Assembly-CSharp::ConfigurableInteractable",
+    "Assembly-CSharp::PickupInteractable",
+    "Assembly-CSharp::DeviceInteractable",
+)
 BATCH_UPDATE_PATH = ROOT_DIR / "ConfigSource" / "batch_interaction_updates.csv"
 OBJECTIVES_SOURCE_PATH = ROOT_DIR / "ConfigSource" / "objectives.csv"
 OBJECTIVES_OUTPUT_PATH = ROOT_DIR / "Assets" / "Data" / "objectives.json"
@@ -285,8 +291,9 @@ def validate_references(
     issues = []
 
     valid_ids = {
-        row["id"].strip()
+        (row.get("id") or "").strip()
         for row in table.rows
+        if (row.get("id") or "").strip()
     }
 
     if not scene_path.exists():
@@ -303,8 +310,19 @@ def validate_references(
     component_blocks = scene_text.split("--- !u!114")
 
     for block in component_blocks:
-        if "Assembly-CSharp::ConfigurableInteractable" not in block:
+        component_identifier = next(
+            (
+                identifier
+                for identifier in CONFIG_ID_COMPONENTS
+                if identifier in block
+            ),
+            None,
+        )
+
+        if component_identifier is None:
             continue
+
+        component_name = component_identifier.split("::", 1)[-1]
 
         match = re.search(
             r"^[ \t]*configId:[ \t]*(.*?)[ \t]*$",
@@ -317,7 +335,7 @@ def validate_references(
                 ValidationIssue(
                     ERROR,
                     f"{scene_path.name}: "
-                    f"ConfigurableInteractable is missing 'configId'."
+                    f"{component_name} is missing 'configId'."
                 )
             )
             continue
@@ -329,7 +347,7 @@ def validate_references(
                 ValidationIssue(
                     ERROR,
                     f"{scene_path.name}: "
-                    f"ConfigurableInteractable has an empty 'configId'."
+                    f"{component_name} has an empty 'configId'."
                 )
             )
             continue
@@ -339,7 +357,7 @@ def validate_references(
                 ValidationIssue(
                     ERROR,
                     f"{scene_path.name}: "
-                    f"ConfigurableInteractable references unknown "
+                    f"{component_name} references unknown "
                     f"config id '{config_id}'."
                 )
             )
