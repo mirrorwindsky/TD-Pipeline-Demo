@@ -2,22 +2,23 @@
 
 ## Status
 
-Day 11 shifted the project from feature development to reliability evidence.
+**Day 11 is complete.**
 
-The main goals were to verify that the existing Pipeline V2 remains predictable with a larger content set, systematically exercise bad-data paths, preserve fail-safe generation behavior, and fix only real defects exposed by QA.
+Day 11 shifted the project from feature development to reliability evidence. The goal was to verify that Pipeline V2 remains predictable with a larger content set, systematically exercise bad-data paths, preserve fail-safe generation behavior, and fix only real defects exposed by QA.
 
-This record documents the tests that were actually executed on 2026-09-11.
+This record documents the tests actually executed on 2026-09-11.
 
-Current result:
+Final result:
 
-- 40-record valid scale fixture completed and preserved;
+- 40-record valid Scale Fixture completed and preserved;
 - Scale generation passed;
 - 8-record Batch Preview / Apply passed;
 - required bad-data categories were exercised;
 - two real validation defects were discovered, reproduced, fixed, and regression-tested;
-- both fixes were cherry-picked into `main`;
-- no optional dependency-cycle / unreachable-objective system was added because the current architecture did not demonstrate a real need;
-- a qualifying AI-assisted implementation failure case has **not yet been selected** and must not be fabricated solely to satisfy the checklist.
+- both fixes were integrated into `main`;
+- optional dependency-cycle / unreachable-objective systems were intentionally skipped because the current architecture did not demonstrate a real need;
+- no qualifying AI-generated implementation failure occurred, so none was fabricated solely to satisfy the original checklist;
+- two genuine AI-assisted debugging cases were documented through the QA-discovered defects below.
 
 ---
 
@@ -35,7 +36,7 @@ D:\UnityProjects\TD-Pipeline-Demo-D11-QA
 
 This kept the D10 baseline safe while allowing repeated source replacement, malformed input, generation, and restoration.
 
-The D11 QA worktree started from the sealed D10 commit:
+The QA worktree started from the sealed D10 commit:
 
 ```text
 4514da2 docs: close Day 10 and hand off to QA
@@ -49,19 +50,19 @@ py Tools/config_tool.py batch-preview
 py Tools/config_tool.py batch-apply
 ```
 
-The protected Week 1 scene was not repurposed for QA. The current V2 runtime scene remained:
+The protected Week 1 Scene was not repurposed for QA. The current V2 runtime Scene remained:
 
 ```text
 Assets/Scenes/VerticalSlice_01.unity
 ```
 
-Most Day 11 checks exercised the Python Pipeline directly; Unity did not need to be opened for each malformed-data case.
+Most Day 11 checks exercised the Python Pipeline directly; Unity did not need to be opened for every malformed-data case.
 
 ---
 
 ## Scale Fixture
 
-The reusable valid fixture is stored under:
+Reusable valid fixture:
 
 ```text
 QA/Fixtures/scale_valid/
@@ -81,7 +82,7 @@ interactables.csv  20 records
 total              40 records
 ```
 
-The fixture deliberately preserves the real Demo IDs such as:
+The fixture deliberately preserves real Demo IDs such as:
 
 ```text
 power_cell
@@ -91,13 +92,13 @@ cube_quick
 cube_sturdy
 ```
 
-while adding enough additional valid Items, Pickups, and Devices to exercise lookup, cross-table reference validation, generation, and Batch behavior beyond the original small baseline.
+while adding valid Items, Pickups, and Devices to exercise lookup, cross-table references, generation, and Batch behavior beyond the original small baseline.
 
 The fixture is not intended to simulate commercial-project scale. Its purpose is to verify that the current parse-once / typed-model / validation / generation behavior does not depend on the source tables containing only a few rows.
 
 ### Scale Batch Fixture
 
-The scale Batch fixture contains 8 updates:
+The Scale Batch fixture contains 8 updates:
 
 ```text
 cube_sturdy          3 -> 4
@@ -125,29 +126,19 @@ maintenance_panel    4 -> 5
 | QA-06 | Invalid integer type | PASS |
 | QA-07 | Invalid numeric range | PASS |
 | QA-08 | Broken cross-table Item reference | PASS |
-| QA-09 | Broken active V2 Scene `configId` reference | FAIL -> FIXED -> PASS |
+| QA-09 | Broken active V2 Scene `configId` reference | FAIL → FIXED → PASS |
 | QA-10 | Missing required column | PASS |
 | QA-11 | Invalid `interactionType` | PASS |
 | QA-12 | Empty CSV input | PASS |
-| QA-13 | Malformed CSV / unexpected extra column | FAIL -> FIXED -> PASS |
+| QA-13 | Malformed CSV / unexpected extra column | FAIL → FIXED → PASS |
 
 ---
 
-## Detailed Test Cases
+## Scale / Batch Evidence
 
 ### QA-00 — Baseline Sanity Check
 
-**Purpose**
-
-Verify that the new QA worktree reproduces the sealed D10 Pipeline state before any Scale or bad-data testing begins.
-
-**Command**
-
-```powershell
-py Tools/config_tool.py generate
-```
-
-**Actual result**
+The untouched D10 baseline reproduced cleanly inside the QA worktree:
 
 ```text
 === Content Pipeline ===
@@ -161,15 +152,9 @@ Loaded 5 interactable configs.
 
 **Result:** PASS
 
----
-
 ### QA-01 — Valid 40-Record Scale Generation
 
-**Purpose**
-
-Verify that the Pipeline handles the complete 40-record valid fixture and produces the expected generated counts.
-
-**Input**
+Input:
 
 ```text
 8 Items
@@ -178,13 +163,7 @@ Verify that the Pipeline handles the complete 40-record valid fixture and produc
 40 total source records
 ```
 
-**Command**
-
-```powershell
-py Tools/config_tool.py generate
-```
-
-**Actual result**
+Actual result:
 
 ```text
 === Content Pipeline ===
@@ -201,63 +180,25 @@ generated interactables: 20
 generated objectives: 12
 ```
 
-The 8 Item records are currently used as the authoritative Item-ID registry and are not emitted to a separate `items.json`, so `20 + 12` generated records is the expected output contract rather than data loss.
+The 8 Item records are the authoritative Item-ID registry and are not emitted to a separate `items.json`; `20 + 12` generated records therefore matches the current output contract.
 
 **Result:** PASS
 
----
-
 ### QA-02 — Scale Batch Preview
 
-**Purpose**
-
-Verify that Batch lookup / preparation remains correct against the larger 20-Interactable table and that Preview performs no source modification.
-
-**Input**
-
-8 valid Batch updates from `QA/Fixtures/scale_valid/batch_interaction_updates.csv`.
-
-**Command**
-
-```powershell
-py Tools/config_tool.py batch-preview
-```
-
-**Actual result**
-
-All eight old -> new values were reported correctly, ending with:
+All eight expected old → new values were reported correctly, ending with:
 
 ```text
 Validated 8 batch updates. No source files were changed.
 ```
 
-The active `ConfigSource/interactables.csv` was compared directly against the valid fixture with:
-
-```powershell
-git diff --no-index `
-  QA\Fixtures\scale_valid\interactables.csv `
-  ConfigSource\interactables.csv
-```
-
-Exit code was `0`, confirming no content difference.
+The active `ConfigSource/interactables.csv` was compared directly against the valid fixture. `git diff --no-index` returned exit code `0`, confirming no content difference.
 
 **Result:** PASS
 
----
-
 ### QA-03 — Scale Batch Apply + Regeneration
 
-**Purpose**
-
-Verify that applying eight updates changes exactly the intended fields, preserves all other Interactable records / fields, and remains valid through normal generation.
-
-**Command**
-
-```powershell
-py Tools/config_tool.py batch-apply
-```
-
-**Independent source verification**
+Independent comparison after Batch Apply showed:
 
 ```text
 baseline records: 20
@@ -276,7 +217,7 @@ Loaded 12 objective configs.
 Loaded 20 interactable configs.
 ```
 
-The generated `interactables.json` was independently inspected. All eight expected values matched:
+Generated JSON verification:
 
 ```text
 PASS cube_sturdy: expected 4, actual 4
@@ -294,27 +235,25 @@ overall: PASS
 
 ---
 
+## Bad-Data Tests That Passed Directly
+
 ### QA-04 — Missing Required Value + Fail-Safe Generation
 
-**Purpose**
-
-Verify row-level required-value detection and prove that invalid input does not partially overwrite previous valid generated data.
-
-**Injected error**
+Injected:
 
 ```text
 aux_power_box.requiredInteractions
 2 -> empty
 ```
 
-**Actual result**
+Actual result:
 
 ```text
 [ERROR] interactables.csv row 14 field 'requiredInteractions': value is required.
 Validation failed. Generated JSON files were not updated.
 ```
 
-The generated JSON hashes were captured before and after the failed generation.
+Generated JSON hashes were captured before and after the failed generation:
 
 ```text
 interactables.json
@@ -326,26 +265,20 @@ objectives.json
 → unchanged
 ```
 
-This provides direct evidence that the ERROR gate preserves the previous valid generated output.
+This directly verifies the fail-safe output-preservation contract.
 
 **Result:** PASS
 
----
-
 ### QA-05 — Duplicate ID
 
-**Purpose**
-
-Verify that duplicate IDs are rejected before typed lookup / runtime ambiguity.
-
-**Injected error**
+Injected:
 
 ```text
 maintenance_panel.id
 maintenance_panel -> power_node
 ```
 
-**Actual result**
+Actual result:
 
 ```text
 [ERROR] interactables.csv row 21 field 'id': duplicate id 'power_node'.
@@ -354,22 +287,16 @@ Validation failed. Generated JSON files were not updated.
 
 **Result:** PASS
 
----
-
 ### QA-06 — Invalid Integer Type
 
-**Purpose**
-
-Verify type validation for `requiredInteractions` before `load_interactables()` constructs the typed model.
-
-**Injected error**
+Injected:
 
 ```text
 backup_generator.requiredInteractions
 5 -> three
 ```
 
-**Actual result**
+Actual result:
 
 ```text
 [ERROR] interactables.csv row 18 field 'requiredInteractions': expected integer, got 'three'.
@@ -378,22 +305,16 @@ Validation failed. Generated JSON files were not updated.
 
 **Result:** PASS
 
----
-
 ### QA-07 — Invalid Range
 
-**Purpose**
-
-Distinguish valid integer parsing from invalid business range.
-
-**Injected error**
+Injected:
 
 ```text
 sensor_array.requiredInteractions
 4 -> 0
 ```
 
-**Actual result**
+Actual result:
 
 ```text
 [ERROR] interactables.csv row 17 field 'requiredInteractions': must be >= 1, got 0.
@@ -402,22 +323,16 @@ Validation failed. Generated JSON files were not updated.
 
 **Result:** PASS
 
----
-
 ### QA-08 — Broken Cross-Table Item Reference
 
-**Purpose**
-
-Re-verify the core Pipeline V2 cross-table reference value at the larger fixture size.
-
-**Injected error**
+Injected:
 
 ```text
 coolant_pump.requiredItemId
 coolant_canister -> missing_coolant
 ```
 
-**Actual result**
+Actual result:
 
 ```text
 [ERROR] interactables.csv row 15 field 'requiredItemId': unknown item id 'missing_coolant'.
@@ -426,17 +341,59 @@ Validation failed. Generated JSON files were not updated.
 
 **Result:** PASS
 
+### QA-10 — Missing Required Column
+
+Removed the required `description` column from `objectives.csv`.
+
+Actual result:
+
+```text
+[ERROR] objectives.csv: missing required column 'description'.
+Validation failed. Generated JSON files were not updated.
+```
+
+**Result:** PASS
+
+### QA-11 — Invalid `interactionType`
+
+Injected:
+
+```text
+security_console.interactionType
+Device -> Terminal
+```
+
+Actual result:
+
+```text
+[ERROR] interactables.csv row 16 field 'interactionType': unknown value 'Terminal'. Expected one of: Device, Pickup.
+Validation failed. Generated JSON files were not updated.
+```
+
+**Result:** PASS
+
+### QA-12 — Empty CSV Input
+
+`items.csv` was truncated to exactly `0` bytes.
+
+Actual result:
+
+```text
+[ERROR] items.csv: CSV header is missing.
+Validation failed. Generated JSON files were not updated.
+```
+
+No traceback occurred.
+
+**Result:** PASS
+
 ---
 
-### QA-09 — Active V2 Scene Config Reference
+## Bug 1 — Active V2 Scene Reference Coverage Gap
 
-**Purpose**
+### QA-09 Reproduction
 
-Verify that a serialized `configId` used by the **current** V2 runtime scene cannot silently become disconnected from the generated Interactable registry.
-
-**Reproduction setup**
-
-The active scene contained:
+The active Scene contained:
 
 ```text
 Assets/Scenes/VerticalSlice_01.unity
@@ -451,7 +408,7 @@ control_terminal -> control_terminal_renamed
 
 The Scene itself was not modified.
 
-#### Initial result — FAIL
+### Initial Result — FAIL
 
 Before the fix, generation incorrectly succeeded:
 
@@ -476,20 +433,20 @@ while the active Scene still contained:
 configId: control_terminal
 ```
 
-This meant the validator could allow a broken active-scene runtime dependency to reach Unity.
+The validator therefore allowed a broken active-Scene runtime dependency to reach Unity.
 
-#### Root cause
+### Root Cause
 
-The existing Unity-reference validator was still a V1-era implementation:
+The Unity-reference validator was still a V1-era implementation:
 
 ```text
 SCENE_PATH -> Prototype_01.unity
 ConfigurableInteractable.configId only
 ```
 
-The current V2 scene uses `PickupInteractable` and `DeviceInteractable` `configId` references.
+The current V2 Scene uses `PickupInteractable` and `DeviceInteractable` `configId` references.
 
-#### Fix
+### Fix
 
 The validator was updated to target:
 
@@ -505,14 +462,14 @@ PickupInteractable
 DeviceInteractable
 ```
 
-The same broken source now produced:
+The same broken source then produced:
 
 ```text
 [ERROR] VerticalSlice_01.unity: DeviceInteractable references unknown config id 'control_terminal'.
 Validation failed. Generated JSON files were not updated.
 ```
 
-The valid 40-record fixture was then restored and passed normal generation again.
+The valid 40-record fixture was restored and passed generation again.
 
 QA-branch fix commit:
 
@@ -520,99 +477,29 @@ QA-branch fix commit:
 5fbf998 fix: validate active scene config references
 ```
 
-Equivalent fix cherry-picked to `main`:
+Equivalent fix in `main`:
 
 ```text
 97b24be fix: validate active scene config references
 ```
 
-**Final result:** FAIL -> FIXED -> PASS
+**Final result:** FAIL → FIXED → PASS
 
 ---
 
-### QA-10 — Missing Required Column
+## Bug 2 — Malformed CSV Could Silently Truncate Content
 
-**Purpose**
+### QA-13 Reproduction
 
-Verify table-level schema validation before typed-object construction.
-
-**Injected error**
-
-Removed the entire required `description` column from `objectives.csv`.
-
-**Actual result**
-
-```text
-[ERROR] objectives.csv: missing required column 'description'.
-Validation failed. Generated JSON files were not updated.
-```
-
-**Result:** PASS
-
----
-
-### QA-11 — Invalid `interactionType`
-
-**Purpose**
-
-Verify enum-like semantic validation for a non-empty but unsupported interaction type.
-
-**Injected error**
-
-```text
-security_console.interactionType
-Device -> Terminal
-```
-
-**Actual result**
-
-```text
-[ERROR] interactables.csv row 16 field 'interactionType': unknown value 'Terminal'. Expected one of: Device, Pickup.
-Validation failed. Generated JSON files were not updated.
-```
-
-**Result:** PASS
-
----
-
-### QA-12 — Empty CSV Input
-
-**Purpose**
-
-Verify that a zero-byte source file fails through a readable validation message rather than an unhandled traceback.
-
-**Injected error**
-
-`items.csv` was truncated to exactly `0` bytes.
-
-**Actual result**
-
-```text
-[ERROR] items.csv: CSV header is missing.
-Validation failed. Generated JSON files were not updated.
-```
-
-No traceback occurred.
-
-**Result:** PASS
-
----
-
-### QA-13 — Malformed CSV / Unexpected Extra Column
-
-**Purpose**
-
-Verify malformed row handling for a common manual CSV-authoring error: an unescaped comma that creates more row values than header columns.
-
-**Injected row**
+Injected row:
 
 ```csv
 inspect_storage,Inspect Storage,Objective: Inspect storage, then return.
 ```
 
-The table header only defines three columns.
+The table header defines only three columns.
 
-#### Initial result — FAIL
+### Initial Result — FAIL
 
 Before the fix, `csv.DictReader` parsed the row as:
 
@@ -639,9 +526,9 @@ Objective: Inspect storage
 
 instead of the intended full description.
 
-This was a **silent data corruption** bug rather than a crash: malformed source was accepted and content was silently truncated.
+This was a **silent data corruption** bug rather than a crash.
 
-#### Fix
+### Fix
 
 `validate_schema()` now detects the `None` key produced by `DictReader` when a row contains unexpected extra values and reports a row-level ERROR.
 
@@ -660,57 +547,13 @@ QA-branch fix commit:
 7d2c058 fix: reject malformed CSV rows with extra columns
 ```
 
-Equivalent fix cherry-picked to `main`:
+Equivalent fix in `main`:
 
 ```text
 bb088b3 fix: reject malformed CSV rows with extra columns
 ```
 
-**Final result:** FAIL -> FIXED -> PASS
-
----
-
-## Bugs Found and Fixed
-
-### Bug 1 — Active V2 Scene Reference Coverage Gap
-
-**Category:** Validation coverage gap / real bug
-
-**Impact:** A source ID could be renamed or removed while `VerticalSlice_01.unity` continued referencing the old ID. Generation could still pass, pushing the failure to Unity Runtime.
-
-**Why it mattered:** The current portfolio claim is that content errors should be caught before Runtime when the Pipeline has enough information to do so. The active scene already contained the relevant serialized IDs, so leaving them unvalidated was a real mismatch between V1 validation coverage and the V2 runtime architecture.
-
-**Fix scope:** Small and targeted. No generic dependency graph, Prefab scanner, or Editor GUI was introduced.
-
-### Bug 2 — Malformed CSV Could Silently Truncate Content
-
-**Category:** Silent data corruption / real bug
-
-**Impact:** A row with an unescaped comma could generate incomplete content while Validation incorrectly reported success.
-
-**Why it mattered:** Silent corruption is more dangerous than a loud parse failure because the Pipeline appears healthy while producing incorrect player-facing data.
-
-**Fix scope:** `validate_schema()` now rejects unexpected extra row values through the existing validation layer. No separate CSV parser framework was introduced.
-
----
-
-## Fail-Safe Generation Evidence
-
-Day 11 directly verified the existing fail-safe generation contract.
-
-For QA-04, valid generated JSON hashes were captured before introducing an invalid required value. After the validation failure, both hashes remained identical.
-
-This establishes the following behavior with direct evidence:
-
-```text
-valid generated data
-→ invalid source introduced
-→ ERROR detected
-→ generation blocked
-→ previous valid JSON preserved
-```
-
-This is useful Case Study evidence because it demonstrates not only error detection but also protection against partial / invalid output replacement.
+**Final result:** FAIL → FIXED → PASS
 
 ---
 
@@ -728,28 +571,39 @@ Day 11 did **not** add:
 
 Reason:
 
-The actual expanded data and QA cases did not demonstrate a concrete need for those systems. Day 11 fixes were restricted to defects that the real test cases reproduced.
+The expanded data and QA cases did not demonstrate a concrete need for those systems. Day 11 fixes were restricted to defects that the real test cases reproduced.
 
 ---
 
-## AI-Assisted Failure Case
+## AI-Assisted Development Note
 
-**Status: pending.**
+No qualifying AI-generated implementation failure occurred during Day 11. An artificial failure was intentionally **not** created solely to satisfy the original checklist.
 
-A qualifying AI-generated / AI-assisted implementation failure has not yet been selected from the project history for this record.
-
-Do not invent an artificial failure solely to complete the checklist. If a real Codex / AI implementation mistake is identified and can be explained as:
+Day 11 did include genuine AI-assisted debugging work on two real QA-discovered defects:
 
 ```text
-AI-assisted implementation
-→ incorrect / incomplete behavior
-→ observed evidence
-→ human diagnosis
-→ fix
-→ regression verification
+active V2 Scene-reference coverage gap
+→ reproduced
+→ root cause identified
+→ targeted fix
+→ same failing input re-tested
+→ valid 40-record regression
+→ integrated into main
 ```
 
-it should be added here before the final D11 / Case Study packaging is considered fully sealed.
+and:
+
+```text
+malformed CSV silent truncation
+→ silent corruption independently verified
+→ validation gap identified
+→ targeted fix
+→ malformed input re-tested
+→ valid 40-record regression
+→ integrated into main
+```
+
+These cases are suitable for the project's AI-assisted debugging evidence because the underlying failures and fixes are concrete, reproducible, and independently explainable. They are **not** represented as AI-generated bugs.
 
 ---
 
@@ -775,15 +629,16 @@ same 40 records
 
 Measure actual time and actual misses / catches. Do not pre-select an expected speedup ratio.
 
-The Day 11 evidence available for the Case Study now includes:
+The Day 11 evidence available for the Case Study includes:
 
-- valid 40-record scale generation;
+- valid 40-record Scale generation;
 - verified 8-record Batch Preview / Apply;
 - exact Batch source and generated-output checks;
 - row / field / value error localization;
 - fail-safe generated-output preservation;
-- one active-scene validation coverage bug found and fixed;
+- one active-Scene validation coverage bug found and fixed;
 - one malformed-CSV silent-corruption bug found and fixed;
+- genuine AI-assisted debugging evidence without fabricating an AI-generated failure;
 - explicit scope decisions not to add unjustified systems.
 
-The `ConfigSource` / generated JSON baseline should remain the normal playable Demo state outside of controlled QA / measurement steps.
+The `ConfigSource` / generated JSON baseline should remain the normal playable Demo state outside controlled QA / measurement steps.
