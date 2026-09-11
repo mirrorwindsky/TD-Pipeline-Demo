@@ -2,9 +2,11 @@
 
 [English](Pipeline_Case_Study.md) | 简体中文
 
+**可玩版本：** [Windows x64 v1.0.0](https://github.com/mirrorwindsky/TD-Pipeline-Demo/releases/tag/v1.0.0)
+
 ## 概览
 
-这个项目是一份面向 Technical Designer 求职的作品集案例，围绕一条连续工作流构建：
+`TD-Pipeline-Demo` 是一个面向 Technical Designer（技术策划）的作品集项目，围绕一条连续工作流构建：
 
 ```text
 Game Content Vertical Slice
@@ -14,9 +16,9 @@ Content Model
 Python Validation / Batch Pipeline
 ```
 
-目标不是制作商业级游戏，也不是搭建大型通用框架，而是证明：一个小型可玩 Unity Slice 会自然产生真实内容生产问题，而一层聚焦的 Tooling / Pipeline 可以减少重复工作、在 Runtime 前发现内容错误，并维持稳定、可解释的策划工作流。
+目标不是制作商业级游戏，也不是搭建大型通用框架，而是让一个紧凑的可玩 Unity Slice 自然产生真实内容生产问题，再只解决实现、QA 或工作流证明确实存在的问题。
 
-当前技术栈：
+核心技术栈：
 
 - Unity 6.3 LTS
 - C#
@@ -24,7 +26,7 @@ Python Validation / Batch Pipeline
 - CSV / JSON
 - Git / GitHub
 
-可玩切片依赖链：
+可玩流程：
 
 ```text
 PowerCell
@@ -35,27 +37,21 @@ PowerCell
 → Mission Complete
 ```
 
-当前 Content Pipeline 支持多表源数据、Typed Intermediate Model、校验、Batch Processing、fail-safe generation 和 Active Scene config-reference check。
-
 ---
 
 ## 1. 问题
 
-项目最初只有一张小型配置表和简单的 CSV → JSON 流程。对于最小原型来说已经足够，但当 Gameplay Slice 开始出现真实内容依赖后，原流程很快暴露出脆弱点。
+第一版 Pipeline 只有一张小型配置表和简单的 CSV → JSON 流程。当 Gameplay Slice 开始出现真实内容依赖后，原流程暴露出一系列生产风险：
 
-主要生产风险包括：
-
-- 多张源表需要保持结构合法；
+- 多张源表需要保持结构一致；
 - `requiredInteractions` 需要类型 / 范围校验；
 - ID 必须唯一；
-- `interactionType` 必须是合法枚举值；
+- `interactionType` 需要语义合法性校验；
 - Interactable 会引用另一张表中的 Item ID；
-- Unity Scene 对象持有 `configId`，配置改名后可能出现 stale reference；
-- 多条参数重复修改既慢又容易输错；
-- malformed CSV 可能生成错误内容；
-- Validation failure 不应该破坏上一版 known-good generated data。
-
-人工流程还需要在源数据和生成数据之间反复查找和核对。数据量很小时这些工作并不难，但随着记录数量和跨表引用增加，重复劳动和错误风险会迅速上升。
+- Unity Scene 对象持有 `configId`，配置改名后可能产生 stale reference；
+- 多条参数调优需要重复查找和编辑；
+- malformed CSV 可能静默生成错误内容；
+- Validation failure 不应覆盖上一版 known-good generated data。
 
 因此核心设计问题变成：
 
@@ -75,7 +71,7 @@ ConfigSource/
 └── batch_interaction_updates.csv
 ```
 
-三张主要内容表各自只 Parse 一次成为 `SourceTable`，再转换成 Typed Python Data：
+三张内容表各自只 Parse 一次成为 `SourceTable`，再转换成 Typed Data：
 
 ```text
 SourceTable
@@ -85,9 +81,7 @@ SourceTable
 → ContentModel
 ```
 
-这样避免多个 Validation Function 重复读取和解析同一份 CSV。
-
-### Validation Flow
+### Validation + Generation
 
 ```text
 CSV Source
@@ -106,16 +100,19 @@ Item cross-reference validation
 ↓
 active Scene configId validation
 ↓
-ERROR gate
+ERROR / WARNING gate
 ↓
 Generated JSON
+↓
+Unity Config Databases
+↓
+Runtime Gameplay + HUD
 ```
 
 当前校验覆盖：
 
-- CSV header 缺失；
-- required columns / values 缺失；
-- unexpected extra columns / malformed rows；
+- CSV header / required column / required value 缺失；
+- unexpected extra column / malformed row；
 - integer / boolean 类型错误；
 - 非法或异常 interaction range；
 - duplicate IDs；
@@ -131,7 +128,7 @@ Assets/Data/interactables.json
 Assets/Data/objectives.json
 ```
 
-Generated JSON 被视为 Pipeline Output，而不是另一份由策划手工维护的源数据。
+Generated JSON 被视为 Pipeline Output，而不是第二份由策划手工维护的真值。
 
 ### Batch Workflow
 
@@ -140,13 +137,13 @@ Generated JSON 被视为 Pipeline Output，而不是另一份由策划手工维�
 ```text
 batch_interaction_updates.csv
 ↓
-validate complete batch
+full-batch validation
 ↓
 typed BatchInteractionUpdate objects
 ↓
 Preview or Apply
 ↓
-atomic source-file replacement
+atomic source replacement
 ↓
 normal generation
 ```
@@ -159,57 +156,40 @@ py Tools/config_tool.py batch-preview
 py Tools/config_tool.py batch-apply
 ```
 
-`batch-preview` 不修改源文件；`batch-apply` 只有在整批逻辑校验通过后才写入 `interactables.csv`。
+`batch-preview` 不修改源数据；`batch-apply` 只有在整批逻辑校验通过后才写入 `interactables.csv`。
 
 ---
 
 ## 3. QA + Scale 证据
 
-D11 使用了可复用的 40 条 Scale Fixture：
+建立了可复用的 40 条 Scale Fixture：
 
 ```text
 QA/Fixtures/scale_valid/
-├── items.csv                    8 records
-├── objectives.csv              12 records
-├── interactables.csv           20 records
+├── items.csv                     8 records
+├── objectives.csv               12 records
+├── interactables.csv            20 records
 └── batch_interaction_updates.csv 8 updates
 ```
 
-目的不是模拟商业项目规模，而是确认当前 Pipeline 行为并不依赖“表里只有几条记录”。
+这并不是为了模拟商业项目规模，而是验证当前 Pipeline 不依赖“表里只有几条记录”这一偶然条件。
 
-### Scale 结果
+Scale 结果：
 
-- 40 条合法数据生成：PASS；
-- 20 条 Interactable 全部正确生成；
-- 12 条 Objective 全部正确生成；
+- 40 条合法数据 Generation：PASS；
+- 20 条 Interactable 正确生成；
+- 12 条 Objective 正确生成；
 - 8 条 Batch Preview：PASS；
 - 8 条 Batch Apply：PASS；
 - 恰好只有目标 8 个 `requiredInteractions` 发生变化；
 - 其他 Interactable 字段保持不变；
-- 8 个目标值全部进入 generated JSON。
+- 8 个目标值全部正确进入 Generated JSON。
 
-### Bad-Data Coverage
+坏数据覆盖包括 required value / column 缺失、duplicate ID、invalid integer type、invalid range、invalid `interactionType`、broken cross-table Item reference、broken active-Scene config reference、empty CSV 和 malformed CSV。
 
-QA 系统测试覆盖：
+### 真实 Bug 1 — Active V2 Scene Reference Coverage Gap
 
-- missing required values；
-- missing required columns；
-- duplicate IDs；
-- invalid integer types；
-- invalid ranges；
-- invalid `interactionType`；
-- broken cross-table Item references；
-- broken active-Scene config references；
-- empty CSV；
-- malformed CSV rows。
-
-结果不是继续堆 speculative feature，而是实际发现两个真实 Validation Defect。
-
-### Bug 1 — Active V2 Scene Reference Coverage Gap
-
-旧 Validator 仍然针对 V1 baseline Scene，并且只识别旧的 `ConfigurableInteractable`。
-
-真实失败复现：
+复现了真实 stale-reference 问题：
 
 ```text
 VerticalSlice_01.unity
@@ -219,9 +199,11 @@ source ID
 control_terminal → control_terminal_renamed
 ```
 
-修复前 Validation 错误地通过，Generated JSON 已不再包含 `control_terminal`，但 Active Scene 仍然引用旧 ID。
+修复前 Generation 错误地通过，而 Active Scene 仍然引用旧 ID。
 
-修复后 Validator 改为针对 `VerticalSlice_01.unity`，并显式维护 config-driven Interactable Component 白名单：
+根因是 Validator 仍然针对 V1 baseline Scene，并只识别旧的 `ConfigurableInteractable` 契约。
+
+修复后 Validator 改为针对 `VerticalSlice_01.unity`，并维护当前 config-driven Component 白名单：
 
 ```text
 ConfigurableInteractable
@@ -229,9 +211,15 @@ PickupInteractable
 DeviceInteractable
 ```
 
-同样的坏引用现在会在 Generation 前被拒绝。
+同样的断链现在会在 Generation 前被阻断。
 
-### Bug 2 — Malformed CSV Silent Truncation
+Main 修复：
+
+```text
+97b24be fix: validate active scene config references
+```
+
+### 真实 Bug 2 — Malformed CSV Silent Truncation
 
 未转义逗号制造了额外 CSV value：
 
@@ -239,21 +227,19 @@ DeviceInteractable
 inspect_storage,Inspect Storage,Objective: Inspect storage, then return.
 ```
 
-Python `csv.DictReader` 会把溢出部分放到 `None` key 下。修复前 Pipeline 忽略这部分，Validation 仍显示成功，并生成被截断的 description：
+`csv.DictReader` 会把溢出部分放到 `None` key 下。修复前 Pipeline 忽略该值，并在仍然报告成功的情况下生成被截断的 Objective Description。
+
+现在 `validate_schema()` 会将 unexpected extra value 作为 row-level ERROR 拦截。
+
+Main 修复：
 
 ```text
-Objective: Inspect storage
+bb088b3 fix: reject malformed CSV rows with extra columns
 ```
-
-这不是 crash，而是 silent data corruption。
-
-现在 `validate_schema()` 会拒绝 unexpected extra values，并在 Generation 前输出 row-level error。
 
 ### Fail-Safe Output 证据
 
-针对 required value 缺失测试，D11 在 failed generation 前后分别计算两个 generated JSON 的 SHA256。
-
-两个 Hash 完全一致。
+针对 required value 缺失测试，失败 Generation 前后分别计算两个 Generated JSON 的 SHA256，两个 Hash 均保持不变：
 
 ```text
 valid generated data
@@ -263,13 +249,13 @@ valid generated data
 → previous valid JSON preserved
 ```
 
-完整 QA 证据见 [`D11_QA.zh-CN.md`](D11_QA.zh-CN.md)。
+完整可复现 QA：[`D11_QA.zh-CN.md`](D11_QA.zh-CN.md)
 
 ---
 
 ## 4. Before / After 量化
 
-使用同一套 40-record Scale Fixture 和同一组 8 条 `requiredInteractions` 修改，做受控 execution-stage 对比。
+使用同一套 40-record Fixture 和同一组 8 条 `requiredInteractions` 修改进行等价输出 execution benchmark。
 
 目标修改：
 
@@ -284,17 +270,11 @@ backup_generator     5 → 3
 maintenance_panel    4 → 5
 ```
 
-### 人工等价输出路径
+### 人工路径
 
-人工 Benchmark 要求：
+人工路径包括：查找 8 个源记录、修改 8 个源值、在 Generated JSON 中找到对应记录、手工同步相同数值、检查并保存两份文件。
 
-1. 在 `ConfigSource/interactables.csv` 找到 8 个目标 ID；
-2. 修改 8 个 `requiredInteractions`；
-3. 在 `Assets/Data/interactables.json` 找到对应记录；
-4. 手工同步相同 8 个值；
-5. 检查并保存两个文件。
-
-实测：
+实测执行时间：
 
 ```text
 192.000 s
@@ -318,13 +298,13 @@ batch-preview
 → generate
 ```
 
-通过 PowerShell `Measure-Command` 实测：
+使用 PowerShell `Measure-Command` 实测：
 
 ```text
 0.2865603 s
 ```
 
-独立校验得到同样的 PASS。
+独立校验同样 PASS。
 
 ### 结果
 
@@ -335,15 +315,9 @@ Execution speedup:        ~670×
 Execution-time reduction: ~99.85%
 ```
 
-这个数字被严格定义为 **execution-stage benchmark**。
+这明确是 **execution-stage benchmark**：不包含 Batch Request 本身的编写时间，也不代表“整个内容生产过程快 670 倍”。
 
-它不包含 Batch Request 本身的编写时间，因此不能解释为“整个内容生产过程快 670 倍”。
-
-更准确的结论是：
-
-> 当批量变更请求已经结构化后，Pipeline 几乎消除了 Execution Stage 中重复的查找、编辑和传播工作，同时仍然经过正常 Generation 使用的同一套 Validation。
-
-这次受控计时里人工和自动都没有出现错误，因此“错误风险下降”不从计时样本中推断，而由 D11 的坏数据 QA、两个真实 Bug 和 fail-safe 证据单独支持。
+这次人工和自动路径都没有错误，因此“错误风险下降”由 D11 QA 证据单独支持，而不是从本次计时样本推断。
 
 ---
 
@@ -366,14 +340,6 @@ change request
 ↓
 Unity Runtime
 ```
-
-主要风险：
-
-- 重复查找工作；
-- 漏改目标；
-- Source / Generated Data 不一致；
-- 缺少系统化 Pre-Runtime Validation；
-- malformed data 可能在人工检查中漏过。
 
 ### After — Pipeline Workflow
 
@@ -399,13 +365,12 @@ Generated JSON
 Unity Runtime
 ```
 
-当前项目已经实际证明的收益：
+已经实际证明的收益：
 
 - deterministic bulk updates；
-- Generated Output 被覆盖前先校验；
+- Generated Output 被覆盖前先完成校验；
 - row / field / value-level error localization；
-- cross-table reference checks；
-- active-Scene config-reference checks；
+- cross-table + active-Scene reference checks；
 - failure 时保留上一版 known-good generated data；
 - Generated Data 始终由 Source 派生，而不是成为第二份手工维护真值。
 
@@ -413,34 +378,31 @@ Unity Runtime
 
 ## 6. 设计取舍与 Scope
 
-以下潜在扩展被有意留在当前范围外：
+项目有意不在没有证据的情况下增加复杂度。当前没有实现：
 
 - Unity Editor GUI；
 - dependency visualization；
 - generalized Quest framework；
-- dependency-cycle detection；
-- unreachable-objective detection；
+- dependency-cycle / unreachable-objective detection；
 - all-Scene / all-Prefab scanning；
-- large automated-test framework。
+- 大型 automated-test framework。
 
-决策规则很简单：
+决策规则：
 
-> 只有当前 Content / QA / Workflow 提供证据说明它能解决真实问题时，才增加复杂度。
+> 只有实现、QA 或工作流证明确实存在真实问题时，才为解决它增加复杂度。
 
 例如：
 
-- Unity Editor Integration 被跳过，因为 CLI 已经能清楚提供 Generate / Preview / Apply，而 Editor 方案会额外引入 Python Process、PATH、Working Directory、stdout/stderr capture 和 Editor-only code 的维护成本；
-- cycle / unreachable checks 被跳过，因为当前架构并没有外部化通用 Objective Dependency Graph；
-- Scene-reference validation 只在 QA 实际证明 V2 Active Scene 会出现 stale config ID 后才扩展；
-- malformed-row validation 只在 QA 实际复现 silent content truncation 后加入。
-
-这样项目保持在“可靠、可解释、解决真实问题”的范围内，而不是靠 Feature Count 堆复杂度。
+- Editor Integration 被跳过，因为 CLI 已经清晰覆盖 Generate / Preview / Apply，无需额外引入 Editor-only 维护成本；
+- cycle / unreachable checks 被跳过，因为当前架构没有外部化通用 Objective Dependency Graph；
+- Active Scene Reference Validation 只在 QA 实际复现 stale-ID 问题后扩展；
+- malformed-row validation 只在 QA 实际复现 silent truncation 后加入。
 
 ---
 
 ## 7. 结果
 
-最终项目形成了一条连续的 Technical Designer Workflow，而不是互不相关的 Gameplay / Python 练习：
+最终项目形成了一条连续的 Technical Designer Workflow：
 
 ```text
 Playable Vertical Slice
@@ -467,12 +429,6 @@ Measured Execution Improvement
 - 系统坏数据 QA；
 - 2 个真实 Validation Bug 被发现并修复；
 - 通过 Hash Comparison 验证 fail-safe generated-output preservation；
-- Windows standalone Vertical Slice 可从启动完整玩到 Mission Complete。
+- Windows x64 v1.0.0 Standalone 已从启动完整测试到 Mission Complete。
 
-Pipeline 的主要价值不是单独的 Benchmark 数字，而是：**更少的重复执行、更早的错误发现、known-good output 保护，以及一条规模足够小、可以被完整解释和维护的内容生产流程。**
-
----
-
-## 面试 / 作品集摘要
-
-> 我做了一个 Unity Vertical Slice，并让真实玩法依赖推动 Python Content Pipeline 的演进。Pipeline 将多表 CSV 解析成 Typed Intermediate Model，校验 Schema、数值、重复 ID、跨表 Item 引用和 Active Scene Config 引用，再生成 Unity 可消费 JSON；同时加入经过完整校验的 atomic Batch Update。项目使用 40 条数据完成 Scale / QA，并通过 QA 发现并修复 2 个真实校验 Bug。在受控的 8 条批量修改 execution benchmark 中，人工等价输出耗时 192 秒，而 Batch Preview → Apply → Generate 耗时 0.287 秒；这个数字只用于说明 execution-stage 自动化收益，不代表整个内容生产流程快 670 倍。
+Pipeline 的主要价值不只是 Benchmark 数字，而是：**更少的重复执行、更早的错误发现、known-good output 保护，以及一条规模足够小、可以被完整理解和维护的内容生产流程。**
