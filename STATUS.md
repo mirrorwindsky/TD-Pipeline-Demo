@@ -1,7 +1,7 @@
 # Current Status
 
 **Last updated:** 2026-09-11  
-**Sprint stage:** Core project, QA, measurement, Case Study, and English README packaging complete; resume / applications are next  
+**Sprint stage:** Core project, QA, measurement, Case Study, and bilingual portfolio documentation complete; resume / applications are next  
 **Repository:** `TD-Pipeline-Demo`
 
 ## Current Direction
@@ -31,7 +31,7 @@ The project intentionally uses real gameplay-content needs to create real Pipeli
 
 ## Current Milestone — Technical Project Core Complete ✅
 
-The project has moved through gameplay implementation, Pipeline V2, presentation, QA, Scale Test, measured workflow comparison, and portfolio documentation.
+The project has moved through gameplay implementation, Pipeline V2, presentation, QA, Scale Test, measured workflow comparison, and bilingual portfolio documentation.
 
 Current completed evidence includes:
 
@@ -50,7 +50,8 @@ Current completed evidence includes:
 - systematic bad-data QA with two real bugs found and fixed;
 - controlled manual-vs-automated execution benchmark;
 - portfolio-ready Pipeline Case Study;
-- final English README packaging with direct links to the supporting evidence.
+- synchronized English / Simplified Chinese README, QA record, and Case Study;
+- bilingual documentation index under `Docs/README.md`.
 
 The next priority is **resume, project explanation, and applications**, not more feature development.
 
@@ -181,9 +182,8 @@ Day 11 results:
 
 Full reproducible QA evidence:
 
-```text
-Docs/D11_QA.md
-```
+- [`Docs/D11_QA.md`](Docs/D11_QA.md)
+- [`Docs/D11_QA.zh-CN.md`](Docs/D11_QA.zh-CN.md)
 
 ### Real Bug Fix 1 — Active Scene Reference Coverage
 
@@ -283,9 +283,8 @@ The benchmark sample produced 0 manual errors and 0 automated errors, so error-r
 
 Full Case Study:
 
-```text
-Docs/Pipeline_Case_Study.md
-```
+- [`Docs/Pipeline_Case_Study.md`](Docs/Pipeline_Case_Study.md)
+- [`Docs/Pipeline_Case_Study.zh-CN.md`](Docs/Pipeline_Case_Study.zh-CN.md)
 
 ---
 
@@ -294,22 +293,23 @@ Docs/Pipeline_Case_Study.md
 The repository now contains:
 
 ```text
-README.md
-→ concise portfolio overview, final benchmark, QA / Case Study links
+README.md / README.zh-CN.md
+→ bilingual portfolio overview, benchmark, QA / Case Study links
 
-Docs/D11_QA.md
+Docs/README.md
+→ bilingual documentation index and current / historical split
+
+Docs/D11_QA.md / D11_QA.zh-CN.md
 → reproducible QA / bug-fix evidence
 
-Docs/Pipeline_Case_Study.md
+Docs/Pipeline_Case_Study.md / Pipeline_Case_Study.zh-CN.md
 → Problem / Pipeline Design / QA / Before-After / Trade-offs / Outcome
 
 QA/Fixtures/scale_valid/
 → reusable 40-record Scale / benchmark fixture
 ```
 
-The English README now reflects the current portfolio state and directly surfaces the Case Study and measured benchmark.
-
-The Simplified Chinese README remains intentionally frozen at an earlier milestone with a visible notice pointing readers to the English README. Full bilingual synchronization is an optional follow-up, not a blocker for producing the resume.
+Historical documents such as `Docs/D10_HANDOFF.md` and `Docs/Pipeline_V1*.md` are intentionally preserved as milestone snapshots rather than rewritten to pretend they describe the current V2 Pipeline.
 
 ---
 
@@ -338,21 +338,16 @@ Anything used in README, Case Study, video, or resume must remain independently 
 
 ---
 
-## Next — Final Local Regression + Resume
+## Next — Resume + Applications
 
 Immediate next work:
 
-1. pull the latest `main` documentation updates locally;
-2. run one final `py Tools/config_tool.py generate` regression on the normal playable baseline;
-3. confirm `git status --short` is empty;
-4. retire the temporary `d11-qa` worktree / branch after restoring any local benchmark modifications;
-5. prepare concise, truthful resume project bullets;
-6. prepare a short interview explanation that can be delivered without Codex;
-7. add the stable GitHub repository link to the resume;
-8. start / expand applications.
+1. prepare concise, truthful resume project bullets;
+2. prepare a short interview explanation that can be delivered without Codex;
+3. add the stable GitHub repository link to the resume;
+4. start / expand applications.
 
 Optional follow-up after the resume is usable:
 
-- synchronize the Chinese README;
 - record a short final demo video;
 - collect external TD / user feedback if available.
