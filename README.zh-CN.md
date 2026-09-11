@@ -2,57 +2,57 @@
 
 [English](README.md) | 简体中文
 
-> **更新说明：** 当前中文版暂时冻结于早期里程碑。项目正在快速迭代，最新状态请以 [English README](README.md) 为准；中文版将在最终作品整理阶段统一同步。
+这是一个面向 **Technical Designer（技术策划）求职作品集** 的项目，将可玩的 Unity Vertical Slice 与面向策划的内容生产管线、校验工具、Batch 自动化、QA 证据和真实流程量化结合在一起。
 
-这是一个仍在持续开发中的 Technical Designer（技术策划）作品集项目，使用 Unity、C# 与 Python 探索**玩法 / 内容实现、数据驱动设计、校验工具、自动化与内容生产管线**。
-
-## 项目概述
-
-`TD-Pipeline-Demo` 将一个可玩的 Unity Gameplay Slice 与一条面向策划的配置生产管线结合在一起。
-
-这个项目并不把玩法实现和工具开发拆成彼此独立的练习，而是把它们放进一条连续工作流中：
+项目不是把玩法实现和脚本工具拆成彼此独立的练习，而是围绕一条连续工作流构建：
 
 ```text
-策划侧 CSV
-        ↓
-Python 校验 / 生成
-        ↓
-生成 JSON
-        ↓
-Unity 配置加载
-        ↓
-运行时配置查找
-        ↓
-配置驱动玩法
+Game Content Vertical Slice
+↕
+Content Model
+↕
+Python Validation / Batch Pipeline
 ```
 
-本项目希望展示：
+## 作品集概览
 
-- Gameplay / Content Implementation（玩法 / 内容实现）
-- Data-Driven Design（数据驱动设计）
-- Python Tooling & Automation（Python 工具与自动化）
-- Pre-Runtime Content Validation（运行前内容校验）
-- Runtime Content Dependencies（运行时内容依赖）
-- End-to-End Content Pipeline Understanding（端到端内容生产管线理解）
-- Debugging & Iteration（调试与迭代）
-- Explainable AI-Assisted Development（可解释的 AI 辅助开发）
+当前项目已经具备以下可验证证据：
+
+- 可完整游玩的室内 Unity Vertical Slice；
+- Windows standalone Build 已从启动到 Mission Complete 完整 Smoke Test；
+- 多表 CSV → Python Typed Model → Unity JSON 的 Content Pipeline；
+- Schema / malformed-row / type / range / duplicate 校验；
+- `interactionType` 合法值校验；
+- 跨表 Item Reference 校验；
+- Active Scene `configId` 校验；
+- 校验失败时保留上一版合法输出的 fail-safe generation；
+- 经过验证的 Batch Preview / atomic Apply；
+- 可复用的 **40 条 Scale Fixture**；
+- 系统 QA 中发现并修复 **2 个真实校验 Bug**；
+- 8 条批量修改受控对比：**人工 192.000 s vs 自动执行 0.287 s**；
+- 独立 QA 记录与 Pipeline Case Study。
+
+主要配套文档：
+
+- [`Docs/Pipeline_Case_Study.zh-CN.md`](Docs/Pipeline_Case_Study.zh-CN.md) — 问题、设计、QA、Before / After 量化、取舍与结果；
+- [`Docs/D11_QA.zh-CN.md`](Docs/D11_QA.zh-CN.md) — 可复现 Scale / 坏数据 QA 证据与 Bug 修复记录；
+- [`TODO.md`](TODO.md) — 冲刺执行记录；
+- [`STATUS.md`](STATUS.md) — 当前项目状态与下一步。
 
 ---
 
-## 当前里程碑
+## 当前 Gameplay Slice
 
-**Day 8 核心已完成：项目现在已经拥有一个可完整跑通的灰盒 Vertical Slice，以及第一版真正接入运行时的 Content Model V2。**
-
-Week 1 的原始原型保留在：
-
-```text
-Assets/Scenes/Prototype_01.unity
-```
-
-当前玩法切片开发场景位于：
+当前玩法 / Build 主场景：
 
 ```text
 Assets/Scenes/VerticalSlice_01.unity
+```
+
+Week 1 原始基线保留在：
+
+```text
+Assets/Scenes/Prototype_01.unity
 ```
 
 当前完整玩法依赖链：
@@ -67,392 +67,395 @@ PowerCell
 → Mission Complete
 ```
 
-当前 Vertical Slice 已包含：
+当前切片包含：
 
-- 多房间灰盒设施布局
-- 基于 `CharacterController` 的移动与重力
-- 平滑跟随相机
-- 基于 `IInteractable` 的通用交互
-- Pickup / Device / Gate 三类玩法内容
-- 基于 ID 的最小 Inventory 状态
-- Required Item 与 prerequisite Device 依赖
-- 事件驱动的 Gate 解锁
-- Interaction Prompt、Objective UI 与 Feedback
-- 事件驱动的任务目标推进
-- 从开始到结束可完整跑通的任务循环
-- 由 CSV 驱动的 Pickup / Device 运行时参数
+- 封闭式多房间工业设施布局；
+- 鼠标控制第三人称相机；
+- 基于 CharacterController 的玩家相对移动与重力；
+- 基于 `IInteractable` 的通用交互；
+- Pickup / Device / Gate 三类玩法内容；
+- 基于 ID 的最小 Inventory 状态；
+- Required Item 与 prerequisite Device 依赖；
+- 事件驱动 Gate 解锁与 Objective 推进；
+- 配置驱动 Objective 文本；
+- `[E] Interact`、瞬时 Feedback、持久 Mission Complete HUD；
+- 基础材质、室内灯光、区域区分和可交互对象可读性；
+- PowerNode / ControlTerminal / Exit 持久完成状态反馈。
 
-一次真实的源数据验证只修改了：
-
-```text
-power_node.requiredInteractions
-3 → 5
-```
-
-然后运行：
+Presentation Pass 后熟练玩家实测：
 
 ```text
-CSV
-→ Python
-→ JSON
-→ Unity
+PowerCell:         0:25
+PowerNode:         0:32
+ControlTerminal:   0:40
+Mission Complete:  0:46
 ```
 
-最终验证 PowerNode 在运行时确实需要 5 次交互。
+早期 5–8 分钟目标已经主动废弃。项目没有通过降速、长空走廊、无意义增加交互次数、强制搜索或无关玩法系统来硬凑时长。
 
-整个过程中：
-
-- 没有手动修改生成 JSON
-- 没有修改玩法 C# 代码
-
-第二次验证则故意修改：
-
-```text
-power_node.requiredItemId
-power_cell → fake_cell
-```
-
-当前生成工具仍会接受这个错误依赖，问题只会在运行时通过行为异常暴露出来。
-
-这暴露出了下一阶段真实的 Pipeline 问题：
-
-> **内容依赖已经可以通过源数据表达，但非法的跨记录引用还不能在运行前被校验。**
-
-这将成为 Pipeline V2 的直接起点。
+Windows x86-64 standalone Build 已完成，并由用户本人从启动完整玩到 Mission Complete。Build 产物保持本地并由 Git ignore。
 
 ---
 
-## 快速开始
+## 面向策划的 Content Pipeline
 
-### 环境要求
-
-- Unity 6.3 LTS
-- Python 3
-
-### 1. 生成配置数据
-
-当前面向策划的源配置位于：
+策划侧源数据：
 
 ```text
-ConfigSource/interactables.csv
+ConfigSource/
+├── items.csv
+├── objectives.csv
+├── interactables.csv
+└── batch_interaction_updates.csv
 ```
 
-在项目根目录运行：
-
-```powershell
-py Tools/config_tool.py
-```
-
-校验通过后，工具会生成：
+正常生成流程：
 
 ```text
-Assets/Data/interactables.json
-```
-
-当前生成行为：
-
-- 检测到 `ERROR` 时阻止生成
-- `WARNING` 会报告，但不会阻止生成
-- 被当前校验规则识别为非法的数据不会覆盖上一版合法生成结果
-
-### 2. 运行当前 Vertical Slice
-
-1. 使用 Unity 6.3 LTS 打开项目。
-2. 打开 `Assets/Scenes/VerticalSlice_01.unity`。
-3. 进入 Play Mode。
-4. 按照屏幕上的 Objective 推进。
-5. 在 Storage 找到并拾取 Power Cell。
-6. 前往 Maintenance，使用它修复 Power Node。
-7. 激活 Control Terminal。
-8. 进入已经解锁的 Exit 区域。
-9. 到达 EndMarker 完成任务。
-
-当前玩法流程：
-
-```text
-找到 PowerCell
-→ 修复 PowerNode
-→ 激活 ControlTerminal
-→ 解锁 ExitDoor
-→ 到达 Exit
-→ Mission Complete
-```
-
-原先的 `Prototype_01.unity` 仍保留为 Pipeline V1 / Week 1 基线场景。
-
----
-
-## 玩法架构
-
-### 玩家移动
-
-```text
-WASD
-→ movement vector
-→ normalization
-→ CharacterController.Move()
-→ gravity
-→ player movement
-```
-
-玩家会朝当前移动方向旋转。
-
-### 跟随相机
-
-简单的跟随相机会在 `LateUpdate` 中，于玩家移动后更新。
-
-这使玩家在更大的 Vertical Slice 场景中移动时仍能持续保持在合适视野内。
-
-### 通用交互
-
-玩家交互代码不再直接依赖某一个具体交互组件。
-
-```text
-E / forward Raycast
-→ Interactable tag
-→ IInteractable
-→ 对象自己的交互逻辑
-```
-
-当前实现包括：
-
-```text
-IInteractable
-├── ConfigurableInteractable   （V1 基线）
-├── PickupInteractable         （V2 Pickup）
-└── DeviceInteractable         （V2 Device）
-```
-
-因此，在新增交互类型时，玩家侧交互代码无需跟着修改。
-
-### Inventory / Pickup
-
-```text
-PowerCell
-→ PickupInteractable
-→ PlayerInventory
-→ grantedItemId = power_cell
-```
-
-`PlayerInventory` 当前使用：
-
-```text
-HashSet<string>
-```
-
-因为现阶段只需要：
-
-- 判断某个 Item ID 是否存在
-- 保证同一 Item ID 不重复
-
-### Device 状态
-
-`DeviceInteractable` 当前维护：
-
-```text
-前置条件是否满足？
+items.csv
++ objectives.csv
++ interactables.csv
         ↓
-当前交互进度
+Parse Once SourceTables
         ↓
-是否完成？
+Schema / malformed-row / type / range / duplicate validation
+        ↓
+Typed ContentModel
+        ↓
+interactionType validation
+        ↓
+Item cross-reference validation
+        ↓
+active Scene configId validation
+        ↓
+ERROR / WARNING gate
+        ↓
+interactables.json + objectives.json
+        ↓
+Unity config databases
+        ↓
+Runtime gameplay + HUD
 ```
 
-一个 Device 当前可以依赖：
-
-- 一个 Item ID
-- 另一个 `DeviceInteractable`
-- 配置中的交互次数
-
-当前 PowerNode 示例：
+Typed Intermediate Model：
 
 ```text
-PlayerInventory 中存在 power_cell
-→ PowerNode 可操作
-→ 消耗 power_cell
-→ 推进 PowerNode 交互进度
-→ PowerNode Completed
+ContentModel
+├── items: list[ItemConfig]
+├── objectives: list[ObjectiveConfig]
+└── interactables: list[InteractableConfig]
 ```
 
-### Device 依赖
-
-ControlTerminal 当前依赖 PowerNode 完成：
+生成输出：
 
 ```text
-PowerNode 未完成
-→ ControlTerminal 被阻挡
-
-PowerNode 已完成
-→ ControlTerminal 可以操作
+Assets/Data/
+├── interactables.json
+└── objectives.json
 ```
 
-### Gate 流程
+生成 JSON 被视为 Pipeline Output，而不是正常工作流里由策划手工维护的第二份真值。
 
-`GateController` 监听 ControlTerminal 的完成事件：
+### 当前校验覆盖
 
-```text
-ControlTerminal.Completed
-→ GateController
-→ ExitDoor 解锁
-```
+Pipeline 当前会检查：
 
-### Mission / Objective 流程
+- CSV header 缺失；
+- required column / value 缺失；
+- unexpected extra columns / malformed rows；
+- integer / boolean 类型错误；
+- 非法或异常 interaction range；
+- duplicate IDs；
+- 非法 `interactionType`；
+- 未知 `requiredItemId` / `grantedItemId`；
+- `VerticalSlice_01.unity` 中受支持 Interactable 组件的 `configId` 引用；
+- Validation failure 后上一版合法输出是否被保留。
 
-当前玩家看到的 Objective 顺序：
-
-```text
-Find a Power Cell in Storage
-→ Repair the Power Node in Maintenance
-→ Activate the Control Terminal
-→ Reach the Exit
-→ Mission Complete
-```
-
-HUD 当前提供：
-
-- 当前 Objective
-- Interaction Prompt
-- 条件不足反馈
-- 交互进度反馈
-- 完成反馈
-
-因此玩家现在可以在**不查看 Unity Console** 的情况下理解并完成整个流程。
+Active Scene Reference Validator 只覆盖当前明确的 config-driven Interactable 组件集合，并不是通用的全 Scene / 全 Prefab dependency scanner。
 
 ---
 
-## Content Model
+## CLI
 
-当前源配置文件：
-
-```text
-ConfigSource/interactables.csv
-```
-
-当前字段包括：
-
-- `id`
-- `displayName`
-- `interactionType`
-- `requiredInteractions`
-- `requiredItemId`
-- `grantedItemId`
-- `blockedMessage`
-- `completionMessage`
-- `deactivateOnComplete`
-
-当前 V2 模型仍然是**单表结构**。
-
-目前已经存在真实的数据关系，例如：
-
-```text
-power_cell
-grantedItemId = power_cell
-```
-
-以及：
-
-```text
-power_node
-requiredItemId = power_cell
-requiredInteractions = 3
-```
-
-运行时内容通过：
-
-```text
-configId
-↓
-InteractableConfigDatabase
-↓
-InteractableConfig
-```
-
-获取对应配置。
-
-同一套配置数据库现在已经被多个运行时组件消费：
-
-```text
-InteractableConfigDatabase
-├── ConfigurableInteractable
-├── PickupInteractable
-└── DeviceInteractable
-```
-
-下一阶段 Pipeline V2 将优先强化源数据建模和引用校验，而不是继续无限扩张当前单表结构。
-
----
-
-## Python 工具
-
-当前 Pipeline 工具：
+工具入口：
 
 ```text
 Tools/config_tool.py
 ```
 
-Week 1 形成的校验流程：
+依赖：
 
-```text
-CSV / Unity Scene
-↓
-Schema Validation
-↓
-Value / Range Validation
-↓
-Duplicate-ID Validation
-↓
-Scene Reference Validation
-↓
-ERROR / WARNING Gate
-↓
-Typed Configuration
-↓
-JSON Generation
+- Python 3
+- Unity 6.3 LTS（用于可玩项目）
+
+查看命令：
+
+```powershell
+py Tools/config_tool.py --help
 ```
 
-当前已经包含的校验：
+正常校验 + 生成：
 
-- CSV Header 缺失
-- Required Column 缺失
-- Required Field 值为空
-- 非法整数
-- 非法布尔值
-- 非法交互范围
-- 可疑的过大交互次数
-- 重复 ID
-- V1 Unity Scene 中的 `configId` 引用
-
-当前工具还**不能**检查类似：
-
-```text
-requiredItemId = fake_cell
+```powershell
+py Tools/config_tool.py
 ```
 
-这样的字段是否真的引用了一个合法 Item / Content ID。
+或：
 
-这正是 Pipeline V2 的明确目标之一。
+```powershell
+py Tools/config_tool.py generate
+```
+
+只 Preview、不修改源数据：
+
+```powershell
+py Tools/config_tool.py batch-preview
+```
+
+应用经过完整校验的 Batch：
+
+```powershell
+py Tools/config_tool.py batch-apply
+```
+
+Batch Apply 后再次运行 normal generation，使修改重新走完整 Validation 并进入 Unity 数据。
+
+当前生成契约：
+
+- `ERROR` 阻断 generation；
+- `WARNING` 输出但不阻断 generation；
+- Validation failure 不覆盖上一版合法 JSON；
+- Batch Preview 不修改源文件；
+- Batch Apply 在逻辑校验通过后使用 atomic source replacement。
+
+---
+
+## Batch Processing
+
+当前真实 Batch 用例是批量修改 `requiredInteractions`。
+
+```text
+batch_interaction_updates.csv
+↓
+full-batch validation
+↓
+typed BatchInteractionUpdate objects
+↓
+Preview or Apply
+↓
+atomic source-file replacement
+↓
+normal Pipeline generation
+↓
+Unity Runtime
+```
+
+正常 Demo Batch 示例：
+
+```text
+cube_sturdy:       3 → 4
+power_node:        3 → 2
+control_terminal:  2 → 1
+```
+
+D11 进一步在 20 条 Interactable 的 Scale Fixture 上验证了 8 条 Batch：恰好只有目标 8 个 `requiredInteractions` 字段发生变化，其他字段保持不变，并且 8 个目标值全部正确进入生成 JSON。
+
+---
+
+## QA + Scale 证据
+
+可复用合法 Fixture：
+
+```text
+QA/Fixtures/scale_valid/
+├── items.csv                    8 records
+├── objectives.csv              12 records
+├── interactables.csv           20 records
+└── batch_interaction_updates.csv 8 updates
+```
+
+Scale Test 总内容：
+
+```text
+40 records
+```
+
+QA 覆盖：
+
+- 40 条合法数据生成；
+- 8 条 Batch Preview；
+- 8 条 Batch Apply + regeneration；
+- required value 缺失；
+- required column 缺失；
+- duplicate IDs；
+- invalid integer type；
+- invalid range；
+- invalid `interactionType`；
+- broken cross-table Item reference；
+- broken active-Scene `configId` reference；
+- empty CSV；
+- malformed CSV；
+- fail-safe output preservation。
+
+完整证据见：[`Docs/D11_QA.zh-CN.md`](Docs/D11_QA.zh-CN.md)
+
+### 真实 Bug 1 — Active V2 Scene Reference Coverage
+
+QA 复现了一个真实断链：`VerticalSlice_01.unity` 仍引用 `control_terminal`，但源配置 ID 已被改名，生成 JSON 中不再存在原 ID。修复前 Validator 仍然扫描 V1 baseline Scene，因此错误地让 Generation 通过。
+
+修复后 Validator 改为针对 Active Scene 和当前 config-driven Interactable 组件白名单，同样的坏引用会在 JSON 生成前被阻断。
+
+Main 修复提交：
+
+```text
+97b24be fix: validate active scene config references
+```
+
+### 真实 Bug 2 — Malformed CSV Silent Truncation
+
+未转义逗号会产生额外 CSV 值。修复前 `csv.DictReader` 将溢出值放到 `None` key 下，而校验没有发现，导致 Objective description 被静默截断后仍然生成。
+
+现在 `validate_schema()` 会对 unexpected extra values 输出 row-level ERROR 并阻断 Generation。
+
+Main 修复提交：
+
+```text
+bb088b3 fix: reject malformed CSV rows with extra columns
+```
+
+### Fail-Safe 证据
+
+针对 required value 缺失测试，D11 在失败 Generation 前后分别计算两个 generated JSON 的 SHA256；两个 Hash 均未变化。
+
+```text
+valid generated data
+→ invalid source introduced
+→ ERROR detected
+→ generation blocked
+→ previous valid JSON preserved
+```
+
+---
+
+## Before / After 量化
+
+使用同一套 40-record fixture 和同一组 8 条 `requiredInteractions` 修改做受控等价输出对比。
+
+### 人工路径
+
+人工流程：
+
+1. 在 `ConfigSource/interactables.csv` 找到 8 个目标；
+2. 手工修改 8 个源值；
+3. 在生成 JSON 中找到对应 8 条记录；
+4. 手工同步相同的 8 个值；
+5. 检查并保存两份文件。
+
+实测执行时间：
+
+```text
+192.000 s
+```
+
+独立校验：
+
+```text
+CSV records: 20
+JSON records: 20
+overall: PASS
+0 unintended CSV field changes detected
+```
+
+### 自动路径
+
+```text
+batch-preview
+→ batch-apply
+→ generate
+```
+
+实测执行时间：
+
+```text
+0.2865603 s
+```
+
+独立校验同样 PASS。
+
+### 结果
+
+```text
+Manual execution:       192.000 s
+Automated execution:      0.287 s
+Execution speedup:        ~670×
+Execution-time reduction: ~99.85%
+```
+
+这明确是 **execution-stage benchmark**：不包含 Batch Request 本身的编写时间，也不代表“整个内容生产流程快 670 倍”。
+
+这次人工和自动流程都没有错误，因此“风险下降”不从这次计时样本推断，而由 D11 的坏数据 QA、真实 Bug 和 fail-safe 证据单独支持。
+
+完整分析见：[`Docs/Pipeline_Case_Study.zh-CN.md`](Docs/Pipeline_Case_Study.zh-CN.md)
+
+---
+
+## 设计取舍
+
+以下扩展被有意留在当前 Scope 外：
+
+- Unity Editor GUI；
+- dependency visualization；
+- generalized Quest framework；
+- dependency-cycle detection；
+- unreachable-objective detection；
+- all-Scene / all-Prefab scanning；
+- 大型 automated-test framework。
+
+决策原则：
+
+> 只有当前内容、QA 或工作流证明确实存在真实问题时，才为解决它增加复杂度。
+
+例如：
+
+- Editor Integration 被跳过，因为 CLI 已经能清晰完成 Generate / Preview / Apply，无需引入额外的 Python process launching 和 Editor-only 维护成本；
+- cycle / unreachable checks 被跳过，因为当前 Objective architecture 并没有外部化为通用 dependency graph；
+- Active Scene Reference Validation 只在 QA 实际复现 stale-ID 问题后扩展；
+- malformed-row validation 只在 QA 实际复现 silent corruption 后加入。
 
 ---
 
 ## 项目结构
 
-关键目录：
-
 ```text
 TD-Pipeline-Demo/
 ├── Assets/
 │   ├── Data/
-│   │   └── interactables.json
-│   ├── Prefabs/
+│   │   ├── interactables.json
+│   │   └── objectives.json
+│   ├── Materials/
+│   │   └── D10Facility/
 │   ├── Scenes/
 │   │   ├── Prototype_01.unity
 │   │   └── VerticalSlice_01.unity
-│   ├── Scripts/
-│   └── Settings/
+│   └── Scripts/
 │
 ├── ConfigSource/
-│   └── interactables.csv
+│   ├── items.csv
+│   ├── objectives.csv
+│   ├── interactables.csv
+│   └── batch_interaction_updates.csv
+│
+├── QA/
+│   └── Fixtures/
+│       └── scale_valid/
 │
 ├── Docs/
+│   ├── README.md
+│   ├── D10_HANDOFF.md
+│   ├── D11_QA.md
+│   ├── D11_QA.zh-CN.md
+│   ├── Pipeline_Case_Study.md
+│   ├── Pipeline_Case_Study.zh-CN.md
 │   ├── Pipeline_V1.md
 │   └── Pipeline_V1.zh-CN.md
 │
@@ -465,205 +468,33 @@ TD-Pipeline-Demo/
 └── TODO.md
 ```
 
-### `ConfigSource`
+---
 
-面向策划的源配置。
+## AI 辅助开发
 
-### `Tools`
+AI / Codex 用于加速实现、检查和调试，而不是替代验证和理解。
 
-Python 校验、转换与内容生产管线工具。
+项目没有为了满足 checklist 人为制造“AI 生成错误”。D11 中两个真实 QA Bug 都经历了具体输入复现、原因定位、小范围修复和回归验证，并被完整记录。
 
-### `Assets/Data`
-
-Unity 运行时消费的生成配置。
-
-### `Assets/Scripts`
-
-当前 Gameplay 与 Pipeline 集成代码，包括：
-
-- 玩家移动 / 重力
-- 跟随相机
-- 通用 Raycast 交互
-- Inventory
-- Pickup 行为
-- Device 行为
-- 配置数据类
-- 配置数据库
-- Gate 控制
-- HUD
-- Objective / Mission Flow
-
-### `Assets/Scenes`
-
-- `Prototype_01.unity` — Pipeline V1 / Week 1 基线
-- `VerticalSlice_01.unity` — 当前 Gameplay Vertical Slice 开发场景
-
-### `Docs`
-
-用于说明项目技术实现与 Pipeline 的文档。
+进入 README、Case Study、视频或简历的实现都应能够在不依赖 Codex 的情况下独立解释。
 
 ---
 
-## 文档
+## 作品集 / 面试一句话说明
 
-- [`Docs/Pipeline_V1.md`](Docs/Pipeline_V1.md) — Pipeline V1 端到端流程、校验、Unity 加载、验证过程与当前边界
-- [`Docs/Pipeline_V1.zh-CN.md`](Docs/Pipeline_V1.zh-CN.md) — 简体中文版本
-- [`STATUS.md`](STATUS.md) — 当前项目状态与交接信息
-- [`TODO.md`](TODO.md) — 当前 V2 Sprint 执行清单
-
-Pipeline V2 文档将在 D9 架构与校验模型稳定后再补充。
+> 我做了一个 Unity Vertical Slice，并让真实玩法依赖推动 Python Content Pipeline 的演进。Pipeline 将多表 CSV 解析成 Typed Intermediate Model，校验 Schema、数值、重复 ID、跨表 Item 引用和 Active Scene Config 引用，再生成 Unity 可消费 JSON；同时加入经过完整校验的 atomic Batch Update。项目使用 40 条数据完成 Scale / QA，并通过 QA 发现并修复 2 个真实校验 Bug。在受控的 8 条批量修改 execution benchmark 中，人工等价输出耗时 192 秒，而 Batch Preview → Apply → Generate 耗时 0.287 秒；这个数字只用于说明 execution-stage 自动化收益，不代表整个内容生产流程快 670 倍。
 
 ---
 
-## 技术栈
+## 当前封装状态
 
-- Unity 6.3 LTS
-- C#
-- TextMeshPro
-- Python
-- CSV / JSON
-- Git / GitHub
+项目技术核心、QA 证据、Pipeline Case Study 以及中英文核心文档已经完成。
 
----
+当前优先级已经转为：**简历、项目讲解和正式投递**，而不是继续增加功能。
 
-## 开发日志
+后续可选项：
 
-### Day 1 — Minimal Unity Prototype
+- 录制一段简短最终演示视频；
+- 有机会时获取 TD / 用户外部反馈。
 
-- 完成 Unity 6.3 LTS 项目初始化
-- 完成基础移动、Raycast 交互、Debug 与 Git 初始化
-
-### Day 2 — First Config-Driven Gameplay Chain
-
-- 加入外部 JSON 配置
-- 加入运行时 Dictionary 查找
-- 验证配置修改可以改变运行时行为
-
-### Day 3 — Python Tool V0
-
-- 加入策划侧 CSV
-- 完成 CSV → Python → JSON → Unity 的第一条生成链
-
-### Day 4 — Demo V0
-
-- 完成第一版可完整跑通的灰盒任务循环
-
-### Day 5 — Python Tool V1
-
-加入：
-
-- Schema 校验
-- 类型 / 范围校验
-- Duplicate ID 校验
-- `ERROR` / `WARNING`
-- 可执行的错误信息
-- Unity Scene 引用校验
-- Fail-safe 生成
-
-### Day 6 — Pipeline V1
-
-验证：
-
-```text
-Designer CSV
-→ Python Validation
-→ Generated JSON
-→ Unity
-→ Runtime Gameplay
-```
-
-完成真实的：
-
-```text
-requiredInteractions
-3 → 5
-```
-
-源数据到运行时验证。
-
-并新增：
-
-```text
-Docs/Pipeline_V1.md
-```
-
-### Day 7 — Week 1 Wrap-up
-
-- 回归测试 Demo V1 与 Tool V1
-- 清理无关 Unity 模板资源
-- 修正 Build Scene 配置
-- 重构 README，使其更适合作品集外部阅读
-- 加入中英文 README / Pipeline 文档
-- 重构剩余 Sprint，使 D8–D10 聚焦 Vertical Slice + Pipeline V2
-
-### Day 8 — Gameplay Vertical Slice + Content Model V2 Core
-
-- 创建 `VerticalSlice_01.unity`
-- 保留 `Prototype_01.unity` 作为 V1 基线
-- 搭建多房间设施灰盒布局
-- 为 CharacterController 增加重力
-- 加入平滑跟随相机
-- 引入 `IInteractable`
-- 保留 V1 `ConfigurableInteractable` 兼容
-- 加入 `PlayerInventory`
-- 加入 `PickupInteractable`
-- 加入可复用 `DeviceInteractable`
-- 加入 Required Item 与 prerequisite Device 逻辑
-- 加入事件驱动 `GateController`
-- 加入 TextMeshPro Objective / Feedback / Prompt HUD
-- 加入事件驱动的 Vertical Slice Objective Flow
-- 加入最终任务完成 Trigger
-- 扩展配置模型，加入 Interaction / Item / Feedback 相关字段
-- 将 PowerCell 与 PowerNode 的行为重新接回 CSV 生成数据
-- 验证 `requiredInteractions: 3 → 5` 可以传播到真实运行时玩法
-- 故意测试 `requiredItemId = fake_cell`
-- 识别出“缺少跨记录引用校验”这一真实 Pipeline V2 问题
-
-当前 Day 8 完整玩法链：
-
-```text
-PowerCell
-→ PlayerInventory
-→ PowerNode
-→ ControlTerminal
-→ ExitDoor
-→ EndMarker
-→ Mission Complete
-```
-
----
-
-## 当前范围
-
-已知限制包括：
-
-- 当前 Vertical Slice 视觉上仍然是灰盒
-- 最终 5–8 分钟目标尚未正式计时
-- 当前 Content Model V2 仍然只有一张 CSV
-- `requiredItemId` 等跨记录引用尚不能在运行前校验
-- `interactionType` 已经进入配置，但还没有合法 enum / value 校验
-- V1 的 Unity 引用校验仍然只针对现有 `ConfigurableInteractable.configId`
-- 当前 Validation 仍会多次读取 CSV，而不是共享同一个已解析 Intermediate Model
-- 当前 Python 工具仍是 CLI
-
-这些都是下一阶段明确的迭代目标，而不是当前实现已经解决的问题。
-
----
-
-## 下一步
-
-### Day 9 — Pipeline V2
-
-下一阶段目标是把当前单表 Content Model V2 升级成更完整的内容生产 Pipeline。
-
-计划包括：
-
-- 在真实需要的地方引入多表源数据
-- 将源数据统一 Parse Once
-- 建立 Typed Intermediate Model
-- 让 Validation 与 Generation 共用同一份解析结果
-- 校验合法 `interactionType`
-- 加入跨记录 / 跨表引用校验
-- 在运行前拦截 `requiredItemId = fake_cell` 这类错误
-- 保留现有 Schema、Type、Range、Duplicate-ID 与 Unity Reference Validation
-- 加入至少一个真实 Batch Processing 工作流
+稳定作品源以 GitHub `main` 分支为准。
