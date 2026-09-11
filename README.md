@@ -2,76 +2,59 @@
 
 English | [简体中文](README.zh-CN.md)
 
-> The English README reflects the current Day 11 milestone. The Simplified Chinese version will be synchronized during the final documentation pass.
+> The English README reflects the current portfolio state. The Simplified Chinese README is intentionally frozen at an earlier milestone and points back here until the final bilingual synchronization pass.
 
-A Technical Designer portfolio project combining a **playable Unity Vertical Slice** with a **designer-facing content pipeline, validation tooling, batch automation, config-driven runtime behavior, and QA evidence**.
+A **Technical Designer portfolio project** combining a playable Unity Vertical Slice with a designer-facing content Pipeline, validation tooling, Batch automation, QA evidence, and measured workflow improvement.
 
-The project is intentionally built as one connected workflow rather than as separate gameplay and tooling exercises.
+The project is intentionally built as one connected workflow rather than as separate gameplay and scripting exercises:
 
 ```text
-Designer-facing multi-table CSV
-├── items.csv
-├── objectives.csv
-└── interactables.csv
-        ↓
-Python parse / validation
-        ↓
-Typed ContentModel
-        ↓
-Cross-reference / semantic / active-scene validation
-        ↓
-Generated Unity JSON
-├── interactables.json
-└── objectives.json
-        ↓
-Unity configuration databases
-        ↓
-Config-driven gameplay + HUD
-        ↓
-Playable Windows standalone demo
+Game Content Vertical Slice
+↕
+Content Model
+↕
+Python Validation / Batch Pipeline
 ```
 
-The Pipeline also includes a validated Batch workflow for designer-facing interaction tuning and a reusable Day 11 QA fixture for Scale / bad-data testing.
+## Portfolio Snapshot
 
-The project is intended to demonstrate:
+Current project evidence:
 
-- gameplay / content implementation;
-- data-driven design;
-- Python tooling and automation;
-- pre-runtime content validation;
-- runtime content dependencies;
-- end-to-end content-pipeline understanding;
-- QA, debugging, and iteration;
-- scope / trade-off decisions;
-- explainable AI-assisted development.
+- playable indoor Unity Vertical Slice;
+- Windows standalone build smoke-tested from launch to Mission Complete;
+- multi-table CSV → typed Python model → generated Unity JSON Pipeline;
+- schema / malformed-row / type / range / duplicate validation;
+- `interactionType` semantic validation;
+- cross-table Item-reference validation;
+- active-Scene `configId` validation;
+- fail-safe generation preserving previous valid output;
+- validated Batch Preview / atomic Apply;
+- reusable **40-record Scale Fixture**;
+- systematic QA with **two real validation bugs found and fixed**;
+- controlled 8-record benchmark: **192.000 s manual vs 0.287 s automated execution**;
+- dedicated QA record and Pipeline Case Study.
+
+Primary supporting documents:
+
+- [`Docs/Pipeline_Case_Study.md`](Docs/Pipeline_Case_Study.md) — problem, design, QA, Before / After benchmark, trade-offs, outcome;
+- [`Docs/D11_QA.md`](Docs/D11_QA.md) — reproducible Scale / bad-data QA evidence and bug-fix history;
+- [`TODO.md`](TODO.md) — sprint execution record;
+- [`STATUS.md`](STATUS.md) — current project state and next focus.
 
 ---
 
-## Current Milestone
+## Current Gameplay Slice
 
-**Day 11 — QA + Scale Test is complete.**
-
-The project now combines:
-
-- a presentation-ready indoor Unity Vertical Slice;
-- Content Pipeline V2;
-- unified CLI workflow;
-- validated Batch Preview / Apply;
-- Windows standalone delivery;
-- a reusable 40-record Scale Fixture;
-- reproducible bad-data QA evidence;
-- two real validation bugs discovered and fixed through QA.
-
-The original Week 1 prototype remains preserved in:
-
-```text
-Assets/Scenes/Prototype_01.unity
-```
-
-The current gameplay / build scene is:
+The active gameplay / build Scene is:
 
 ```text
 Assets/Scenes/VerticalSlice_01.unity
+```
+
+The preserved Week 1 baseline is:
+
+```text
+Assets/Scenes/Prototype_01.unity
 ```
 
 Current gameplay dependency chain:
@@ -86,25 +69,22 @@ PowerCell
 → Mission Complete
 ```
 
-The current slice includes:
+The slice includes:
 
-- an enclosed multi-room industrial-facility layout;
-- third-person mouse-controlled camera yaw / pitch with camera-wall shortening;
-- player-relative CharacterController WASD movement with gravity;
+- enclosed multi-room industrial-facility layout;
+- mouse-controlled third-person camera;
+- player-relative CharacterController movement with gravity;
 - generic interaction through `IInteractable`;
-- Pickup, Device, and Gate gameplay types;
+- Pickup / Device / Gate gameplay types;
 - minimal ID-based inventory state;
 - required-item and prerequisite-device dependencies;
 - event-driven gate unlocking and objective progression;
-- config-driven Objective content;
-- `[E] Interact`, transient Feedback, and Mission Complete HUD presentation;
-- basic materials, indoor lighting, room differentiation, and readable interactables;
-- persistent world-state feedback for PowerNode, ControlTerminal, and Exit unlock;
-- a complete start-to-end mission loop that does not require the Unity Console.
+- config-driven Objective text;
+- `[E] Interact`, transient Feedback, and persistent Mission Complete HUD;
+- materials, indoor lighting, room differentiation, and readable interactables;
+- persistent PowerNode / ControlTerminal / Exit completion-state feedback.
 
-### Presentation / Delivery Result
-
-The first open-graybox timing was `0:27`. After the D10 camera and spatial restructure, the familiar-player timing was measured at `0:46`:
+Familiar-player timing after the presentation pass:
 
 ```text
 PowerCell:         0:25
@@ -113,22 +93,15 @@ ControlTerminal:   0:40
 Mission Complete:  0:46
 ```
 
-The earlier 5–8 minute target was intentionally **not** forced. Extending the slice through slower movement, long empty corridors, inflated interaction counts, or arbitrary searching would add filler rather than portfolio value. Final unfamiliar-player timing is deferred to the later user-test stage.
+The earlier 5–8 minute target was intentionally retired rather than padded with slower movement, empty corridors, inflated interaction counts, arbitrary searching, or unrelated gameplay systems.
 
-A Windows x86-64 standalone build was completed and manually smoke-tested from launch to Mission Complete. Build artifacts remain local and ignored by Git; the repository stores the build configuration, not the binaries.
+A Windows x86-64 standalone build was completed and manually smoke-tested from launch to Mission Complete. Build artifacts remain local and are ignored by Git.
 
 ---
 
-## Quick Start
+## Designer-Facing Content Pipeline
 
-### Requirements
-
-- Unity 6.3 LTS
-- Python 3
-
-### 1. Use the Content Pipeline CLI
-
-Designer-facing sources:
+Designer-authored source:
 
 ```text
 ConfigSource/
@@ -137,6 +110,85 @@ ConfigSource/
 ├── interactables.csv
 └── batch_interaction_updates.csv
 ```
+
+Normal generation flow:
+
+```text
+items.csv
++ objectives.csv
++ interactables.csv
+        ↓
+Parse Once SourceTables
+        ↓
+Schema / malformed-row / type / range / duplicate validation
+        ↓
+Typed ContentModel
+        ↓
+interactionType validation
+        ↓
+Item cross-reference validation
+        ↓
+active Scene configId validation
+        ↓
+ERROR / WARNING gate
+        ↓
+interactables.json + objectives.json
+        ↓
+Unity config databases
+        ↓
+Runtime gameplay + HUD
+```
+
+Typed intermediate model:
+
+```text
+ContentModel
+├── items: list[ItemConfig]
+├── objectives: list[ObjectiveConfig]
+└── interactables: list[InteractableConfig]
+```
+
+Generated output:
+
+```text
+Assets/Data/
+├── interactables.json
+└── objectives.json
+```
+
+Generated JSON is treated as Pipeline output rather than normal designer-authored source.
+
+### Current Validation Coverage
+
+The Pipeline currently checks:
+
+- missing CSV headers;
+- missing required columns / values;
+- unexpected extra columns / malformed rows;
+- invalid integer / boolean values;
+- invalid or suspicious interaction ranges;
+- duplicate IDs;
+- illegal `interactionType` values;
+- unknown `requiredItemId` / `grantedItemId` references;
+- supported Interactable `configId` references in `VerticalSlice_01.unity`;
+- fail-safe output preservation after validation failure.
+
+The active-Scene reference validator intentionally targets the current known config-driven Interactable component types. It is **not** a generalized all-Scene / all-Prefab dependency scanner.
+
+---
+
+## CLI
+
+Tool entry point:
+
+```text
+Tools/config_tool.py
+```
+
+Requirements:
+
+- Python 3
+- Unity 6.3 LTS for the playable project
 
 Show available commands:
 
@@ -150,358 +202,59 @@ Normal validation + generation:
 py Tools/config_tool.py
 ```
 
-or explicitly:
+or:
 
 ```powershell
 py Tools/config_tool.py generate
 ```
 
-Dry-run Batch Preview:
+Preview a validated Batch without changing source files:
 
 ```powershell
 py Tools/config_tool.py batch-preview
 ```
 
-Apply a validated Batch to designer-facing source data:
+Apply a validated Batch:
 
 ```powershell
 py Tools/config_tool.py batch-apply
 ```
 
-After a Batch Apply, run normal generation again to validate and propagate the changed source into Unity data.
+After Batch Apply, run normal generation again to validate and propagate the changed source into Unity data.
 
-If validation succeeds, the Pipeline writes:
-
-```text
-Assets/Data/
-├── interactables.json
-└── objectives.json
-```
-
-Current generation behavior:
+Current generation contract:
 
 - `ERROR` blocks generation;
 - `WARNING` is reported but does not block generation;
-- invalid source data does not overwrite previous valid generated data;
-- generated JSON is not manually edited in the normal workflow;
-- successful generation prints a concise validation / output summary;
-- Batch Preview explicitly confirms that source files were not modified.
-
-### 2. Run the Vertical Slice in Unity
-
-1. Open the project with Unity 6.3 LTS.
-2. Open `Assets/Scenes/VerticalSlice_01.unity`.
-3. Enter Play Mode.
-4. Follow the on-screen objective.
-5. Find and pick up the Power Cell in Storage.
-6. Repair the Power Node in Maintenance.
-7. Activate the Control Terminal.
-8. Enter the unlocked Exit area.
-9. Reach the EndMarker to complete the mission.
-
-Current gameplay flow:
-
-```text
-Find PowerCell
-→ Repair PowerNode
-→ Activate ControlTerminal
-→ Unlock ExitDoor
-→ Reach Exit
-→ Mission Complete
-```
-
-The final build configuration also starts directly in `VerticalSlice_01.unity`.
+- failed validation does not overwrite previous valid JSON;
+- Batch Preview performs no source modification;
+- Batch Apply writes source CSV atomically after logical validation.
 
 ---
 
-## Gameplay Architecture
+## Batch Processing
 
-### Player / Camera
+The current real Batch use case is bulk modification of `requiredInteractions`.
 
-The current V2 scene uses player-relative movement and a mouse-controlled third-person camera.
-
-```text
-Mouse delta
-→ camera yaw / pitch
-→ player facing
-
-WASD
-→ player-relative movement vector
-→ normalization
-→ CharacterController.Move()
-→ gravity
-```
-
-The camera follows in `LateUpdate`, clamps pitch, and shortens its distance when solid geometry blocks the normal follow position.
-
-The V2 movement mode is serialized as an opt-in so the preserved V1 baseline can retain its previous behavior.
-
-### Generic Interaction
+Workflow:
 
 ```text
-E / forward Raycast
-→ Interactable tag
-→ IInteractable
-→ object-specific behavior
+batch_interaction_updates.csv
+↓
+full-batch validation
+↓
+typed BatchInteractionUpdate objects
+↓
+Preview or Apply
+↓
+atomic source-file replacement
+↓
+normal Pipeline generation
+↓
+Unity Runtime
 ```
 
-Current implementations:
-
-```text
-IInteractable
-├── ConfigurableInteractable   (V1 baseline)
-├── PickupInteractable         (V2 pickup)
-└── DeviceInteractable         (V2 device)
-```
-
-### Inventory / Pickup
-
-```text
-PowerCell
-→ PickupInteractable
-→ PlayerInventory
-→ grantedItemId = power_cell
-```
-
-`PlayerInventory` currently uses a `HashSet<string>` because the slice only needs unique item-ID membership checks.
-
-### Device State / Dependency
-
-`DeviceInteractable` tracks prerequisite satisfaction, interaction progress, and completion.
-
-```text
-PlayerInventory has power_cell
-→ PowerNode becomes usable
-→ power_cell is consumed
-→ configured interaction progress
-→ PowerNode.Completed
-```
-
-ControlTerminal uses an existing serialized prerequisite-device relationship:
-
-```text
-PowerNode incomplete
-→ ControlTerminal blocked
-
-PowerNode completed
-→ ControlTerminal usable
-```
-
-### Gate / World-State Presentation
-
-```text
-ControlTerminal.Completed
-├── GateController → ExitDoor opens
-└── CompletionVisualFeedback → Exit frame shows unlocked state
-```
-
-`CompletionVisualFeedback` is presentation-only. It subscribes to existing `DeviceInteractable.Completed` events and swaps assigned Renderer material references without changing gameplay state.
-
-Accepted world-state changes:
-
-- PowerNode: warm amber → powered cyan;
-- ControlTerminal: cyan → success green;
-- Exit: closed Gate → open path with persistent brighter green frame cue.
-
-### Mission / Objective / HUD Flow
-
-Gameplay events determine **when** mission progression occurs; player-facing Objective descriptions come from configuration.
-
-```text
-gameplay event
-→ objective ID
-→ ObjectiveConfigDatabase
-→ ObjectiveConfig.description
-→ PlayerHUD
-```
-
-Current sequence:
-
-```text
-Find a Power Cell in Storage
-→ Repair the Power Node in Maintenance
-→ Activate the Control Terminal
-→ Reach the Exit
-→ Mission Complete
-```
-
-The final HUD presentation includes:
-
-- top-left config-driven Objective card;
-- bottom-center `[E] Interact` prompt;
-- upper-center transient Feedback card;
-- distinct persistent Mission Complete card.
-
----
-
-## Content Model
-
-Pipeline V2 uses three real designer-facing content tables.
-
-### `items.csv`
-
-Fields:
-
-- `id`
-- `displayName`
-
-It is the authoritative registry for Item IDs referenced by interaction content.
-
-### `objectives.csv`
-
-Fields:
-
-- `id`
-- `displayName`
-- `description`
-
-Objective descriptions are generated into `objectives.json` and loaded by `ObjectiveConfigDatabase`.
-
-Current Demo IDs:
-
-- `find_power_cell`
-- `repair_power_node`
-- `activate_control_terminal`
-- `reach_exit`
-- `mission_complete`
-
-### `interactables.csv`
-
-Fields:
-
-- `id`
-- `displayName`
-- `interactionType`
-- `requiredInteractions`
-- `requiredItemId`
-- `grantedItemId`
-- `blockedMessage`
-- `completionMessage`
-- `deactivateOnComplete`
-
-Current example dependency:
-
-```text
-power_cell.grantedItemId = power_cell
-
-power_node.requiredItemId = power_cell
-power_node.requiredInteractions = 3
-```
-
-The Python Pipeline converts source tables into typed intermediate data:
-
-```text
-SourceTable
-→ ItemConfig / ObjectiveConfig / InteractableConfig
-→ ContentModel
-```
-
-The model intentionally stops short of a generalized quest framework. Prerequisite-device relationships and ExitDoor control remain in the existing Unity gameplay architecture where that is currently simpler.
-
----
-
-## Python Tool / Pipeline V2
-
-Tool entry point:
-
-```text
-Tools/config_tool.py
-```
-
-Normal-generation flow:
-
-```text
-items.csv
-+ objectives.csv
-+ interactables.csv
-        ↓
-Parse each source table once
-        ↓
-SourceTable
-        ↓
-Schema / malformed-row / type / range / duplicate validation
-        ↓
-Typed ContentModel
-        ↓
-interactionType / Item-reference / active-Scene configId validation
-        ↓
-ERROR / WARNING gate
-        ↓
-interactables.json + objectives.json
-```
-
-Current validation includes:
-
-- missing CSV headers;
-- missing required columns / values;
-- unexpected extra columns / malformed rows;
-- invalid integer / boolean values;
-- invalid or suspicious interaction ranges;
-- duplicate IDs;
-- illegal `interactionType` values;
-- unknown `requiredItemId` / `grantedItemId` references;
-- `configId` references used by supported Interactable components in `VerticalSlice_01.unity`;
-- fail-safe generation behavior.
-
-### Cross-Table Validation Iteration
-
-The concrete V1 → V2 iteration came from a real failure:
-
-```text
-power_node.requiredItemId
-power_cell → fake_cell
-```
-
-Before cross-reference validation, this invalid dependency could reach Unity Runtime. Pipeline V2 now produces:
-
-```text
-unknown item reference
-→ Python ERROR
-→ generation blocked
-→ previous valid generated data preserved
-→ invalid dependency never reaches runtime
-```
-
-A separate valid `backup_cell` test confirmed that the validator still permits valid designer-authored dependency changes.
-
-### Active Scene Reference Validation
-
-Day 11 found that the old Scene-reference validator still targeted the V1 baseline and did not cover the V2 `PickupInteractable` / `DeviceInteractable` `configId` contract.
-
-Reproduced failure:
-
-```text
-VerticalSlice_01.unity
-configId = control_terminal
-
-source ID
-control_terminal → control_terminal_renamed
-
-before fix
-→ Validation incorrectly PASSED
-```
-
-The validator was updated to target the active `VerticalSlice_01.unity` Scene and an explicit whitelist of config-driven Interactable component types. The same broken reference is now blocked before JSON generation.
-
-### Malformed CSV Validation
-
-Day 11 also found a silent-corruption case: an unescaped comma could create an unexpected extra CSV value, which `DictReader` stored under the `None` key while the Pipeline silently generated a truncated Objective description.
-
-`validate_schema()` now rejects these unexpected extra row values with a row-level ERROR.
-
----
-
-## Batch V1
-
-The genuine Batch use case is bulk modification of `requiredInteractions`.
-
-Example source:
-
-```text
-ConfigSource/batch_interaction_updates.csv
-```
-
-The normal Demo Batch example is:
+The normal Demo Batch example includes:
 
 ```text
 cube_sturdy:       3 → 4
@@ -509,27 +262,13 @@ power_node:        3 → 2
 control_terminal:  2 → 1
 ```
 
-Workflow:
-
-```text
-batch source
-→ full-batch validation
-→ typed BatchInteractionUpdate objects
-→ preview or apply
-→ atomic source-file replacement
-→ normal Pipeline V2 generation
-→ Unity runtime
-```
-
-Any invalid Batch entry rejects the logical Batch before source modification.
-
-Day 11 also verified an 8-record Batch against a 20-Interactable Scale Fixture. Exactly the intended eight `requiredInteractions` fields changed, all other records / fields remained unchanged, and all eight values propagated into generated JSON.
+Day 11 additionally verified an 8-record Batch against a 20-Interactable Scale Fixture. Exactly the intended eight `requiredInteractions` fields changed, no other source fields changed, and all eight values propagated into generated JSON.
 
 ---
 
-## Day 11 QA + Scale Test
+## QA + Scale Evidence
 
-Reusable fixture:
+Reusable valid fixture:
 
 ```text
 QA/Fixtures/scale_valid/
@@ -559,34 +298,38 @@ QA coverage included:
 - broken cross-table Item references;
 - broken active-Scene `configId` references;
 - empty CSV input;
-- malformed CSV rows with unexpected extra values;
-- fail-safe generated-output preservation.
+- malformed CSV rows;
+- fail-safe output preservation.
 
-Two real defects were found through QA:
+Full evidence: [`Docs/D11_QA.md`](Docs/D11_QA.md)
+
+### Real Bug 1 — Active V2 Scene Reference Coverage
+
+QA reproduced a source rename where `VerticalSlice_01.unity` still referenced `control_terminal`, but generated JSON no longer contained that ID. The pre-fix validator still targeted the V1 baseline Scene and incorrectly passed generation.
+
+The validator was updated to target the active Scene and the current config-driven Interactable component whitelist. The same broken reference is now blocked before generation.
+
+Main fix:
 
 ```text
-Active V2 Scene reference coverage gap
-→ FAIL
-→ targeted fix
-→ regression PASS
-
-Malformed CSV silent truncation
-→ FAIL
-→ targeted fix
-→ regression PASS
+97b24be fix: validate active scene config references
 ```
 
-Full reproducible evidence is documented in:
+### Real Bug 2 — Malformed CSV Silent Truncation
+
+An unescaped comma produced an unexpected extra CSV value. Before the fix, `csv.DictReader` stored the overflow under the `None` key, validation passed, and an Objective description was silently truncated.
+
+`validate_schema()` now rejects unexpected extra values with a row-level ERROR.
+
+Main fix:
 
 ```text
-Docs/D11_QA.md
+bb088b3 fix: reject malformed CSV rows with extra columns
 ```
 
 ### Fail-Safe Evidence
 
-For a missing required value, SHA256 hashes of both generated JSON files were captured before and after the failed generation. Both hashes remained unchanged.
-
-Verified behavior:
+For a missing required value, SHA256 hashes of both generated JSON files were captured before and after failed generation. Both hashes remained unchanged.
 
 ```text
 valid generated data
@@ -596,11 +339,92 @@ valid generated data
 → previous valid JSON preserved
 ```
 
-### AI-Assisted Development Note
+---
 
-No qualifying AI-generated implementation failure occurred during Day 11, so none was fabricated solely to satisfy a checklist.
+## Before / After Benchmark
 
-Day 11 did include genuine AI-assisted debugging on both QA-discovered defects. The issues were reproduced from concrete inputs, diagnosed, fixed with narrow changes, regression-tested, and integrated into `main`.
+The same 40-record fixture and the same 8 intended `requiredInteractions` changes were used for a controlled equivalent-output comparison.
+
+### Manual Path
+
+The manual workflow required:
+
+1. locate the 8 targets in `ConfigSource/interactables.csv`;
+2. edit the 8 source values;
+3. locate the corresponding generated JSON records;
+4. manually apply the same 8 values;
+5. check and save both files.
+
+Measured execution time:
+
+```text
+192.000 s
+```
+
+Independent verification:
+
+```text
+CSV records: 20
+JSON records: 20
+overall: PASS
+0 unintended CSV field changes detected
+```
+
+### Automated Path
+
+```text
+batch-preview
+→ batch-apply
+→ generate
+```
+
+Measured execution time:
+
+```text
+0.2865603 s
+```
+
+Independent verification also passed.
+
+### Result
+
+```text
+Manual execution:       192.000 s
+Automated execution:      0.287 s
+Execution speedup:        ~670×
+Execution-time reduction: ~99.85%
+```
+
+This is explicitly an **execution-stage benchmark**. It excludes the time required to author the Batch request itself and is not presented as a claim that the entire content-production process is 670× faster.
+
+The timing sample produced 0 manual errors and 0 automated errors. Error-risk reduction is therefore supported separately by the QA evidence rather than inferred from this benchmark.
+
+Full analysis: [`Docs/Pipeline_Case_Study.md`](Docs/Pipeline_Case_Study.md)
+
+---
+
+## Design Trade-offs
+
+Several possible extensions were intentionally not implemented:
+
+- Unity Editor GUI;
+- dependency visualization;
+- generalized Quest framework;
+- dependency-cycle detection;
+- unreachable-objective detection;
+- all-Scene / all-Prefab scanning;
+- large automated-test framework.
+
+Decision rule:
+
+> Add complexity only when current content, QA, or workflow evidence demonstrates that the complexity solves a real problem.
+
+Examples:
+
+- Unity Editor integration was skipped because the CLI already exposes Generate / Preview / Apply without adding process-launching and Editor-only maintenance overhead.
+- dependency-cycle / unreachable-objective checks were skipped because the current architecture does not externalize a generalized objective dependency graph.
+- active-Scene reference validation was expanded only after QA demonstrated a real stale-ID failure.
+- malformed-row validation was added only after QA reproduced silent content corruption.
 
 ---
 
@@ -617,8 +441,7 @@ TD-Pipeline-Demo/
 │   ├── Scenes/
 │   │   ├── Prototype_01.unity
 │   │   └── VerticalSlice_01.unity
-│   ├── Scripts/
-│   └── Settings/
+│   └── Scripts/
 │
 ├── ConfigSource/
 │   ├── items.csv
@@ -633,6 +456,7 @@ TD-Pipeline-Demo/
 ├── Docs/
 │   ├── D10_HANDOFF.md
 │   ├── D11_QA.md
+│   ├── Pipeline_Case_Study.md
 │   ├── Pipeline_V1.md
 │   └── Pipeline_V1.zh-CN.md
 │
@@ -647,102 +471,34 @@ TD-Pipeline-Demo/
 
 ---
 
-## Development Log
+## AI-Assisted Development
 
-### Day 1–7 — Pipeline V1 Baseline
+AI / Codex was used as a development accelerator, not as a substitute for validation or understanding.
 
-Built the first Unity prototype, external config chain, Python CSV → JSON tool, validation layer, end-to-end Pipeline V1, and bilingual Week 1 documentation.
+No artificial AI-generated failure was created simply to satisfy a checklist. Day 11 did include genuine AI-assisted debugging on two real QA-discovered defects. Both failures were reproduced from concrete inputs, diagnosed, fixed with narrow changes, regression-tested, and integrated into `main`.
 
-### Day 8 — Gameplay Vertical Slice + Content Model V2 Core
-
-- Created `VerticalSlice_01.unity` and preserved `Prototype_01.unity`.
-- Added Pickup / Inventory / Device / Gate / Objective gameplay chain.
-- Added generic `IInteractable` interaction and a complete graybox mission loop.
-- Expanded config-driven gameplay and discovered the missing cross-record reference-validation problem through the `fake_cell` test.
-
-### Day 9 — Multi-Table Pipeline V2 + Cross-Reference + Batch
-
-- Added `items.csv`, `objectives.csv`, and typed `ContentModel`.
-- Added parse-once source handling, legal interaction-type validation, and Item cross-reference validation.
-- Added config-driven Objective descriptions.
-- Added validated dry-run / atomic Batch V1 and verified runtime propagation.
-- Restored the intended gameplay baseline and completed full regression testing.
-
-### Day 10 — Game Presentation + Tool UX + Standalone Delivery
-
-- Replaced the fixed high camera with mouse-controlled third-person camera behavior and player-relative movement.
-- Rebuilt the open graybox into an enclosed indoor facility with real room boundaries, ceilings, doorways, turns, and occlusion.
-- Measured pacing and intentionally rejected artificial padding toward the old 5–8 minute target.
-- Added facility materials, indoor lighting, room identity, and interactable readability.
-- Added persistent PowerNode / ControlTerminal / Exit completion-state presentation.
-- Polished Objective / Prompt / Feedback / Mission Complete UI.
-- Built and manually smoke-tested the Windows standalone demo from launch to completion.
-- Added a unified CLI: `generate`, `batch-preview`, and `batch-apply`.
-- Evaluated Unity Editor Integration and intentionally skipped it because the unified CLI already solves the demonstrated workflow problem with much lower maintenance cost.
-
-### Day 11 — QA + Scale Test
-
-- Added and verified a reusable 40-record Scale Fixture.
-- Verified larger-data generation and 8-record Batch Preview / Apply behavior.
-- Exercised required bad-data categories and fail-safe generation.
-- Found an active V2 Scene-reference validation coverage gap and fixed it.
-- Found malformed-CSV silent data truncation and fixed it.
-- Preserved reproducible QA evidence in `Docs/D11_QA.md`.
-- Kept optional cycle / unreachable-objective systems out of scope because the real test data did not justify them.
+Anything presented in the README, Case Study, video, or resume is intended to remain independently explainable without Codex.
 
 ---
 
-## Current Scope / Known Limitations
+## Portfolio / Interview Summary
 
-Current boundaries are explicit rather than hidden:
+A concise explanation of the project:
 
-- the Vertical Slice is intentionally compact; familiar-player timing is about 46 seconds rather than the retired 5–8 minute target;
-- final unfamiliar-player timing is still pending later user testing;
-- standalone has no pause / quit menu or in-game resolution settings; these are not required for the current portfolio slice;
-- no dedicated sound / VFX pass has been added;
-- active-Scene config-reference validation targets `VerticalSlice_01.unity` and the known config-driven Interactable component types; it is not a generalized all-Scene / all-Prefab dependency scanner;
-- prerequisite-device relationships remain Unity serialized references rather than externalized content IDs;
-- Objective progression order remains event-driven in C#; only player-facing Objective content is configuration-driven;
-- no Unity Editor GUI was added because no current workflow evidence justifies the extra process / path / maintenance layer.
+> I built a Unity Vertical Slice and used its real content dependencies to drive a Python Content Pipeline. The Pipeline parses multi-table CSV into a typed intermediate model, validates schema, values, duplicate IDs, cross-table Item references, and active-Scene config references, then generates Unity-consumable JSON. I added validated atomic Batch updates for repeated interaction tuning, tested the system with a 40-record fixture, and used QA to discover and fix two real validation bugs. In a controlled 8-record execution benchmark, manual equivalent-output editing took 192 seconds while Batch Preview → Apply → Generate took 0.287 seconds; I treat that as execution-stage evidence rather than a claim about the entire production workflow.
 
 ---
 
-## Next
+## Current Packaging Status
 
-### Day 12 — Before / After + Pipeline Case Study
+The technical project core, QA evidence, and Pipeline Case Study are complete.
 
-The next milestone reuses the same 40-record fixture for equivalent manual and automated workflows.
+Immediate next work is resume / application packaging rather than more feature development.
 
-Day 12 will:
+Optional follow-up after the resume is usable:
 
-- time the equivalent manual workflow;
-- time the Pipeline / Batch workflow;
-- record actual manual misses and automatic catches;
-- record the measured efficiency / error-risk difference without pre-selecting a target ratio;
-- draw the Before / After pipeline;
-- explain pain points, automation scope, remaining manual work, validation coverage, risk reduction, and trade-offs;
-- produce Pipeline Case Study V1.
+- synchronize the Simplified Chinese README;
+- record a short final demo video;
+- collect external TD / user feedback if available.
 
-No new gameplay system, content framework, dependency visualizer, or Editor GUI is planned for Day 12.
-
----
-
-## Documentation
-
-- [`Docs/D10_HANDOFF.md`](Docs/D10_HANDOFF.md) — Day 10 completion record and handoff to QA
-- [`Docs/D11_QA.md`](Docs/D11_QA.md) — Day 11 Scale / bad-data QA evidence, bugs, fixes, and D12 handoff
-- [`Docs/Pipeline_V1.md`](Docs/Pipeline_V1.md) — Pipeline V1 end-to-end flow and boundaries
-- [`Docs/Pipeline_V1.zh-CN.md`](Docs/Pipeline_V1.zh-CN.md) — Simplified Chinese Pipeline V1 documentation
-- [`STATUS.md`](STATUS.md) — current project state and next focus
-- [`TODO.md`](TODO.md) — 14-day sprint execution checklist
-
----
-
-## Tech
-
-- Unity 6.3 LTS
-- C#
-- TextMeshPro
-- Python
-- CSV / JSON
-- Git / GitHub
+The stable portfolio source is the GitHub `main` branch.
