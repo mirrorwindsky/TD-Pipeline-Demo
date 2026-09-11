@@ -1,42 +1,17 @@
-# Current Status
+# Technical Project Status
 
 **Last updated:** 2026-09-11  
-**Sprint stage:** Core project, QA, measurement, Case Study, and bilingual portfolio documentation complete; resume / applications are next  
+**Release:** `v1.0.0`  
 **Repository:** `TD-Pipeline-Demo`
 
-## Current Direction
+## Current Milestone — Portfolio Release Complete ✅
 
-Primary job target: **Technical Designer**
+The technical project core, QA evidence, measured workflow comparison, bilingual documentation, and Windows x64 playable release are complete.
 
-Current project strategy:
-
-- Unity / C# for a playable game-content Vertical Slice;
-- Python for validation, conversion, batch processing, and automation;
-- Git / GitHub for version history;
-- Codex / AI Coding as an accelerator while keeping all portfolio content explainable.
-
-Current project relationship:
-
-```text
-Game Content Vertical Slice
-↕
-Content Model
-↕
-Python Pipeline / Validation / Batch Tool
-```
-
-The project intentionally uses real gameplay-content needs to create real Pipeline problems, then solves only the problems demonstrated by implementation, QA, or workflow evidence.
-
----
-
-## Current Milestone — Technical Project Core Complete ✅
-
-The project has moved through gameplay implementation, Pipeline V2, presentation, QA, Scale Test, measured workflow comparison, and bilingual portfolio documentation.
-
-Current completed evidence includes:
+Current verified evidence includes:
 
 - playable indoor Unity Vertical Slice;
-- Windows standalone build smoke-tested from launch to Mission Complete;
+- Windows x86-64 standalone release tested from launch to Mission Complete;
 - multi-table Content Pipeline V2;
 - parse-once `SourceTable` architecture;
 - typed `ContentModel`;
@@ -44,16 +19,18 @@ Current completed evidence includes:
 - legal `interactionType` validation;
 - Item cross-table reference validation;
 - active `VerticalSlice_01.unity` `configId` validation for supported Interactable components;
-- fail-safe generation that preserves previous valid JSON on ERROR;
+- fail-safe generation preserving previous valid JSON on ERROR;
 - validated Batch Preview / atomic Apply;
 - reusable 40-record Scale Fixture;
-- systematic bad-data QA with two real bugs found and fixed;
+- systematic bad-data QA with two real validation defects found and fixed;
 - controlled manual-vs-automated execution benchmark;
-- portfolio-ready Pipeline Case Study;
-- synchronized English / Simplified Chinese README, QA record, and Case Study;
-- bilingual documentation index under `Docs/README.md`.
+- bilingual Pipeline Case Study and QA record;
+- GitHub Release `v1.0.0` with the tested Windows x64 build.
 
-The next priority is **resume, project explanation, and applications**, not more feature development.
+Playable release:
+
+- [Release Notes](https://github.com/mirrorwindsky/TD-Pipeline-Demo/releases/tag/v1.0.0)
+- [Download Windows x64 v1.0.0](https://github.com/mirrorwindsky/TD-Pipeline-Demo/releases/download/v1.0.0/TD-Pipeline-Demo-Windows-x64-v1.0.0.zip)
 
 ---
 
@@ -76,7 +53,7 @@ power_node        = 3
 control_terminal  = 2
 ```
 
-Current active presentation / build Scene:
+Active presentation / build Scene:
 
 ```text
 Assets/Scenes/VerticalSlice_01.unity
@@ -87,8 +64,6 @@ Protected Week 1 baseline:
 ```text
 Assets/Scenes/Prototype_01.unity
 ```
-
-The normal playable source / generated-data baseline should remain restored outside controlled QA / measurement work.
 
 ---
 
@@ -121,11 +96,10 @@ Runtime Gameplay + HUD
 Windows standalone demo
 ```
 
-Current CLI:
+CLI:
 
 ```powershell
 py Tools/config_tool.py --help
-py Tools/config_tool.py
 py Tools/config_tool.py generate
 py Tools/config_tool.py batch-preview
 py Tools/config_tool.py batch-apply
@@ -139,7 +113,7 @@ Verified guarantees:
 - Batch Preview performs no source modification;
 - Batch Apply writes `interactables.csv` atomically after logical validation;
 - active-Scene config references are checked for the current supported Interactable types;
-- malformed CSV rows with unexpected extra columns are rejected instead of silently truncating data.
+- malformed CSV rows with unexpected extra values are rejected instead of silently truncating data.
 
 ---
 
@@ -149,19 +123,15 @@ Reusable fixture:
 
 ```text
 QA/Fixtures/scale_valid/
-├── items.csv                    8 records
-├── objectives.csv              12 records
-├── interactables.csv           20 records
+├── items.csv                     8 records
+├── objectives.csv               12 records
+├── interactables.csv            20 records
 └── batch_interaction_updates.csv 8 updates
 ```
 
-Total content records used for Scale Test:
+Total content records used for Scale Test: **40**.
 
-```text
-40
-```
-
-Day 11 results:
+Test summary:
 
 | ID | Test | Result |
 | --- | --- | --- |
@@ -180,95 +150,25 @@ Day 11 results:
 | QA-12 | Empty CSV input | PASS |
 | QA-13 | Malformed CSV / extra column | FAIL → FIXED → PASS |
 
-Full reproducible QA evidence:
+Full evidence:
 
 - [`Docs/D11_QA.md`](Docs/D11_QA.md)
 - [`Docs/D11_QA.zh-CN.md`](Docs/D11_QA.zh-CN.md)
 
-### Real Bug Fix 1 — Active Scene Reference Coverage
-
-The pre-D11 validator still targeted the V1 `Prototype_01.unity` / `ConfigurableInteractable` boundary. QA reproduced a stale `control_terminal` `configId` in the active V2 Scene that incorrectly passed generation.
-
-The validator was updated to target `VerticalSlice_01.unity` and the current config-driven Interactable component whitelist.
-
-Main fix:
+Real fixes:
 
 ```text
 97b24be fix: validate active scene config references
-```
-
-### Real Bug Fix 2 — Malformed CSV Silent Truncation
-
-An unescaped comma could create an extra CSV value stored by `DictReader` under the `None` key. Before the fix, the Pipeline silently generated a truncated Objective description while reporting success.
-
-`validate_schema()` now rejects unexpected extra values with a row-level ERROR.
-
-Main fix:
-
-```text
 bb088b3 fix: reject malformed CSV rows with extra columns
 ```
 
-### Fail-Safe Evidence
-
-QA-04 compared SHA256 hashes for both generated JSON files before and after invalid source input. Both hashes remained unchanged after validation failed.
-
-```text
-valid generated data
-→ invalid source introduced
-→ ERROR detected
-→ generation blocked
-→ previous valid JSON preserved
-```
+Fail-safe behavior was independently verified by comparing SHA256 hashes of both generated JSON files before and after a failed generation; both remained unchanged.
 
 ---
 
-## Before / After Measurement ✅
+## Before / After Measurement
 
-A controlled execution-stage benchmark reused the same 40-record fixture and the same 8 intended `requiredInteractions` updates.
-
-### Manual Equivalent-Output Workflow
-
-Manual work included:
-
-- locate 8 target IDs in `ConfigSource/interactables.csv`;
-- edit the 8 source values;
-- locate corresponding records in generated `Assets/Data/interactables.json`;
-- manually apply the same 8 values;
-- check and save both files.
-
-Measured time:
-
-```text
-192.000 s
-```
-
-Independent verification:
-
-```text
-CSV records: 20
-JSON records: 20
-overall: PASS
-0 unintended CSV field changes detected
-```
-
-### Automated Workflow
-
-```text
-batch-preview
-→ batch-apply
-→ generate
-```
-
-Measured execution time:
-
-```text
-0.2865603 s
-```
-
-Independent verification also passed.
-
-### Measurement Result
+Controlled execution-stage benchmark using the same 40-record fixture and the same 8 intended updates:
 
 ```text
 Manual execution:       192.000 s
@@ -277,9 +177,17 @@ Execution speedup:        ~670×
 Execution-time reduction: ~99.85%
 ```
 
-This is explicitly an **execution-stage benchmark**. It excludes authoring the Batch request and is not presented as a claim that the entire content-production process is 670× faster.
+Automated path:
 
-The benchmark sample produced 0 manual errors and 0 automated errors, so error-risk reduction is supported separately by the QA evidence rather than inferred from this timing sample.
+```text
+batch-preview
+→ batch-apply
+→ generate
+```
+
+Both manual and automated outputs passed independent verification.
+
+This measurement excludes authoring the Batch request itself and is not a claim that the entire content-production process is 670× faster.
 
 Full Case Study:
 
@@ -288,66 +196,35 @@ Full Case Study:
 
 ---
 
-## Current Portfolio Evidence
+## Scope Boundaries
 
-The repository now contains:
+The current release intentionally does not include:
 
-```text
-README.md / README.zh-CN.md
-→ bilingual portfolio overview, benchmark, QA / Case Study links
+- a generalized Quest framework;
+- dependency visualization;
+- Unity Editor GUI;
+- dependency-cycle / unreachable-objective detection;
+- generalized all-Scene / all-Prefab dependency scanning;
+- a large automated-test framework;
+- dedicated sound / VFX polish.
 
-Docs/README.md
-→ bilingual documentation index and current / historical split
-
-Docs/D11_QA.md / D11_QA.zh-CN.md
-→ reproducible QA / bug-fix evidence
-
-Docs/Pipeline_Case_Study.md / Pipeline_Case_Study.zh-CN.md
-→ Problem / Pipeline Design / QA / Before-After / Trade-offs / Outcome
-
-QA/Fixtures/scale_valid/
-→ reusable 40-record Scale / benchmark fixture
-```
-
-Historical documents such as `Docs/D10_HANDOFF.md` and `Docs/Pipeline_V1*.md` are intentionally preserved as milestone snapshots rather than rewritten to pretend they describe the current V2 Pipeline.
+These are explicit scope decisions rather than hidden omissions. New complexity is added only when implementation, QA, or workflow evidence demonstrates a concrete need.
 
 ---
 
-## AI-Assisted Development Note
+## AI-Assisted Development
 
-No qualifying AI-generated implementation failure occurred during Day 11, so none was fabricated solely to satisfy a checklist.
-
-Day 11 did include genuine AI-assisted debugging on two real QA-discovered defects. Both were reproduced from concrete inputs, diagnosed, fixed with narrow changes, regression-tested, and integrated into `main`.
-
-Anything used in README, Case Study, video, or resume must remain independently explainable without Codex.
+AI / Codex was used as a development accelerator during implementation, diagnosis, and verification. Project claims are backed by concrete repository history, reproducible QA inputs, independent checks, measured results, and manual standalone testing.
 
 ---
 
-## Current Scope Boundaries
+## Documentation
 
-- No new gameplay system is planned unless later application / interview feedback reveals a real blocker.
-- No generalized quest framework is planned.
-- No dependency visualization is planned without demonstrated need.
-- No Unity Editor GUI is planned unless later user feedback demonstrates a workflow benefit.
-- Active-Scene reference validation is not a generalized all-Scene / all-Prefab dependency scanner.
-- Prerequisite-device relationships remain Unity serialized references.
-- Objective progression timing remains event-driven in C#; only player-facing Objective content is data-driven.
-- Sound / VFX remain optional and deferred.
-- External user testing is currently unavailable and is not treated as an application blocker.
-- Lilith TD feedback is opportunistic rather than a prerequisite for applications.
+Current portfolio documents:
 
----
+- [`README.md`](README.md) / [`README.zh-CN.md`](README.zh-CN.md)
+- [`Docs/Pipeline_Case_Study.md`](Docs/Pipeline_Case_Study.md) / [`Docs/Pipeline_Case_Study.zh-CN.md`](Docs/Pipeline_Case_Study.zh-CN.md)
+- [`Docs/D11_QA.md`](Docs/D11_QA.md) / [`Docs/D11_QA.zh-CN.md`](Docs/D11_QA.zh-CN.md)
+- [`Docs/README.md`](Docs/README.md)
 
-## Next — Resume + Applications
-
-Immediate next work:
-
-1. prepare concise, truthful resume project bullets;
-2. prepare a short interview explanation that can be delivered without Codex;
-3. add the stable GitHub repository link to the resume;
-4. start / expand applications.
-
-Optional follow-up after the resume is usable:
-
-- record a short final demo video;
-- collect external TD / user feedback if available.
+Historical milestone records are preserved separately and are not presented as the current V2 specification.
