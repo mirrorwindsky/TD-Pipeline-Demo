@@ -1,0 +1,13 @@
+id,displayName,description
+find_power_cell,Find Power Cell,Objective: Find a Power Cell in Storage.
+repair_power_node,Repair Power Node,Objective: Repair the Power Node in Maintenance.
+activate_control_terminal,Activate Control Terminal,Objective: Activate the Control Terminal.
+reach_exit,Reach Exit,Objective: Reach the Exit.
+mission_complete,Mission Complete,Mission Complete
+inspect_storage,Inspect Storage,Objective: Inspect the storage area.
+restore_aux_power,Restore Auxiliary Power,Objective: Restore auxiliary power.
+replace_fuse,Replace Fuse,Objective: Replace the damaged fuse.
+stabilize_cooling,Stabilize Cooling,Objective: Stabilize the cooling system.
+authorize_terminal,Authorize Terminal,Objective: Authorize the security terminal.
+calibrate_array,Calibrate Array,Objective: Calibrate the sensor array.
+retrieve_data,Retrieve Data,Objective: Retrieve the stored data.

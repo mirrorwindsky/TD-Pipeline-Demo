@@ -1,0 +1,9 @@
+id,requiredInteractions
+cube_sturdy,4
+power_node,2
+control_terminal,1
+aux_power_box,3
+coolant_pump,4
+sensor_array,2
+backup_generator,3
+maintenance_panel,5

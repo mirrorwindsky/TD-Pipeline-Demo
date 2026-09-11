@@ -1,0 +1,21 @@
+id,displayName,interactionType,requiredInteractions,requiredItemId,grantedItemId,blockedMessage,completionMessage,deactivateOnComplete
+cube_quick,Quick Cube,Device,1,,,,,true
+cube_sturdy,Sturdy Cube,Device,3,,,,,true
+power_cell,Power Cell,Pickup,1,,power_cell,,Power Cell acquired.,true
+power_node,Power Node,Device,3,power_cell,,A Power Cell is required.,Power restored.,false
+control_terminal,Control Terminal,Device,2,,,Restore the Power Node first.,Exit unlocked.,false
+pickup_fuse_a,Fuse A Pickup,Pickup,1,,fuse_a,,Fuse A acquired.,true
+pickup_fuse_b,Fuse B Pickup,Pickup,1,,fuse_b,,Fuse B acquired.,true
+pickup_coolant,Coolant Pickup,Pickup,1,,coolant_canister,,Coolant acquired.,true
+pickup_access_chip,Access Chip Pickup,Pickup,1,,access_chip,,Access Chip acquired.,true
+pickup_calibration_key,Calibration Key Pickup,Pickup,1,,calibration_key,,Calibration Key acquired.,true
+pickup_spare_battery,Spare Battery Pickup,Pickup,1,,spare_battery,,Spare Battery acquired.,true
+pickup_data_module,Data Module Pickup,Pickup,1,,data_module,,Data Module acquired.,true
+aux_power_box,Auxiliary Power Box,Device,2,fuse_a,,Fuse A is required.,Auxiliary power restored.,false
+coolant_pump,Coolant Pump,Device,3,coolant_canister,,Coolant is required.,Cooling stabilized.,false
+security_console,Security Console,Device,2,access_chip,,Access Chip is required.,Security authorized.,false
+sensor_array,Sensor Array,Device,4,calibration_key,,Calibration Key is required.,Sensor array calibrated.,false
+backup_generator,Backup Generator,Device,5,spare_battery,,Spare Battery is required.,Backup power online.,false
+data_terminal,Data Terminal,Device,2,data_module,,Data Module is required.,Data retrieved.,false
+fuse_bank_b,Fuse Bank B,Device,3,fuse_b,,Fuse B is required.,Fuse Bank B restored.,false
+maintenance_panel,Maintenance Panel,Device,4,,,,Maintenance complete.,false
