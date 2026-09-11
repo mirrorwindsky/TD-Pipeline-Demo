@@ -1,336 +1,217 @@
-# TD Pipeline Demo — 14-Day Sprint TODO
+# TD Pipeline Demo — 14-Day Sprint Record
 
-> Goal: build one portfolio-ready Technical Designer flagship student case combining a game-like Unity Vertical Slice with a real content-production Pipeline, validation tooling, automation, and measurable workflow improvement.
+> Goal: build one portfolio-ready Technical Designer project combining a playable Unity Vertical Slice with a real content-production Pipeline, validation tooling, automation, QA evidence, and measurable workflow improvement.
 >
-> Core stack for this sprint is frozen: **Unity 6.3 LTS + C# + Python + Git**.
+> Core stack: **Unity 6.3 LTS + C# + Python + Git**.
 
-## Day 1–7 — Completed Baseline ✅
+This file is preserved as a **project-development record**. It documents the implementation sequence and major acceptance decisions; current portfolio documentation lives in `README.md`, `Docs/Pipeline_Case_Study*.md`, and `Docs/D11_QA*.md`.
 
-- [x] D1 Minimal Unity prototype
-- [x] D2 Config-driven runtime chain
-- [x] D3 Python CSV → JSON Tool V0
-- [x] D4 Demo V0
-- [x] D5 Validation-aware Tool V1
-- [x] D6 Pipeline V1 end-to-end verification
-- [x] D7 Week 1 stabilization + bilingual documentation + V2 plan
+---
+
+## Day 1–7 — Pipeline V1 Baseline ✅
+
+- [x] Minimal Unity prototype
+- [x] Config-driven runtime chain
+- [x] Python CSV → JSON Tool V0
+- [x] Demo V0
+- [x] Validation-aware Tool V1
+- [x] End-to-end Pipeline V1 verification
+- [x] Week 1 stabilization and bilingual V1 documentation
 
 ---
 
 ## Day 8 — Gameplay Vertical Slice + Content Model V2 Core ✅
 
-### Gameplay
-
-- [x] Choose a clear scene theme and player objective
-- [x] Build a complete playable graybox mission loop
-- [x] Implement Pickup / Device / Gate content types
-- [x] Add a cross-object dependency chain
-- [x] Add minimal Inventory / Player State
-- [x] Add Interaction Prompt
-- [x] Add Objective UI
-- [x] Add blocked / progress / completion feedback
-- [x] Add a final mission-completion trigger
-- [x] Ensure the intended flow works without Console dependency
-
-### Player / Scene Foundation
-
 - [x] Preserve `Prototype_01.unity`
 - [x] Create `VerticalSlice_01.unity`
-- [x] Build a multi-room graybox layout
-- [x] Add CharacterController gravity
-- [x] Add a smooth follow camera
+- [x] Build complete PowerCell → PowerNode → ControlTerminal → Exit mission flow
+- [x] Add Pickup / Device / Gate content types
+- [x] Add minimal Inventory / Player State
+- [x] Add generic `IInteractable` interaction
+- [x] Add Objective / Prompt / Feedback HUD
+- [x] Add config-driven Pickup / Device behavior
+- [x] Reproduce the `fake_cell` dependency failure that motivated cross-table validation
+- [x] Restore valid source data and complete regression
 
-### Gameplay Architecture
-
-- [x] Introduce `IInteractable`
-- [x] Preserve V1 compatibility
-- [x] Add `PlayerInventory`
-- [x] Add `PickupInteractable`
-- [x] Add reusable `DeviceInteractable`
-- [x] Add prerequisite-device logic
-- [x] Add event-driven `GateController`
-- [x] Add event-driven mission / objective flow
-
-### Content Model V2 — Initial Integration
-
-- [x] Expand `InteractableConfig`
-- [x] Expand the Python dataclass / JSON output
-- [x] Make Pickup and Device behavior load values from config
-- [x] Express at least one dependency through source config
-- [x] Verify `requiredInteractions: 3 → 5`
-- [x] Intentionally test `requiredItemId: power_cell → fake_cell`
-- [x] Restore valid source data and re-test the complete flow
-
-### Day 8 Acceptance
-
-- [x] Complete graybox loop works from start to finish
-- [x] At least 3 content-object types participate
-- [x] At least 1 cross-object dependency exists
-- [x] Objective / Prompt / Feedback works
-- [x] At least 1 gameplay dependency is source-config-driven
-- [x] A real Pipeline V2 limitation was discovered from testing
-- [x] DFS / BFS practice covered by previous day's extra problems
+Acceptance result: complete graybox mission loop, multiple content types, a real cross-object dependency, and one concrete Pipeline V2 limitation discovered through testing.
 
 ---
 
 ## Day 9 — Multi-Table Pipeline V2 + Cross-Reference + Batch ✅
 
-### Source Model / Architecture
+### Content Model
 
-- [x] Introduce `items.csv`, `objectives.csv`, and retain `interactables.csv`
-- [x] Keep only fields with real runtime / pipeline value
-- [x] Read the real source tables through one unified pipeline
+- [x] Add `items.csv`, `objectives.csv`, and retain `interactables.csv`
 - [x] Parse each source table once into `SourceTable`
 - [x] Build typed `ItemConfig`, `ObjectiveConfig`, `InteractableConfig`, and `ContentModel`
-- [x] Reuse parsed / typed representations across validation and generation
-- [x] Preserve `interactables.json` while adding `objectives.json`
+- [x] Generate `interactables.json` and `objectives.json`
+- [x] Drive Objective descriptions from configuration
 
 ### Validation
 
-- [x] Preserve schema / type / range / duplicate-ID validation
-- [x] Preserve `ERROR` / `WARNING` and fail-safe generation
-- [x] Preserve current Unity scene-reference validation boundary
-- [x] Validate legal `interactionType` values
-- [x] Add Item ID registry
-- [x] Validate `requiredItemId` and `grantedItemId`
-- [x] Reject `requiredItemId = fake_cell` before JSON generation
-- [x] Produce clear file / row / field / reference errors
+- [x] Schema / type / range / duplicate-ID validation
+- [x] legal `interactionType` validation
+- [x] Item-ID registry
+- [x] `requiredItemId` / `grantedItemId` cross-reference validation
+- [x] fail-safe generation preserving previous valid JSON on ERROR
 
-### Objective Content Pipeline
+### Batch
 
-- [x] Parse and validate `objectives.csv`
-- [x] Add typed `ObjectiveConfig`
-- [x] Generate `Assets/Data/objectives.json`
-- [x] Add Unity `ObjectiveConfigDatabase`
-- [x] Replace hard-coded HUD descriptions with ID-based runtime lookup
-- [x] Verify a source-only Objective edit changes the HUD without C# changes
-- [x] Keep progression timing event-driven instead of building a generalized quest system
-
-### Batch Processing
-
-- [x] Implement genuine batch modification of `requiredInteractions`
-- [x] Add dry-run preview
-- [x] Validate the entire batch before successful preview / apply
-- [x] Reject duplicate or invalid targets
-- [x] Add typed prepared batch updates
-- [x] Apply valid batches with all-or-nothing behavior
-- [x] Write source CSV through temporary file + atomic replace
-- [x] Verify invalid batch input causes zero source modifications
-- [x] Verify valid batch changes multiple real gameplay parameters
-- [x] Restore the normal `3 / 3 / 2` baseline after verification
-
-### Day 9 Acceptance
-
-- [x] Multi-table source data generates Unity-consumable output
-- [x] Cross-reference errors are blocked before runtime
-- [x] Valid source dependency edits alter real gameplay
-- [x] Source-only Objective edits alter real HUD content
-- [x] Generated data requires no manual editing
-- [x] Batch V1 reaches Unity Runtime
-- [x] Full Vertical Slice regression passes after restoring baseline
-- [x] Solve 1 DFS / BFS problem — LeetCode 994, Rotting Oranges
+- [x] Real Batch modification of `requiredInteractions`
+- [x] dry-run Preview
+- [x] full-batch validation
+- [x] duplicate / invalid target rejection
+- [x] atomic source-file replacement
+- [x] invalid Batch causes zero source changes
+- [x] valid Batch propagates into generated data and Runtime
+- [x] restore normal gameplay baseline after verification
 
 ---
 
-## Day 10 — Game Presentation + Tool UX / Optional Editor Integration ✅
+## Day 10 — Presentation + Tool UX + Standalone Delivery ✅
 
-### Gameplay Timing / Presentation
+### Gameplay / Presentation
 
-- [x] Time the current full gameplay loop — familiar-player run measured `0:46`
-- [x] Diagnose pacing and document the decision **not** to force the old 5–8 minute target through filler
-- [x] Replace the fixed high camera with mouse-controlled third-person camera behavior
-- [x] Add player-relative movement while preserving the V1 baseline mode
-- [x] Improve scene layout / spatial readability with enclosed rooms, ceilings, doorways, turns, and occlusion
-- [x] Add basic materials / visual differentiation
-- [x] Improve indoor lighting
-- [x] Make interactable objects visually identifiable
-- [x] Add visible state changes for PowerNode / ControlTerminal / Exit
+- [x] Measure full mission timing
+- [x] Retire the old 5–8 minute target instead of padding the slice with filler
+- [x] Add mouse-controlled third-person camera
+- [x] Add player-relative movement
+- [x] Improve room structure / occlusion / spatial readability
+- [x] Add materials, lighting, interactable readability, and persistent completion-state feedback
 - [x] Polish Objective / Prompt / Feedback / Mission Complete presentation
-- [x] Evaluate sound / VFX and intentionally defer them because core presentation is already sufficient for the current slice
 
 ### Tool UX
 
-- [x] Add a concise successful validation / generation summary
-- [x] Confirm existing validation errors already provide actionable file / row / field / value context
-- [x] Add discoverable `argparse` CLI commands
-- [x] Keep the no-argument command backward-compatible with normal generation
-- [x] Replace `py -c` Batch entry points with `batch-preview` / `batch-apply`
-- [x] Make Preview explicitly state that no source files were changed
-- [x] Verify `batch-apply` still performs real source updates, then restore the baseline and regenerate
+- [x] Unified `argparse` CLI
+- [x] `generate`
+- [x] `batch-preview`
+- [x] `batch-apply`
+- [x] actionable validation errors
+- [x] concise successful-generation summary
+- [x] evaluate and intentionally skip Unity Editor GUI because the CLI already solves the demonstrated workflow need
 
-Current CLI:
+### Build
 
-```powershell
-py Tools/config_tool.py --help
-py Tools/config_tool.py
-py Tools/config_tool.py generate
-py Tools/config_tool.py batch-preview
-py Tools/config_tool.py batch-apply
-```
-
-### Optional Unity Editor Integration
-
-- [x] Evaluate whether Editor Integration genuinely shortens the current workflow
-- [x] Intentionally skip Editor GUI integration: the unified CLI solves the demonstrated problem with much lower process / path / maintenance cost
-
-### Build Verification
-
-- [x] Update Build Scene configuration to `VerticalSlice_01.unity`
-- [x] Produce a Windows x86-64 standalone Build
-- [x] Keep Build artifacts ignored by Git
-- [x] Play the standalone executable from beginning to end
-- [x] Confirm no Unity Console dependency
-- [x] Confirm Pipeline V2 generated data is included in and drives the real standalone Demo
-- [x] Confirm `Prototype_01.unity` remains unchanged
-
-### D10 Acceptance
-
-- [x] Duration was measured and the old 5–8 minute target was explicitly retired rather than padded artificially
-- [x] Demo visibly resembles a small game rather than a default Unity test scene
-- [x] At least 3 content types participate
-- [x] At least 1 config-driven dependency exists
-- [x] Invalid references are detected before runtime
-- [x] Generated data is not manually edited
-- [x] Scene has materials, lighting, spatial structure, UI, prompts, feedback, and persistent world-state changes
-- [x] Standalone Demo runs from launch to Mission Complete
-- [x] Current state is visually strong enough for the later final demo-video pass
-- [x] Solve linked-list / tree practice — LeetCode 206 Reverse Linked List + 141 Linked List Cycle
+- [x] `VerticalSlice_01.unity` configured as Build Scene
+- [x] Windows x86-64 standalone Build
+- [x] Build artifacts excluded from Git history
+- [x] standalone manually tested from launch to Mission Complete
 
 ---
 
 ## Day 11 — QA + Scale Test ✅
 
-- [x] Prepare roughly 30–50 content records — completed with a reusable 40-record fixture
-- [x] Verify the Pipeline processes the full test set
-- [x] Test missing fields / duplicate IDs / invalid types / invalid ranges
-- [x] Test broken cross-table and active Unity references
-- [x] Test empty / malformed input
-- [x] Fix real bugs discovered by QA
-- [x] Record reproducible test cases in `Docs/D11_QA.md`
-- [x] Evaluate optional dependency-cycle / unreachable-objective detection and intentionally skip it because the current architecture did not demonstrate a real need
-- [x] Solve 1 basic coding problem — LeetCode 2265, Count Nodes Equal to Average of Subtree
+- [x] Create reusable 40-record Scale Fixture
+- [x] Validate 8 Items + 12 Objectives + 20 Interactables
+- [x] Verify 8-record Batch Preview / Apply
+- [x] Test missing values / columns
+- [x] Test duplicate IDs
+- [x] Test invalid type / range / `interactionType`
+- [x] Test broken cross-table references
+- [x] Test broken active-Scene config references
+- [x] Test empty / malformed CSV input
+- [x] Verify fail-safe output preservation with SHA256 hashes
+- [x] Find and fix active V2 Scene reference coverage gap
+- [x] Find and fix malformed-CSV silent truncation
+- [x] Preserve reproducible evidence in `Docs/D11_QA.md`
+- [x] intentionally skip cycle / unreachable-objective systems because no current architecture need was demonstrated
 
-### AI-Assisted Development Note
+Main fixes:
 
-No qualifying AI-generated implementation failure occurred during Day 11, so no artificial failure case was created solely to satisfy the original checklist.
-
-Day 11 did include genuine AI-assisted debugging work on two QA-discovered defects:
-
-- active `VerticalSlice_01.unity` config-reference validation coverage;
-- malformed CSV rows causing silent data truncation.
-
-Both defects were reproduced, diagnosed, fixed, regression-tested, and integrated into `main`.
+```text
+97b24be fix: validate active scene config references
+bb088b3 fix: reject malformed CSV rows with extra columns
+```
 
 ---
 
 ## Day 12 — Before / After + Pipeline Case Study ✅
 
-The original D12 scope was compressed into a single controlled benchmark plus a portfolio-ready Case Study.
+The same 40-record fixture and same 8 intended updates were used for a controlled equivalent-output execution benchmark.
 
-- [x] Reuse the same 40-record fixture from D11
-- [x] Time an equivalent manual output workflow — `192.000 s`
-- [x] Time the automated `batch-preview → batch-apply → generate` execution path — `0.2865603 s`
-- [x] Independently verify both outputs — both PASS
-- [x] Record actual execution-stage improvement — approximately `670×` speedup / `99.85%` time reduction
-- [x] Keep measurement scope explicit: Batch-request authoring time is excluded
-- [x] Do not fabricate manual errors; the manual sample completed with 0 detected errors
-- [x] Use D11 QA separately as error-risk evidence
-- [x] Document Before / After workflow and design trade-offs
-- [x] Produce `Docs/Pipeline_Case_Study.md`
+- [x] Manual workflow measured: `192.000 s`
+- [x] Automated `batch-preview → batch-apply → generate`: `0.2865603 s`
+- [x] Both outputs independently verified: PASS
+- [x] Measured execution-stage speedup: approximately `670×`
+- [x] Measured execution-time reduction: approximately `99.85%`
+- [x] Keep benchmark scope explicit: Batch-request authoring time is excluded
+- [x] Do not infer error reduction from the timing sample; use QA evidence separately
+- [x] Produce bilingual Pipeline Case Study
 
 ---
 
-## Day 13 — External Feedback + Resume — Compressed
+## Day 13 — Documentation Consolidation ✅
 
-The original external-feedback plan was reduced so it does not block applications.
+- [x] Consolidate current technical evidence
+- [x] Separate current portfolio docs from historical milestone records
+- [x] Produce English / Simplified Chinese QA record
+- [x] Produce English / Simplified Chinese Pipeline Case Study
+- [x] Keep V1 / D10 documents as historical snapshots rather than rewriting history
+- [x] Avoid speculative Tool / Pipeline V3 work without new evidence
 
-### Scope Decisions
-
-- External user test: **skipped for now** because no suitable tester is currently available.
-- Lilith TD feedback: **opportunistic**, not a blocker; project / resume can be sent when the senior has time to review.
-- Tool / Pipeline V3: only if later feedback reveals a concrete issue; no speculative expansion now.
-
-### Remaining Deliverables
-
-- [ ] Produce / update Resume V1 / V2
-- [ ] Add truthful, verifiable project bullets
-- [ ] Prepare a concise interview explanation of the project
+External user testing was not included in this release; the technical release is based on internal regression, standalone smoke testing, reproducible QA, and independent output checks.
 
 ---
 
-## Day 14 — Final Wrap-up + Applications — Compressed
+## Day 14 — Final Packaging + Release ✅
 
-> **Do not start new technology or expand feature scope.**
+- [x] Final normal Pipeline regression
+- [x] clean stable `main` branch
+- [x] English / Simplified Chinese README synchronized
+- [x] bilingual Case Study and QA evidence linked from README
+- [x] documentation index under `Docs/README.md`
+- [x] Windowed 1280×720 standalone configuration
+- [x] resizable Windows player
+- [x] project version set to `1.0.0`
+- [x] final Windows x86-64 Build tested from launch to Mission Complete
+- [x] GitHub Release `v1.0.0` published
+- [x] playable Build download linked from README
 
-### Project Packaging
+Release:
 
-- [x] Run one final `main` Pipeline regression and confirm clean Git state
-- [x] Pipeline Case Study exists in `Docs/Pipeline_Case_Study.md`
-- [x] Simplified Chinese Case Study exists in `Docs/Pipeline_Case_Study.zh-CN.md`
-- [x] Reusable 40-record QA fixture exists in `QA/Fixtures/scale_valid/`
-- [x] D11 QA evidence exists in English and Simplified Chinese
-- [x] Stable portfolio repository is the GitHub `main` branch
-- [x] English / Simplified Chinese README are synchronized to the current portfolio state
-- [x] `Docs/README.md` separates current portfolio evidence from historical milestone records
-- Final demo video: optional follow-up; not a blocker for producing the resume today
-
-### Applications
-
-- [ ] Produce Resume V2
-- [ ] Add stable GitHub project link to resume
-- [ ] Start / expand formal applications
-- Lilith referral timing: decide independently of whether external feedback arrives
+[TD Pipeline Demo — Windows x64 Portfolio Build v1.0.0](https://github.com/mirrorwindsky/TD-Pipeline-Demo/releases/tag/v1.0.0)
 
 ---
 
-## Final Acceptance Checklist — V2
+## Final Acceptance — V2 ✅
 
 ### Unity Vertical Slice
 
-- [x] Compact end-to-end Demo is playable; measured familiar-player duration and scope decision are documented
-- [x] Demo looks like a small game rather than a test scene
-- [x] Clear objective and complete beginning → middle → ending flow
-- [x] At least 3 different content-object types
-- [x] Prompt / Objective UI / Feedback work without Console
-- [x] Basic materials, lighting, environment layout, and state feedback
-- [x] Windows standalone build passes manual smoke test
+- [x] complete beginning → middle → ending mission flow
+- [x] Pickup / Device / Gate content types
+- [x] Prompt / Objective / Feedback without Console dependency
+- [x] materials, lighting, environment structure, and persistent state feedback
+- [x] Windows standalone Build verified
 
 ### Content Model / Pipeline
 
-- [x] Pipeline processes real multi-table content data
-- [x] At least one cross-object / cross-table dependency exists
-- [x] Source config changes dependency / gameplay conditions
-- [x] Objective content is source-config-driven through the Pipeline
-- [x] Schema / type / range / duplicate / cross-reference / current Unity-reference errors are detected
-- [x] At least one genuine batch operation exists
-- [x] Generated Unity data is not manually edited
-- [x] Designer-facing CLI exposes generate / preview / apply without internal Python imports
+- [x] real multi-table source data
+- [x] typed `ContentModel`
+- [x] source-driven gameplay / Objective content
+- [x] schema / malformed-row / type / range / duplicate validation
+- [x] cross-table Item-reference validation
+- [x] active-Scene config-reference validation
+- [x] genuine Batch Preview / Apply
+- [x] atomic source replacement
+- [x] generated JSON treated as derived output
 
-### Verification / Iteration
+### Verification / Evidence
 
-- [x] 40 records used for Scale Test
-- [x] Real V1 → problem → V2 iteration exists
-- [x] At least one efficiency improvement measured
-- [x] Before / After Pipeline documented
-- [x] At least one AI-assisted debugging case documented
-- External user feedback is currently unavailable and is not treated as a blocker
-
-### Portfolio / Applications
-
-- [x] README clearly explains the current portfolio state
-- [x] Dedicated Pipeline Case Study documents the final technical flow and measured benchmark
-- [x] Core portfolio documentation is synchronized in English / Simplified Chinese where appropriate
-- [ ] Resume V2 contains truthful, verifiable project bullets
-- [x] Stable GitHub portfolio repository exists
-- [ ] Formal applications started / expanded
-- [ ] Without Codex, the full data flow, modules, core logic, tool value, and trade-offs can be explained
+- [x] 40-record Scale Test
+- [x] systematic bad-data QA
+- [x] two real validation defects found and fixed
+- [x] fail-safe preservation verified by hash comparison
+- [x] Before / After workflow documented
+- [x] execution-stage efficiency measured
+- [x] bilingual technical documentation
+- [x] stable GitHub repository and downloadable v1.0.0 Build
 
 ---
 
-## Sprint Rules — V2
+## Scope Rules Preserved Through Release
 
-- Keep **Unity 6.3 LTS + C# + Python + Git** as the main stack through final packaging.
-- Do not start a second portfolio project before the current project is usable for applications.
-- Do not add low-value features merely because implementation is going smoothly.
+- Do not add features only to increase feature count.
 - New complexity must solve a demonstrated gameplay, QA, or workflow problem.
-- Anything entering README / Case Study / Resume / video must remain independently explainable without Codex.
-- From this point, **resume and applications outrank further feature work**.
+- Keep the project explainable end-to-end.
+- Preserve historical milestone documents instead of rewriting them to match later architecture.
+- Treat generated data as Pipeline output, not a second hand-maintained source of truth.
