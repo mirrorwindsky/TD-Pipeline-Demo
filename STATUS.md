@@ -1,7 +1,7 @@
 # Current Status
 
 **Last updated:** 2026-09-11  
-**Sprint stage:** Core project, QA, measurement, and Case Study complete; resume / application packaging is next  
+**Sprint stage:** Core project, QA, measurement, Case Study, and English README packaging complete; resume / applications are next  
 **Repository:** `TD-Pipeline-Demo`
 
 ## Current Direction
@@ -31,7 +31,7 @@ The project intentionally uses real gameplay-content needs to create real Pipeli
 
 ## Current Milestone — Technical Project Core Complete ✅
 
-The project has moved through gameplay implementation, Pipeline V2, presentation, QA, Scale Test, and measured workflow comparison.
+The project has moved through gameplay implementation, Pipeline V2, presentation, QA, Scale Test, measured workflow comparison, and portfolio documentation.
 
 Current completed evidence includes:
 
@@ -49,9 +49,10 @@ Current completed evidence includes:
 - reusable 40-record Scale Fixture;
 - systematic bad-data QA with two real bugs found and fixed;
 - controlled manual-vs-automated execution benchmark;
-- portfolio-ready Pipeline Case Study.
+- portfolio-ready Pipeline Case Study;
+- final English README packaging with direct links to the supporting evidence.
 
-The next priority is **resume, final README packaging, project explanation, and applications**, not more feature development.
+The next priority is **resume, project explanation, and applications**, not more feature development.
 
 ---
 
@@ -293,6 +294,9 @@ Docs/Pipeline_Case_Study.md
 The repository now contains:
 
 ```text
+README.md
+→ concise portfolio overview, final benchmark, QA / Case Study links
+
 Docs/D11_QA.md
 → reproducible QA / bug-fix evidence
 
@@ -303,9 +307,9 @@ QA/Fixtures/scale_valid/
 → reusable 40-record Scale / benchmark fixture
 ```
 
-The English README currently reflects the Day 11 technical milestone and should receive one final small packaging pass to surface the new Case Study and benchmark before applications.
+The English README now reflects the current portfolio state and directly surfaces the Case Study and measured benchmark.
 
-The Simplified Chinese README remains intentionally frozen at an earlier milestone with a visible notice pointing readers to the English README. Full bilingual synchronization is a follow-up task, not a blocker for producing the resume.
+The Simplified Chinese README remains intentionally frozen at an earlier milestone with a visible notice pointing readers to the English README. Full bilingual synchronization is an optional follow-up, not a blocker for producing the resume.
 
 ---
 
@@ -334,16 +338,18 @@ Anything used in README, Case Study, video, or resume must remain independently 
 
 ---
 
-## Next — Final Packaging + Resume
+## Next — Final Local Regression + Resume
 
 Immediate next work:
 
-1. update the English README to surface the final Case Study and measured benchmark;
-2. run one final `main` Pipeline regression and confirm clean Git state;
-3. prepare concise, truthful resume project bullets;
-4. prepare a short interview explanation that can be delivered without Codex;
-5. add the stable GitHub repository link to the resume;
-6. start / expand applications.
+1. pull the latest `main` documentation updates locally;
+2. run one final `py Tools/config_tool.py generate` regression on the normal playable baseline;
+3. confirm `git status --short` is empty;
+4. retire the temporary `d11-qa` worktree / branch after restoring any local benchmark modifications;
+5. prepare concise, truthful resume project bullets;
+6. prepare a short interview explanation that can be delivered without Codex;
+7. add the stable GitHub repository link to the resume;
+8. start / expand applications.
 
 Optional follow-up after the resume is usable:
 
