@@ -222,54 +222,62 @@ Both defects were reproduced, diagnosed, fixed, regression-tested, and integrate
 
 ---
 
-## Day 12 — Before / After + Pipeline Case Study
+## Day 12 — Before / After + Pipeline Case Study ✅
 
-- [ ] Use the same 30–50 records for both workflows
-- [ ] Time the equivalent manual workflow
-- [ ] Time the automated workflow
-- [ ] Record manual misses and automatic catches
-- [ ] Record actual efficiency difference
-- [ ] Draw Before / After pipeline
-- [ ] Explain pain points, automation, remaining manual work, validation, efficiency, bug risk, and trade-offs
-- [ ] Produce Pipeline Case Study V1
+The original D12 scope was compressed into a single controlled benchmark plus a portfolio-ready Case Study.
+
+- [x] Reuse the same 40-record fixture from D11
+- [x] Time an equivalent manual output workflow — `192.000 s`
+- [x] Time the automated `batch-preview → batch-apply → generate` execution path — `0.2865603 s`
+- [x] Independently verify both outputs — both PASS
+- [x] Record actual execution-stage improvement — approximately `670×` speedup / `99.85%` time reduction
+- [x] Keep measurement scope explicit: Batch-request authoring time is excluded
+- [x] Do not fabricate manual errors; the manual sample completed with 0 detected errors
+- [x] Use D11 QA separately as error-risk evidence
+- [x] Document Before / After workflow and design trade-offs
+- [x] Produce `Docs/Pipeline_Case_Study.md`
 
 ---
 
-## Day 13 — User Test + TD External Feedback + Resume
+## Day 13 — External Feedback + Resume — Compressed
 
-- [ ] Ask 1–2 people to use the workflow without live teaching
-- [ ] Record confusion / misoperations / unclear wording
-- [ ] Iterate based on real feedback
-- [ ] Produce Tool / Pipeline V3 if justified
-- [ ] Send project material to the Lilith referral senior
-- [ ] Ask whether the direction resembles real TD pipeline/tooling work
-- [ ] Ask which parts still look student-like / low-value
-- [ ] Ask about hiring / HC timing and referral timing
-- [ ] Produce or update Resume V1 / V2
+The original external-feedback plan was reduced so it does not block applications.
+
+### Scope Decisions
+
+- External user test: **skipped for now** because no suitable tester is currently available.
+- Lilith TD feedback: **opportunistic**, not a blocker; project / resume can be sent when the senior has time to review.
+- Tool / Pipeline V3: only if later feedback reveals a concrete issue; no speculative expansion now.
+
+### Remaining Deliverables
+
+- [ ] Produce / update Resume V1 / V2
 - [ ] Add truthful, verifiable project bullets
+- [ ] Prepare a concise interview explanation of the project
 
 ---
 
-## Day 14 — Final Wrap-up + Formal Applications
+## Day 14 — Final Wrap-up + Applications — Compressed
 
-> **Do not start new technology or expand feature scope today.**
+> **Do not start new technology or expand feature scope.**
 
-- [ ] Standalone Demo runs end-to-end
-- [ ] Python Pipeline runs end-to-end
-- [ ] Full source → validation → generation → Unity → gameplay chain works
-- [ ] Clean Git repository
-- [ ] Finish English / Chinese README
-- [ ] Finish English / Chinese Pipeline documentation
-- [ ] Finish Case Study and bilingual version if appropriate
-- [ ] Record final 2–4 minute demo video
-- [ ] Show both gameplay and Pipeline
-- [ ] Show a config-driven gameplay change
-- [ ] Show a validation failure before runtime
+### Project Packaging
+
+- [ ] Run one final `main` Pipeline regression and confirm clean Git state
+- [x] Pipeline Case Study exists in `Docs/Pipeline_Case_Study.md`
+- [x] Reusable 40-record QA fixture exists in `QA/Fixtures/scale_valid/`
+- [x] D11 QA evidence exists in `Docs/D11_QA.md`
+- [x] Stable portfolio repository is the GitHub `main` branch
+- [ ] Update the English README to surface the final Case Study / benchmark
+- Chinese README / bilingual final synchronization: optional follow-up after the resume is usable; not an application blocker
+- Final demo video: optional follow-up; not a blocker for producing the resume today
+
+### Applications
+
 - [ ] Produce Resume V2
-- [ ] Prepare stable portfolio link
-- [ ] Finish game-experience materials
-- [ ] Expand formal applications
-- [ ] Decide Lilith referral timing
+- [ ] Add stable GitHub project link to resume
+- [ ] Start / expand formal applications
+- Lilith referral timing: decide independently of whether external feedback arrives
 
 ---
 
@@ -300,19 +308,18 @@ Both defects were reproduced, diagnosed, fixed, regression-tested, and integrate
 
 - [x] 40 records used for Scale Test
 - [x] Real V1 → problem → V2 iteration exists
-- [ ] At least one efficiency or error-risk improvement measured
-- [ ] Before / After Pipeline documented
+- [x] At least one efficiency improvement measured
+- [x] Before / After Pipeline documented
 - [x] At least one AI-assisted debugging case documented
-- [ ] At least one external feedback cycle completed
+- External user feedback is currently unavailable and is not treated as a blocker
 
 ### Portfolio / Applications
 
-- [x] README clearly explains the current project milestone
-- [ ] Dedicated Pipeline V2 / Case Study documentation clearly explains the final technical flow
-- [ ] Core external docs have Chinese / English versions where appropriate
-- [ ] Final video shows gameplay and Pipeline
+- [x] README clearly explains the Day 11 technical milestone
+- [x] Dedicated Pipeline Case Study documents the final technical flow and measured benchmark
+- [ ] English README surfaces the final Case Study / benchmark
 - [ ] Resume V2 contains truthful, verifiable project bullets
-- [ ] Stable portfolio link exists
+- [x] Stable GitHub portfolio repository exists
 - [ ] Formal applications started / expanded
 - [ ] Without Codex, the full data flow, modules, core logic, tool value, and trade-offs can be explained
 
@@ -320,12 +327,9 @@ Both defects were reproduced, diagnosed, fixed, regression-tested, and integrate
 
 ## Sprint Rules — V2
 
-- Keep **Unity 6.3 LTS + C# + Python + Git** as the main stack through D14.
-- Do not start a second portfolio project.
-- D8–D10 are one continuous Build Sprint.
-- Build one small but complete Vertical Slice, not a large game.
-- Complexity must come from real content-production needs.
-- Editor Tool / GUI / dependency visualization are optional unless they shorten a real workflow.
-- D11–D14 shift from feature expansion to QA, measurement, Case Study, Resume, video, feedback, and applications.
-- Finishing early is allowed; do not add low-value features merely to fill time.
-- Anything entering README / Case Study / Resume / video must be independently explainable without Codex.
+- Keep **Unity 6.3 LTS + C# + Python + Git** as the main stack through final packaging.
+- Do not start a second portfolio project before the current project is usable for applications.
+- Do not add low-value features merely because implementation is going smoothly.
+- New complexity must solve a demonstrated gameplay, QA, or workflow problem.
+- Anything entering README / Case Study / Resume / video must remain independently explainable without Codex.
+- From this point, **resume and applications outrank further feature work**.
