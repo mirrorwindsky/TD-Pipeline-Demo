@@ -256,7 +256,7 @@ QA/Fixtures/scale_valid/
 → reusable Scale / benchmark fixture
 ```
 
-Historical records such as `D10_HANDOFF.md` and `Pipeline_V1.md` are intentionally preserved as milestone snapshots rather than rewritten as final V2 documentation.
+Historical records such as  `Pipeline_V1.md` are intentionally preserved as milestone snapshots rather than rewritten as final V2 documentation.
 
 ---
 

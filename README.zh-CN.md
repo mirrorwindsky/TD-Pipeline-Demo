@@ -256,7 +256,7 @@ QA/Fixtures/scale_valid/
 → 可复用 Scale / Benchmark Fixture
 ```
 
-`D10_HANDOFF.md`、`Pipeline_V1.md` 等旧文档有意保留为历史里程碑快照，而不是改写成最终 V2 规格。
+`Pipeline_V1.md` 等旧文档有意保留为历史里程碑快照，而不是改写成最终 V2 规格。
 
 ---
 

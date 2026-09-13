@@ -16,7 +16,7 @@ Content Model
 Python Validation / Batch Pipeline
 ```
 
-The goal was not to build a commercial-scale game or a large general-purpose framework. The project uses a compact playable Unity slice to create real content-production problems, then solves only the problems demonstrated by implementation, QA, or workflow evidence.
+The project uses a compact playable Unity slice to create real content-production problems, then solves only the problems demonstrated by implementation, QA, or workflow evidence.
 
 Core stack:
 

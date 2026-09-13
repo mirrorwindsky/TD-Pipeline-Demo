@@ -16,7 +16,7 @@ Content Model
 Python Validation / Batch Pipeline
 ```
 
-目标不是制作商业级游戏，也不是搭建大型通用框架，而是让一个紧凑的可玩 Unity Slice 自然产生真实内容生产问题，再只解决实现、QA 或工作流证明确实存在的问题。
+目标是让一个紧凑的可玩 Unity Slice 自然产生真实内容生产问题，再只解决实现、QA 或工作流证明确实存在的问题。
 
 核心技术栈：
 
