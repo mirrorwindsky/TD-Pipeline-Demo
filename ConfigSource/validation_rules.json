@@ -1,0 +1,285 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "items.columns",
+      "type": "columns",
+      "table": "items",
+      "field": "",
+      "params": {
+        "fields": [
+          "id",
+          "displayName"
+        ]
+      },
+      "level": "ERROR",
+      "enabled": true
+    },
+    {
+      "id": "items.required",
+      "type": "required",
+      "table": "items",
+      "field": "",
+      "params": {
+        "fields": [
+          "id",
+          "displayName"
+        ]
+      },
+      "level": "ERROR",
+      "enabled": true
+    },
+    {
+      "id": "items.unique_id",
+      "type": "unique",
+      "table": "items",
+      "field": "id",
+      "params": {},
+      "level": "ERROR",
+      "enabled": true
+    },
+    {
+      "id": "objectives.columns",
+      "type": "columns",
+      "table": "objectives",
+      "field": "",
+      "params": {
+        "fields": [
+          "id",
+          "displayName",
+          "description"
+        ]
+      },
+      "level": "ERROR",
+      "enabled": true
+    },
+    {
+      "id": "objectives.required",
+      "type": "required",
+      "table": "objectives",
+      "field": "",
+      "params": {
+        "fields": [
+          "id",
+          "displayName",
+          "description"
+        ]
+      },
+      "level": "ERROR",
+      "enabled": true
+    },
+    {
+      "id": "objectives.unique_id",
+      "type": "unique",
+      "table": "objectives",
+      "field": "id",
+      "params": {},
+      "level": "ERROR",
+      "enabled": true
+    },
+    {
+      "id": "interactables.columns",
+      "type": "columns",
+      "table": "interactables",
+      "field": "",
+      "params": {
+        "fields": [
+          "id",
+          "displayName",
+          "interactionType",
+          "requiredInteractions",
+          "deactivateOnComplete"
+        ]
+      },
+      "level": "ERROR",
+      "enabled": true
+    },
+    {
+      "id": "interactables.required",
+      "type": "required",
+      "table": "interactables",
+      "field": "",
+      "params": {
+        "fields": [
+          "id",
+          "displayName",
+          "interactionType",
+          "requiredInteractions",
+          "deactivateOnComplete"
+        ]
+      },
+      "level": "ERROR",
+      "enabled": true
+    },
+    {
+      "id": "interactables.unique_id",
+      "type": "unique",
+      "table": "interactables",
+      "field": "id",
+      "params": {},
+      "level": "ERROR",
+      "enabled": true
+    },
+    {
+      "id": "batch.columns",
+      "type": "columns",
+      "table": "batch",
+      "field": "",
+      "params": {
+        "fields": [
+          "id",
+          "requiredInteractions"
+        ]
+      },
+      "level": "ERROR",
+      "enabled": true
+    },
+    {
+      "id": "batch.required",
+      "type": "required",
+      "table": "batch",
+      "field": "",
+      "params": {
+        "fields": [
+          "id",
+          "requiredInteractions"
+        ]
+      },
+      "level": "ERROR",
+      "enabled": true
+    },
+    {
+      "id": "batch.unique_id",
+      "type": "unique",
+      "table": "batch",
+      "field": "id",
+      "params": {},
+      "level": "ERROR",
+      "enabled": true
+    },
+    {
+      "id": "interactables.integer",
+      "type": "type",
+      "table": "interactables",
+      "field": "requiredInteractions",
+      "params": {
+        "value_type": "integer"
+      },
+      "level": "ERROR",
+      "enabled": true
+    },
+    {
+      "id": "interactables.boolean",
+      "type": "type",
+      "table": "interactables",
+      "field": "deactivateOnComplete",
+      "params": {
+        "value_type": "boolean"
+      },
+      "level": "ERROR",
+      "enabled": true
+    },
+    {
+      "id": "interactables.minimum",
+      "type": "range",
+      "table": "interactables",
+      "field": "requiredInteractions",
+      "params": {
+        "minimum": 1
+      },
+      "level": "ERROR",
+      "enabled": true
+    },
+    {
+      "id": "interactables.recommended_maximum",
+      "type": "range",
+      "table": "interactables",
+      "field": "requiredInteractions",
+      "params": {
+        "maximum": 10
+      },
+      "level": "WARNING",
+      "enabled": true
+    },
+    {
+      "id": "interactables.interaction_type",
+      "type": "enum",
+      "table": "interactables",
+      "field": "interactionType",
+      "params": {
+        "values": [
+          "Pickup",
+          "Device"
+        ]
+      },
+      "level": "ERROR",
+      "enabled": true
+    },
+    {
+      "id": "interactables.requiredItemId",
+      "type": "reference",
+      "table": "interactables",
+      "field": "requiredItemId",
+      "params": {
+        "target_table": "items",
+        "target_field": "id",
+        "allow_empty": true
+      },
+      "level": "ERROR",
+      "enabled": true
+    },
+    {
+      "id": "interactables.grantedItemId",
+      "type": "reference",
+      "table": "interactables",
+      "field": "grantedItemId",
+      "params": {
+        "target_table": "items",
+        "target_field": "id",
+        "allow_empty": true
+      },
+      "level": "ERROR",
+      "enabled": true
+    },
+    {
+      "id": "batch.target",
+      "type": "reference",
+      "table": "batch",
+      "field": "id",
+      "params": {
+        "target_table": "interactables",
+        "target_field": "id"
+      },
+      "level": "ERROR",
+      "enabled": true
+    },
+    {
+      "id": "batch.integer",
+      "type": "type",
+      "table": "batch",
+      "field": "requiredInteractions",
+      "params": {
+        "value_type": "integer"
+      },
+      "level": "ERROR",
+      "enabled": true
+    },
+    {
+      "id": "scene.config_ids",
+      "type": "scene_reference",
+      "table": "interactables",
+      "field": "id",
+      "params": {
+        "scene": "Assets/Scenes/VerticalSlice_01.unity",
+        "source_field": "configId",
+        "components": [
+          "Assembly-CSharp::ConfigurableInteractable",
+          "Assembly-CSharp::PickupInteractable",
+          "Assembly-CSharp::DeviceInteractable"
+        ]
+      },
+      "level": "ERROR",
+      "enabled": true
+    }
+  ]
+}
