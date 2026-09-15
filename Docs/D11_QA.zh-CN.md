@@ -1,36 +1,14 @@
-# D11 QA + Scale Test 记录
+# Day 11 QA 与规模测试记录
 
 [English](D11_QA.md) | 简体中文
 
-## 状态
+> 历史测试记录：**2026-09-11，Pipeline V2**。下文输入、控制台输出、哈希和结果均属于当次测试。配置工具 V3 延续这些用例，实现和输出格式已有调整；见文末 V3 说明及[当前案例文档](Pipeline_Case_Study.zh-CN.md)。
 
-Day 11 将项目重点从继续开发功能切换为建立可靠性证据。目标是验证 Pipeline V2 在更大内容集下仍然可预测，系统覆盖坏数据路径，确认 fail-safe generation，并且只修复 QA 真正复现出来的缺陷。
+## 目的与环境
 
-本文档记录 2026-09-11 实际执行的测试。
+Day 11 检查了更大输入集、坏数据处理，以及生成失败后保留合法输出的行为。期间建立了可复用的 40 条记录样例，完成规模生成和 8 项批量更新测试，并发现两项缺陷。两项缺陷均已复现、修复、回归，并合入 `main`。
 
-最终结果：
-
-- 建立并保留可复用的 40 条 Scale Fixture；
-- Scale Generation 通过；
-- 8 条 Batch Preview / Apply 通过；
-- 主要坏数据类别均已覆盖；
-- 发现、复现并修复 2 个真实 Validation Bug；
-- 两个修复均完成回归并进入 `main`；
-- 没有真实需求证据的可选系统被有意留在 Scope 外。
-
----
-
-## 测试环境
-
-破坏性 QA 使用独立 Git worktree / branch 与稳定工作区隔离，以便安全地反复替换 Source、制造 malformed input、Generation 和恢复。
-
-QA 从 D10 封版提交开始：
-
-```text
-4514da2 docs: close Day 10 and hand off to QA
-```
-
-主要命令：
+替换源文件和注入异常数据的测试使用独立 Git worktree/branch，从 `4514da2`（`docs: close Day 10 and hand off to QA`）开始，场景为 `Assets/Scenes/VerticalSlice_01.unity`。主要命令：
 
 ```powershell
 py Tools/config_tool.py generate
@@ -38,39 +16,23 @@ py Tools/config_tool.py batch-preview
 py Tools/config_tool.py batch-apply
 ```
 
-当前 V2 Runtime Scene 始终保持：
+多数坏数据用例直接运行 Python，无需逐项打开 Unity。实现修改限定在已复现的缺陷内。
 
-```text
-Assets/Scenes/VerticalSlice_01.unity
-```
+## 规模样例
 
-大多数坏数据案例直接针对 Python Pipeline，因此不需要为了每个失败路径重复打开 Unity。
+保留的样例位于 `QA/Fixtures/scale_valid/`：
 
----
+| 文件 | 记录数 |
+| --- | --- |
+| items.csv | 8 |
+| objectives.csv | 12 |
+| interactables.csv | 20 |
+| **内容总数** | **40** |
+| batch_interaction_updates.csv | 对现有记录的 8 条更新 |
 
-## Scale Fixture
+样例用于检查超出最初几行数据后的单次解析、类型模型、校验、生成和批量行为，未提供商业项目规模的性能测量。
 
-可复用合法 Fixture：
-
-```text
-QA/Fixtures/scale_valid/
-├── items.csv
-├── objectives.csv
-├── interactables.csv
-└── batch_interaction_updates.csv
-```
-
-规模：
-
-```text
-items.csv           8 records
-objectives.csv     12 records
-interactables.csv  20 records
------------------------------
-total              40 records
-```
-
-Scale Batch 修改：
+目标修改：
 
 ```text
 cube_sturdy          3 -> 4
@@ -83,45 +45,30 @@ backup_generator     5 -> 3
 maintenance_panel    4 -> 5
 ```
 
-这 40 条并不是为了模拟商业项目规模，而是验证 Parse Once / Typed Model / Validation / Generation / Batch 不依赖“只有几条数据”这一偶然条件。
-
----
-
 ## 测试汇总
 
 | ID | 测试 | 结果 |
 | --- | --- | --- |
-| QA-00 | D10 baseline sanity check | PASS |
-| QA-01 | 40 条合法数据 Scale Generation | PASS |
-| QA-02 | 8 条 Scale Batch Preview | PASS |
-| QA-03 | 8 条 Scale Batch Apply + Regeneration | PASS |
-| QA-04 | Missing required value + fail-safe output preservation | PASS |
-| QA-05 | Duplicate interactable ID | PASS |
-| QA-06 | Invalid integer type | PASS |
-| QA-07 | Invalid numeric range | PASS |
-| QA-08 | Broken cross-table Item reference | PASS |
-| QA-09 | Broken active V2 Scene `configId` reference | FAIL → FIXED → PASS |
-| QA-10 | Missing required column | PASS |
-| QA-11 | Invalid `interactionType` | PASS |
-| QA-12 | Empty CSV input | PASS |
-| QA-13 | Malformed CSV / unexpected extra column | FAIL → FIXED → PASS |
+| QA-00 | D10 基线检查 | PASS |
+| QA-01 | 40 条合法数据生成 | PASS |
+| QA-02 | 8 条批量更新预览 | PASS |
+| QA-03 | 8 条批量更新应用与重新生成 | PASS |
+| QA-04 | 缺少必填值与输出保留 | PASS |
+| QA-05 | 交互物 ID 重复 | PASS |
+| QA-06 | 整数类型错误 | PASS |
+| QA-07 | 数值范围错误 | PASS |
+| QA-08 | 跨表物品引用失效 | PASS |
+| QA-09 | 主场景 configId 引用失效 | FAIL → FIXED → PASS |
+| QA-10 | 缺少必需列 | PASS |
+| QA-11 | interactionType 非法 | PASS |
+| QA-12 | 空 CSV | PASS |
+| QA-13 | CSV 格式错误与多余列 | FAIL → FIXED → PASS |
 
----
+## 规模与 Batch 结果
 
-## Scale / Batch 证据
+### QA-01 — 生成
 
-### QA-01 — 40 条合法 Generation
-
-输入：
-
-```text
-8 Items
-12 Objectives
-20 Interactables
-40 total source records
-```
-
-结果：
+输入为 8 个物品、12 个目标和 20 个交互物，当时输出：
 
 ```text
 Validation: PASSED
@@ -130,28 +77,21 @@ Loaded 12 objective configs.
 Loaded 20 interactable configs.
 ```
 
-独立统计 Generated Output：
+独立统计得到 20 个生成交互物和 12 个生成目标。8 个物品作为 Item-ID 引用表使用，不单独输出 `items.json`，与生成格式一致。
 
-```text
-generated interactables: 20
-generated objectives: 12
-```
+### QA-02 — 预览
 
-8 条 Item 当前作为权威 Item-ID Registry 使用，不单独生成 `items.json`，因此 Output Count 与当前 Generation Contract 一致。
-
-### QA-02 — Scale Batch Preview
-
-8 条预期修改全部被正确输出，结尾显示：
+8 条预期修改全部显示，结尾为：
 
 ```text
 Validated 8 batch updates. No source files were changed.
 ```
 
-随后直接比较文件内容，没有发现差异，确认 Preview 未修改 Source。
+直接比较文件后确认源内容没有变化。
 
-### QA-03 — Scale Batch Apply + Regeneration
+### QA-03 — 应用与重新生成
 
-Apply 后独立比较：
+应用后独立比较：
 
 ```text
 baseline records: 20
@@ -159,31 +99,20 @@ actual records:   20
 field changes:     8
 ```
 
-恰好只有预期 8 个 `requiredInteractions` 字段发生变化，其他 Source Field 保持不变。
+仅目标 8 个 `requiredInteractions` 发生变化，其他源字段不变。重新生成以 8 / 12 / 20 条加载记录通过，JSON 中的 8 个目标值也通过独立检查。
 
-随后 Generation 以 8 / 12 / 20 条记录正常通过，并独立验证 8 个目标值全部进入 Generated JSON。
+## 坏数据结果
 
----
+### QA-04 — 缺少必填值与输出保留
 
-## 坏数据覆盖
-
-### QA-04 — Missing Required Value + Fail-Safe Generation
-
-注入：
-
-```text
-aux_power_box.requiredInteractions
-2 -> empty
-```
-
-结果：
+注入 `aux_power_box.requiredInteractions: 2 → 空值`，输出为：
 
 ```text
 [ERROR] interactables.csv row 14 field 'requiredInteractions': value is required.
 Validation failed. Generated JSON files were not updated.
 ```
 
-失败 Generation 前后 SHA256：
+失败生成前后，两份 SHA256 均未改变：
 
 ```text
 interactables.json
@@ -195,131 +124,34 @@ objectives.json
 → unchanged
 ```
 
-这直接验证 fail-safe output-preservation contract。
+### 其他被拦截的输入
 
-### QA-05 — Duplicate ID
+| ID | 注入内容 | 当时的错误输出 |
+| --- | --- | --- |
+| QA-05 | `maintenance_panel → power_node` | `[ERROR] interactables.csv row 21 field 'id': duplicate id 'power_node'.` |
+| QA-06 | `backup_generator.requiredInteractions: 5 → three` | `[ERROR] interactables.csv row 18 field 'requiredInteractions': expected integer, got 'three'.` |
+| QA-07 | `sensor_array.requiredInteractions: 4 → 0` | `[ERROR] interactables.csv row 17 field 'requiredInteractions': must be >= 1, got 0.` |
+| QA-08 | `coolant_pump.requiredItemId: coolant_canister → missing_coolant` | `[ERROR] interactables.csv row 15 field 'requiredItemId': unknown item id 'missing_coolant'.` |
+| QA-10 | 删除 `objectives.csv` 的 `description` 列 | `[ERROR] objectives.csv: missing required column 'description'.` |
+| QA-11 | `security_console.interactionType: Device → Terminal` | `[ERROR] interactables.csv row 16 field 'interactionType': unknown value 'Terminal'. Expected one of: Device, Pickup.` |
+| QA-12 | 将 `items.csv` 清空为 0 字节 | `[ERROR] items.csv: CSV header is missing.` |
 
-```text
-maintenance_panel -> power_node
-```
+QA-12 返回错误时没有出现 Python traceback。QA-09 和 QA-13 需要修复，过程如下。
 
-结果：
+## QA-09 — 主场景引用覆盖缺口
 
-```text
-[ERROR] interactables.csv row 21 field 'id': duplicate id 'power_node'.
-```
-
-### QA-06 — Invalid Integer Type
-
-```text
-backup_generator.requiredInteractions
-5 -> three
-```
-
-结果：
-
-```text
-[ERROR] interactables.csv row 18 field 'requiredInteractions': expected integer, got 'three'.
-```
-
-### QA-07 — Invalid Range
-
-```text
-sensor_array.requiredInteractions
-4 -> 0
-```
-
-结果：
-
-```text
-[ERROR] interactables.csv row 17 field 'requiredInteractions': must be >= 1, got 0.
-```
-
-### QA-08 — Broken Cross-Table Item Reference
-
-```text
-coolant_pump.requiredItemId
-coolant_canister -> missing_coolant
-```
-
-结果：
-
-```text
-[ERROR] interactables.csv row 15 field 'requiredItemId': unknown item id 'missing_coolant'.
-```
-
-### QA-10 — Missing Required Column
-
-删除 `objectives.csv` 中 required `description` 列后：
-
-```text
-[ERROR] objectives.csv: missing required column 'description'.
-```
-
-### QA-11 — Invalid `interactionType`
-
-```text
-security_console.interactionType
-Device -> Terminal
-```
-
-结果：
-
-```text
-[ERROR] interactables.csv row 16 field 'interactionType': unknown value 'Terminal'. Expected one of: Device, Pickup.
-```
-
-### QA-12 — Empty CSV Input
-
-将 `items.csv` 截断为 0 Byte 后：
-
-```text
-[ERROR] items.csv: CSV header is missing.
-```
-
-没有 Python traceback。
-
----
-
-## Bug 1 — Active V2 Scene Reference Coverage Gap
-
-### QA-09 复现
-
-Active Scene：
+场景保留以下引用：
 
 ```text
 Assets/Scenes/VerticalSlice_01.unity
 configId: control_terminal
 ```
 
-只修改 Source ID：
+只将源 ID 从 `control_terminal` 改为 `control_terminal_renamed`，生成最初错误通过。独立检查发现 JSON 已使用新 ID，场景仍引用旧 ID。
 
-```text
-control_terminal -> control_terminal_renamed
-```
+校验器仍使用 V1 范围：`SCENE_PATH → Prototype_01.unity`，且只识别 `ConfigurableInteractable.configId`。V2 场景还使用 `PickupInteractable` 和 `DeviceInteractable`。
 
-修复前 Generation 错误地通过。独立验证发现 Generated JSON 只包含 `control_terminal_renamed`，而 Scene 仍引用 `control_terminal`。
-
-### 根因
-
-Unity Reference Validator 仍是 V1 时代的实现：
-
-```text
-SCENE_PATH -> Prototype_01.unity
-ConfigurableInteractable.configId only
-```
-
-当前 V2 Scene 使用 `PickupInteractable` 和 `DeviceInteractable` 的 config reference。
-
-### 修复
-
-Validation 改为针对：
-
-```text
-Assets/Scenes/VerticalSlice_01.unity
-```
-
-并使用显式组件白名单：
+提交 `97b24be`（`fix: validate active scene config references`）将目标改为 `VerticalSlice_01.unity`，覆盖以下三类配置驱动组件：
 
 ```text
 ConfigurableInteractable
@@ -327,96 +159,59 @@ PickupInteractable
 DeviceInteractable
 ```
 
-同样的坏 Source 现在会产生：
+相同坏数据随后得到：
 
 ```text
 [ERROR] VerticalSlice_01.unity: DeviceInteractable references unknown config id 'control_terminal'.
 ```
 
-恢复 40 条合法 Fixture 后 Regression PASS。
+恢复 40 条合法样例后，回归通过。**结果：FAIL → FIXED → PASS。**
 
-Main 修复：
+## QA-13 — 异常 CSV 静默截断
 
-```text
-97b24be fix: validate active scene config references
-```
-
-**最终结果：FAIL → FIXED → PASS**
-
----
-
-## Bug 2 — Malformed CSV Silent Truncation
-
-### QA-13 复现
-
-注入：
+在三列目标表中注入：
 
 ```csv
 inspect_storage,Inspect Storage,Objective: Inspect storage, then return.
 ```
 
-在三列表头下，`csv.DictReader` 会把溢出部分放到 `None` key。修复前 Pipeline 仍报告成功，并生成被截断的 Objective Description。
+`csv.DictReader` 将多出的值放入 `None` 键。管线忽略该值，报告成功并生成缩短的目标描述，造成静默内容损坏。
 
-这属于 **silent data corruption**，不是 crash。
-
-### 修复
-
-`validate_schema()` 现在会拒绝 unexpected extra row values。同一份输入会产生：
+提交 `bb088b3`（`fix: reject malformed CSV rows with extra columns`）在当时的 `validate_schema()` 中拒绝额外值。同一输入得到：
 
 ```text
 [ERROR] objectives.csv row 7: unexpected extra column value(s) [' then return.']. Check for an unescaped comma or mismatched column count.
 ```
 
-恢复 40 条合法 Fixture 后 Regression PASS。
+恢复 40 条合法样例后，回归通过。**结果：FAIL → FIXED → PASS。**
 
-Main 修复：
+## 范围与调试
 
-```text
-bb088b3 fix: reject malformed CSV rows with extra columns
+本轮 QA 未增加依赖环路检查、不可达目标检查、通用任务校验、全 prefab 扫描、依赖可视化、Unity Editor GUI 或大型测试框架，修改集中于两项已复现的问题。
+
+AI/Codex 参与诊断与实现。两项缺陷均来自具体 QA 输入，并经过独立检查、小范围修复、回归和合入 `main`。
+
+## 后续基准
+
+同一套样例随后用于相同 8 项修改的受控对比：
+
+| 测量项 | 记录值 |
+| --- | --- |
+| 人工执行 | 192.000 s |
+| 自动执行 | 0.287 s |
+| 执行提速 | 约 670 倍 |
+| 执行用时减少 | 约 99.85% |
+
+测量仅包含执行阶段，未计批量请求编写，且发生在 V3 之前。完整方法、精确计时与核对结果见[中文案例](Pipeline_Case_Study.zh-CN.md) / [English](Pipeline_Case_Study.md)。
+
+## 在 V3 中复用这些用例
+
+V3 提交 `22c992e` 将项目标准移入 `ConfigSource/validation_rules.json`，CLI、GUI 和 Batch 共用校验。场景规则延续上述三类组件，多余列拦截现由 `pipeline_core.parse_csv_table()` 执行；Batch 写入前检查全部修改后数据。
+
+`Tools/tests/` 在临时项目副本中继续使用规模样例，并补充规则配置、草稿、GUI、AI 服务、凭据和项目定位测试：
+
+```powershell
+py -m unittest discover -s Tools/tests
 ```
 
-**最终结果：FAIL → FIXED → PASS**
-
----
-
-## Scope 决策
-
-QA 没有证明以下系统当前有必要：
-
-- dependency-cycle detection；
-- unreachable-objective detection；
-- generalized quest validation；
-- all-Prefab scanning；
-- dependency visualization；
-- Unity Editor GUI；
-- 大型 automated-test framework。
-
-因此本轮实现修改严格限制在真实 Test Case 已经复现出来的缺陷。
-
----
-
-## AI-Assisted Debugging
-
-AI / Codex 用于加速诊断和实现。上述两个真实 QA Bug 都经历了具体输入复现、独立验证、小范围修复、回归测试并最终进入 `main`。
-
-文档将它们如实记录为 QA 发现的真实缺陷，而不是描述成“AI 生成 Bug”。
-
----
-
-## 后续量化
-
-同一套 40-record Fixture 后续被继续用于受控 Before / After Benchmark，完整结果记录在 Pipeline Case Study：
-
-```text
-Manual execution:       192.000 s
-Automated execution:      0.287 s
-Execution speedup:        ~670×
-Execution-time reduction: ~99.85%
-```
-
-该数字明确属于 execution-stage measurement，不包含 Batch Request 本身的编写时间。
-
-完整分析：
-
-- [`Pipeline_Case_Study.md`](Pipeline_Case_Study.md)
-- [`Pipeline_Case_Study.zh-CN.md`](Pipeline_Case_Study.zh-CN.md)
+AI HTTP 响应使用 mock。GUI 测试需要 tkinter 和桌面环境，Windows 凭据真实存取另有显式启用的测试。可通过这些测试回归当前工具，无需替换工作项目的 CSV。上面的历史日志和哈希保留为 2026-09-11 测试的证据。

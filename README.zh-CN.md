@@ -2,272 +2,144 @@
 
 [English](README.md) | 简体中文
 
-**可玩版本：** [下载 Windows x64 v1.0.0](https://github.com/mirrorwindsky/TD-Pipeline-Demo/releases/download/v1.0.0/TD-Pipeline-Demo-Windows-x64-v1.0.0.zip) · [Release Notes](https://github.com/mirrorwindsky/TD-Pipeline-Demo/releases/tag/v1.0.0)
+**可玩版本：** [下载 Windows x64 v1.0.0](https://github.com/mirrorwindsky/TD-Pipeline-Demo/releases/download/v1.0.0/TD-Pipeline-Demo-Windows-x64-v1.0.0.zip) · [版本说明](https://github.com/mirrorwindsky/TD-Pipeline-Demo/releases/tag/v1.0.0)
 
-这是一个面向 **Technical Designer（技术策划）求职作品集** 的项目，将可玩的 Unity Vertical Slice 与面向策划的内容生产管线、校验工具、Batch 自动化、QA 证据和真实流程量化结合在一起。
+这是一个 Technical Designer（技术策划）作品集项目，包含可玩的 Unity 玩法切片和 Python 内容配置管线，覆盖 CSV 编写、数据校验、JSON 生成、批量调参及 QA。**配置工具 V3** 新增独立桌面 GUI、可编辑校验规则和 AI 规则提案。
 
-```text
-Game Content Vertical Slice
-↕
-Content Model
-↕
-Python Validation / Batch Pipeline
+技术栈：Unity 6.3 LTS、C#、Python、CSV / JSON、Git / GitHub。
+
+## 运行项目
+
+### Unity 可玩版本
+
+下载并完整解压发行包，运行 `TD-Pipeline-Demo.exe`。v1.0.0 Windows x86-64 版本已完成从启动到 Mission Complete 的人工测试。
+
+| 操作 | 功能 |
+| --- | --- |
+| WASD | 移动 |
+| 鼠标 | 控制镜头 |
+| E | 交互 |
+| Esc | 释放鼠标 |
+| 关闭窗口 | 退出 |
+
+### 配置工具 V3
+
+安装 Python 3.10 及以上版本（含 tkinter）后，在项目根目录运行：
+
+```powershell
+py Tools/config_tool.py gui
 ```
 
-## 作品集概览
+界面默认中文，右上角可切换 English。需要 Windows EXE 时，运行：
 
-- 可完整游玩的室内 Unity Vertical Slice，并已发布 Windows x86-64 standalone Release；
-- 多表 CSV → Python Typed Model → Unity JSON 的 Content Pipeline；
-- Schema / malformed-row / type / range / duplicate 校验；
-- `interactionType`、跨表 Item Reference、Active Scene `configId` 校验；
-- 校验失败时保留上一版合法输出的 fail-safe generation；
-- 经过验证的 Batch Preview / atomic Apply；
-- 可复用的 **40 条 Scale Fixture**；
-- 系统 QA 中发现并修复 **2 个真实校验 Bug**；
-- 8 条批量修改受控对比：**人工 192.000 s vs 自动执行 0.287 s**；
-- 中英文 QA 记录与 Pipeline Case Study。
-
-主要配套文档：
-
-- Pipeline Case Study：[`English`](Docs/Pipeline_Case_Study.md) | [`简体中文`](Docs/Pipeline_Case_Study.zh-CN.md)
-- Day 11 QA Record：[`English`](Docs/D11_QA.md) | [`简体中文`](Docs/D11_QA.zh-CN.md)
-- [`Docs/README.md`](Docs/README.md) — 当前文档 / 历史文档索引
-
----
-
-## 可玩版本
-
-当前作品集 Release：
-
-```text
-v1.0.0
-Windows x86-64
-Unity 6.3 LTS
+```powershell
+py Tools/build_exe.py
 ```
 
-从上方 GitHub Release 下载完整压缩包，解压后运行：
+生成的 `Builds/ConfigTool/TDConfigTool.exe` 自带 Python 和 tkinter。它会从自身位置查找项目；移到项目外时，会提示选择项目目录。CSV、规则和生成结果仍保存在所选项目中。构建产物不进入 Git；Unity 可玩版本与配置工具使用各自的启动程序。
+
+详细操作见[使用说明](Docs/使用说明.md)，模块与数据流程见[技术实现](Docs/技术实现.md)。
+
+## 玩法切片
+
+当前玩法与构建主场景为 `Assets/Scenes/VerticalSlice_01.unity`，Week 1 原型保留在 `Assets/Scenes/Prototype_01.unity`。
 
 ```text
-TD-Pipeline-Demo.exe
+PowerCell → PlayerInventory → PowerNode → ControlTerminal
+→ ExitDoor → EndMarker → Mission Complete
 ```
 
-操作方式：
+切片包含多房间工业设施、第三人称鼠标相机、玩家相对移动、基于 `IInteractable` 的交互、拾取物、设备、门、最小背包状态、配置驱动物品需求与目标文本，以及事件驱动的门和任务流程。视觉整理阶段补充了 HUD、材质、灯光和持续显示的世界状态反馈。
 
-- `WASD` — 移动
-- Mouse — 控制镜头
-- `E` — 交互
-- `Esc` — 释放鼠标
-- 关闭窗口即可退出
-
-该版本已经从启动到 Mission Complete 完成人工测试。Build 产物不进入 Git 历史，正式可玩包通过 GitHub Releases 分发。
-
----
-
-## 当前 Gameplay Slice
-
-当前玩法 / Build 主场景：
-
-```text
-Assets/Scenes/VerticalSlice_01.unity
-```
-
-Week 1 原始基线保留在：
-
-```text
-Assets/Scenes/Prototype_01.unity
-```
-
-完整玩法依赖链：
-
-```text
-PowerCell
-→ PlayerInventory
-→ PowerNode
-→ ControlTerminal
-→ ExitDoor
-→ EndMarker
-→ Mission Complete
-```
-
-当前切片包含多房间工业设施布局、第三人称鼠标相机、玩家相对移动、基于 `IInteractable` 的通用交互、Pickup / Device / Gate 内容、最小 Inventory 状态、配置驱动 Item 依赖与 Objective 文本、事件驱动 Gate / Mission 流程、HUD 反馈、材质、灯光以及持久 World-State Feedback。
-
-Presentation Pass 后熟练玩家实测：
-
-```text
-PowerCell:         0:25
-PowerNode:         0:32
-ControlTerminal:   0:40
-Mission Complete:  0:46
-```
-
-早期 5–8 分钟目标已经主动废弃，没有通过 filler 硬凑时长。
-
----
-
-## 面向策划的 Content Pipeline
-
-策划侧源数据：
+## 内容配置管线 V3
 
 ```text
 ConfigSource/
 ├── items.csv
 ├── objectives.csv
 ├── interactables.csv
-└── batch_interaction_updates.csv
+├── batch_interaction_updates.csv
+└── validation_rules.json
 ```
-
-正常生成流程：
 
 ```text
-items.csv + objectives.csv + interactables.csv
-        ↓
-Parse Once SourceTables
-        ↓
-Schema / malformed-row / type / range / duplicate validation
-        ↓
-Typed ContentModel
-        ↓
-interactionType validation
-        ↓
-Item cross-reference validation
-        ↓
-active Scene configId validation
-        ↓
-ERROR / WARNING gate
-        ↓
-interactables.json + objectives.json
-        ↓
-Unity config databases
-        ↓
-Runtime gameplay + HUD
+CSV → SourceTable（原始字符串）→ 可配置规则引擎 → 无 ERROR
+→ 带类型的 ContentModel → Unity JSON → 配置数据库 → 玩法 / HUD
 ```
 
-Typed Model：
+`ContentModel` 包含 `ItemConfig`、`ObjectiveConfig`、`InteractableConfig` 列表。输出为 `Assets/Data/interactables.json` 和 `objectives.json`；items 提供物品引用表。日常修改在 CSV 中完成，再重新生成 JSON。
+
+外部 JSON 包含 22 条基线规则，支持必需列、必填值、整数/布尔/文本类型、范围、枚举、唯一值、正则、跨表引用和场景引用。基线要求交互次数至少为 1，超过 10 时警告，并检查物品引用、Batch 目标 ID 及 `VerticalSlice_01.unity` 中受支持组件的引用。
+
+CLI、GUI 和 Batch 共用校验核心及结构化 `ValidationIssue`。CSV 解析完整性和 Unity 类型转换始终受检查。内容错误阻止生成和批量写入，警告允许继续；校验失败时保留原输出。单个文件采用原子替换；多个 JSON 写入发生 I/O 错误时会尝试回滚，但没有跨文件的断电事务保障。
+
+### 规则编辑与批量更新
+
+GUI 支持新增、编辑、复制、启用/停用和删除规则。修改先保存在草稿中，点击 **保存规则** 才写入规则文件；校验、生成和 Batch 可直接使用未保存的草稿。例如，把次数下限从 1 改为 4，当前 5 个交互物都会报错；恢复为 1 后通过。
+
+Batch 用于批量修改 `requiredInteractions`：
 
 ```text
-ContentModel
-├── items: list[ItemConfig]
-├── objectives: list[ObjectiveConfig]
-└── interactables: list[InteractableConfig]
+检查更新表 → 在内存中应用修改 → 校验全部修改后数据
+→ 预览，或原子写入 interactables.csv → 生成 JSON
 ```
 
-生成 JSON 被视为 Pipeline Output，而不是由策划手工维护的第二份真值。
+因此，调整同一条 Interactable 下限规则，就会同时影响普通校验、生成和 Batch Apply。预览不改源文件；应用会修改 CSV，之后需单独生成 JSON。
 
-### CLI
+### AI 规则提案
+
+OpenAI 和 DeepSeek 可将自然语言需求转换为新增、更新或停用规则的 RulePatch：
+
+```text
+需求 + 表头 + 支持的规则类型 + 当前规则
+→ 检查提案结构 → 预览 → 应用到草稿 → 本地校验 → 按需保存规则
+```
+
+内容是否合格由 Python 引擎判断。AI 不接收 CSV 数据行，流程中也没有执行生成代码或直接写文件的步骤。非法或过期提案会被拒绝。没有 AI 密钥或 SDK 时，GUI、规则编辑、校验、生成和 Batch 均可使用；Fake Provider 提供离线演示。
+
+在 GUI 中输入遮蔽显示的 API 密钥即可供本次使用。需要保留时，勾选 **在此电脑记住密钥** 并应用设置，Windows 凭据管理器会分别保存 OpenAI 和 DeepSeek 的密钥。密钥不写入项目文件；环境变量保留为兼容方式，**忘记密钥** 可移除本工具保存的凭据。
+
+### CLI 与测试
 
 ```powershell
 py Tools/config_tool.py --help
+py Tools/config_tool.py rules-check
+py Tools/config_tool.py validate
 py Tools/config_tool.py generate
 py Tools/config_tool.py batch-preview
 py Tools/config_tool.py batch-apply
+py -m unittest discover -s Tools/tests
 ```
 
-生成契约：
+无子命令的 `py Tools/config_tool.py` 仍执行生成。CLI 可通过 `--root`、`--source-dir`、`--output-dir`、`--rules` 指定路径。测试使用临时项目副本和模拟 AI 响应；Tk 测试需要桌面环境，Windows 凭据真实存取测试需显式启用。
 
-- `ERROR` 阻断 generation；
-- `WARNING` 输出但不阻断；
-- Validation failure 不覆盖上一版合法 JSON；
-- Batch Preview 不修改源数据；
-- Batch Apply 在完整逻辑校验通过后进行 atomic source replacement。
+## QA 与测量结果
 
----
+可复用样例位于 `QA/Fixtures/scale_valid/`：
 
-## QA + Scale 证据
+| 文件 | 内容 |
+| --- | --- |
+| items.csv | 8 条记录 |
+| objectives.csv | 12 条记录 |
+| interactables.csv | 20 条记录 |
+| batch_interaction_updates.csv | 对上述记录的 8 条更新 |
 
-可复用 Fixture：
+Day 11 使用这 40 条内容记录，覆盖缺列、缺值、重复 ID、类型/范围/枚举错误、物品与场景引用失效、空文件、异常 CSV 和失败时保留输出。期间修复了场景引用覆盖缺口（`97b24be`）和异常 CSV 静默截断（`bb088b3`）；失败生成前后不变的 SHA256 验证了输出保留行为。V3 继续使用该样例，并增加规则配置、草稿、GUI、AI 服务、凭据和 EXE 项目定位测试。
 
-```text
-QA/Fixtures/scale_valid/
-├── items.csv                     8 records
-├── objectives.csv               12 records
-├── interactables.csv            20 records
-└── batch_interaction_updates.csv 8 updates
-```
+Day 11 后续基准对比了相同的 8 条修改，两种输出均通过独立校验。
 
-Scale Test 总内容：**40 records**。
+## 范围与文档
 
-QA 覆盖合法 Scale 生成、Batch Preview / Apply、required value / column 缺失、duplicate IDs、invalid type / range / `interactionType`、broken cross-table reference、broken active-Scene config reference、empty CSV、malformed row 以及 fail-safe output preservation。
+工具采用独立 GUI 和标准库测试。Unity Editor 集成、CSV 内容编辑器、依赖可视化、通用任务图、环路/不可达目标检查及全场景/全 prefab 扫描均未纳入范围。校验缺陷根据 QA 复现结果修复；V3 根据从业者对工具使用和规则调整的反馈扩展。
 
-QA 中发现并修复两个真实缺陷：
+AI/Codex 参与实现与调试。仓库历史、可复现测试、实测数据和可玩版本人工检查构成项目证据。
 
-1. **Active V2 Scene Reference Coverage Gap** — `VerticalSlice_01.unity` 中 stale `configId` 原本可能错误通过 Validation；修复提交 `97b24be`。
-2. **Malformed CSV Silent Truncation** — 未转义逗号原本可能被接受并静默截断 Objective 内容；修复提交 `bb088b3`。
+| 文档 | 内容 |
+| --- | --- |
+| [案例说明](Docs/Pipeline_Case_Study.zh-CN.md) / [English](Docs/Pipeline_Case_Study.md) | 到 V3 的设计演进、QA 发现、历史基准和取舍 |
+| [Day 11 QA](Docs/D11_QA.zh-CN.md) / [English](Docs/D11_QA.md) | 2026-09-11 的测试、日志、哈希与修复 |
+| [使用说明](Docs/使用说明.md) | GUI、规则、Batch、EXE 和 AI 配置 |
+| [技术实现](Docs/技术实现.md) | 当前模块、数据流程、存储和 AI 接口 |
+| [Pipeline V1](Docs/Pipeline_V1.zh-CN.md) / [English](Docs/Pipeline_V1.md) | Week 1 单表架构及 Day 6 验证 |
 
-在一次非法源数据测试中，失败 Generation 前后两个 generated JSON 的 SHA256 均未变化，直接验证了“保留上一版 known-good output”的契约。
-
-完整证据：[`English`](Docs/D11_QA.md) | [`简体中文`](Docs/D11_QA.zh-CN.md)
-
----
-
-## Before / After 量化
-
-使用同一套 40-record fixture 和同一组 8 条 `requiredInteractions` 修改进行等价输出对比：
-
-```text
-Manual execution:       192.000 s
-Automated execution:      0.287 s
-Execution speedup:        ~670×
-Execution-time reduction: ~99.85%
-```
-
-自动路径：
-
-```text
-batch-preview
-→ batch-apply
-→ generate
-```
-
-人工和自动输出均通过独立校验。
-
-这明确是 **execution-stage benchmark**：不包含 Batch Request 本身的编写时间，也不代表“整个内容生产流程快 670 倍”。错误风险下降由 D11 的 QA 证据单独支持，而不是从这次计时样本推断。
-
-完整分析：[`English`](Docs/Pipeline_Case_Study.md) | [`简体中文`](Docs/Pipeline_Case_Study.zh-CN.md)
-
----
-
-## 设计取舍
-
-项目有意没有加入 Unity Editor GUI、dependency visualization、generalized Quest framework、cycle / unreachable-objective detection、全 Scene / 全 Prefab scanning 或大型 test framework。
-
-决策原则：
-
-> 只有实现、QA 或工作流证明确实存在真实问题时，才为解决它增加复杂度。
-
-Active Scene Reference Validator 与 malformed-row validation 都是在 QA 实际复现失败后才加入的。
-
----
-
-## 文档结构
-
-当前作品集文档：
-
-```text
-README.md / README.zh-CN.md
-→ 作品集入口 + 可玩 Release
-
-Docs/Pipeline_Case_Study.md / .zh-CN.md
-→ Problem / Design / QA / Benchmark / Trade-offs / Outcome
-
-Docs/D11_QA.md / .zh-CN.md
-→ 可复现 QA 与 Bug 修复证据
-
-QA/Fixtures/scale_valid/
-→ 可复用 Scale / Benchmark Fixture
-```
-
-`Pipeline_V1.md` 等旧文档有意保留为历史里程碑快照，而不是改写成最终 V2 规格。
-
----
-
-## AI 辅助开发
-
-AI / Codex 用于加速实现、检查和调试，而不是替代验证和理解。两个 QA Bug 都经历了具体输入复现、原因定位、小范围修复和回归测试。项目中的结论由仓库历史、可复现 QA、实测结果和 standalone 人工验证共同支撑。
-
----
-
-## 项目结果
-
-`TD-Pipeline-Demo` 展示了一条紧凑但完整的 Technical Designer 工作流：将可玩内容、数据驱动配置、运行前校验、Batch 自动化、QA 与实际工作流量化连接在同一个项目中。
-
-仓库包含完整源码、中英文 Case Study 与 QA 文档、可复用 Scale Fixture，以及经过完整人工测试的 **v1.0.0 Windows x64 可玩版本**。
+仓库包含完整 Unity/Python 源码、可复用样例、中英文案例与 QA 记录，以及经过测试的 v1.0.0 可玩版本下载入口。
